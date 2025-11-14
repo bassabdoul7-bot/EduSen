@@ -1,0 +1,9 @@
+{
+  "appId": "com.edusen.platform",
+  "appName": "EduSen",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}

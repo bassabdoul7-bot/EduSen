@@ -1,0 +1,1 @@
+export default function ForumPage() { return <div className='card'><h1 className='text-2xl font-bold mb-4'>Forum</h1><p className='text-gray-600'>En construction...</p></div> }
