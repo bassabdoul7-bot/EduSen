@@ -11,7 +11,8 @@ import {
   LogOut,
   Menu,
   X,
-  Crown
+  Crown,
+  Star
 } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
@@ -55,7 +56,9 @@ export default function Layout() {
                 {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
               <div className='flex items-center space-x-2'>
-                <div className='w-8 h-8 bg-gradient-to-br from-senegal-green via-senegal-yellow to-senegal-red rounded-lg'></div>
+                <div className='w-8 h-8 bg-gradient-to-br from-senegal-green via-senegal-yellow to-senegal-red rounded-lg flex items-center justify-center'>
+                  <Star size={14} className='text-senegal-green fill-senegal-green' />
+                </div>
                 <span className='text-xl font-bold text-senegal-green'>EduSen</span>
               </div>
             </div>

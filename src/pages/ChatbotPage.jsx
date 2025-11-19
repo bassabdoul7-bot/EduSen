@@ -2,11 +2,13 @@ import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { usePremium } from '../context/PremiumContext'
 import { chatService } from '../services/chat'
-import { Send, Loader2, Crown, Camera } from 'lucide-react'
+import { Send, Loader2, Crown, Camera, FileText, Download } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ImageUpload from '../components/ImageUpload'
 import Tesseract from 'tesseract.js'
 import * as pdfjsLib from 'pdfjs-dist'
+import { Document, Paragraph, TextRun, Packer, AlignmentType, HeadingLevel } from 'docx'
+import { jsPDF } from 'jspdf'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
 
@@ -26,7 +28,7 @@ const SUBJECTS = [
 ]
 
 export default function ChatbotPage() {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const { isPremium, messageCount, canSendMessage, incrementMessageCount } = usePremium()
   const [selectedSubject, setSelectedSubject] = useState(SUBJECTS[0])
   const [messages, setMessages] = useState([])
@@ -34,6 +36,7 @@ export default function ChatbotPage() {
   const [loading, setLoading] = useState(false)
   const [showImageUpload, setShowImageUpload] = useState(false)
   const [processingImage, setProcessingImage] = useState(false)
+  const [exporting, setExporting] = useState(false)
   const messagesEndRef = useRef(null)
 
   const scrollToBottom = () => {
@@ -199,6 +202,207 @@ export default function ChatbotPage() {
     }
   }
 
+  const exportToWord = async () => {
+    if (messages.length === 0) {
+      toast.error('Aucune conversation à exporter')
+      return
+    }
+
+    setExporting(true)
+    toast.loading('Création du document Word...', { id: 'export' })
+
+    try {
+      const doc = new Document({
+        sections: [{
+          properties: {},
+          children: [
+            // Header
+            new Paragraph({
+              text: 'EduSen - Plateforme Éducative',
+              heading: HeadingLevel.HEADING_1,
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 200 }
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Matière: ${selectedSubject.name}`,
+                  bold: true
+                })
+              ],
+              spacing: { after: 100 }
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Étudiant: ${profile?.full_name || 'Étudiant'}`,
+                  bold: true
+                })
+              ],
+              spacing: { after: 100 }
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Date: ${new Date().toLocaleDateString('fr-FR')}`,
+                  bold: true
+                })
+              ],
+              spacing: { after: 400 }
+            }),
+            
+            // Divider
+            new Paragraph({
+              text: '─'.repeat(50),
+              spacing: { after: 400 }
+            }),
+
+            // Messages
+            ...messages.flatMap((msg, idx) => [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: msg.role === 'user' ? 'QUESTION:' : 'RÉPONSE:',
+                    bold: true,
+                    color: msg.role === 'user' ? '006838' : '0066CC',
+                    size: 24
+                  })
+                ],
+                spacing: { before: idx === 0 ? 0 : 300, after: 100 }
+              }),
+              new Paragraph({
+                text: msg.content,
+                spacing: { after: 200 }
+              })
+            ]),
+
+            // Footer
+            new Paragraph({
+              text: '─'.repeat(50),
+              spacing: { before: 400, after: 200 }
+            }),
+            new Paragraph({
+              text: '© EduSen - Excellence Académique pour le Sénégal',
+              alignment: AlignmentType.CENTER,
+              italics: true
+            })
+          ]
+        }]
+      })
+
+      const blob = await Packer.toBlob(doc)
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `EduSen-${selectedSubject.id}-${Date.now()}.docx`
+      a.click()
+      window.URL.revokeObjectURL(url)
+      
+      toast.success('Document Word téléchargé!', { id: 'export' })
+    } catch (error) {
+      console.error('Export error:', error)
+      toast.error('Erreur lors de l\'export Word', { id: 'export' })
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  const exportToPDF = async () => {
+    if (messages.length === 0) {
+      toast.error('Aucune conversation à exporter')
+      return
+    }
+
+    setExporting(true)
+    toast.loading('Création du PDF...', { id: 'export' })
+
+    try {
+      const doc = new jsPDF()
+      let yPosition = 20
+
+      // Header
+      doc.setFontSize(20)
+      doc.setTextColor(0, 104, 56) // Senegal green
+      doc.text('EduSen - Plateforme Éducative', 105, yPosition, { align: 'center' })
+      yPosition += 15
+
+      doc.setFontSize(12)
+      doc.setTextColor(0, 0, 0)
+      doc.text(`Matière: ${selectedSubject.name}`, 20, yPosition)
+      yPosition += 7
+      doc.text(`Étudiant: ${profile?.full_name || 'Étudiant'}`, 20, yPosition)
+      yPosition += 7
+      doc.text(`Date: ${new Date().toLocaleDateString('fr-FR')}`, 20, yPosition)
+      yPosition += 15
+
+      // Divider
+      doc.setDrawColor(200, 200, 200)
+      doc.line(20, yPosition, 190, yPosition)
+      yPosition += 10
+
+      // Messages
+      messages.forEach((msg, idx) => {
+        // Check if we need a new page
+        if (yPosition > 270) {
+          doc.addPage()
+          yPosition = 20
+        }
+
+        // Label
+        doc.setFontSize(11)
+        if (msg.role === 'user') {
+          doc.setTextColor(0, 104, 56) // Green for questions
+          doc.setFont(undefined, 'bold')
+          doc.text('QUESTION:', 20, yPosition)
+        } else {
+          doc.setTextColor(0, 102, 204) // Blue for answers
+          doc.setFont(undefined, 'bold')
+          doc.text('RÉPONSE:', 20, yPosition)
+        }
+        yPosition += 7
+
+        // Content
+        doc.setTextColor(0, 0, 0)
+        doc.setFont(undefined, 'normal')
+        doc.setFontSize(10)
+        
+        const lines = doc.splitTextToSize(msg.content, 170)
+        lines.forEach(line => {
+          if (yPosition > 280) {
+            doc.addPage()
+            yPosition = 20
+          }
+          doc.text(line, 20, yPosition)
+          yPosition += 5
+        })
+        
+        yPosition += 5
+      })
+
+      // Footer on last page
+      const pageCount = doc.internal.getNumberOfPages()
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i)
+        doc.setFontSize(8)
+        doc.setTextColor(128, 128, 128)
+        doc.text(
+          `© EduSen - Excellence Académique pour le Sénégal | Page ${i}/${pageCount}`,
+          105,
+          290,
+          { align: 'center' }
+        )
+      }
+
+      doc.save(`EduSen-${selectedSubject.id}-${Date.now()}.pdf`)
+      toast.success('PDF téléchargé!', { id: 'export' })
+    } catch (error) {
+      console.error('Export error:', error)
+      toast.error('Erreur lors de l\'export PDF', { id: 'export' })
+    } finally {
+      setExporting(false)
+    }
+  }
+
   return (
     <div className='flex flex-col h-[calc(100vh-8rem)]'>
       <div className='flex items-center justify-between mb-4'>
@@ -215,6 +419,29 @@ export default function ChatbotPage() {
         </select>
         
         <div className='flex items-center gap-2'>
+          {messages.length > 1 && (
+            <>
+              <button
+                onClick={exportToWord}
+                disabled={exporting}
+                className='btn-secondary flex items-center gap-2 text-sm'
+                title='Exporter en Word'
+              >
+                <FileText size={16} />
+                Word
+              </button>
+              <button
+                onClick={exportToPDF}
+                disabled={exporting}
+                className='btn-secondary flex items-center gap-2 text-sm'
+                title='Exporter en PDF'
+              >
+                <Download size={16} />
+                PDF
+              </button>
+            </>
+          )}
+          
           {isPremium ? (
             <span className='flex items-center gap-2 text-senegal-green font-semibold'>
               <Crown size={20} />
