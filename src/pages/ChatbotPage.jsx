@@ -34,7 +34,7 @@ export default function ChatbotPage() {
   const { user, profile } = useAuth()
   const { isPremium, messageCount, canSendMessage, incrementMessageCount } = usePremium()
   const [selectedSubject, setSelectedSubject] = useState(SUBJECTS[0])
-  const [showAllSubjects, setShowAllSubjects] = useState(true)
+  const [showAllSubjects, setShowAllSubjects] = useState(false)
   const [messages, setMessages] = useState([])
   const [inputMessage, setInputMessage] = useState('')
   const [loading, setLoading] = useState(false)
@@ -43,7 +43,7 @@ export default function ChatbotPage() {
   const [exporting, setExporting] = useState(false)
   const [conversations, setConversations] = useState([])
   const [currentConversationId, setCurrentConversationId] = useState(null)
-  const [showSidebar, setShowSidebar] = useState(true)
+  const [showSidebar, setShowSidebar] = useState(false)
   const messagesEndRef = useRef(null)
 
   const scrollToBottom = () => {
@@ -62,7 +62,6 @@ export default function ChatbotPage() {
     const { data } = await chatService.getAllConversations(user.id, selectedSubject.id)
     if (data && data.length > 0) {
       setConversations(data)
-      // Load the most recent conversation
       loadConversation(data[0])
     } else {
       setConversations([])
@@ -457,68 +456,121 @@ export default function ChatbotPage() {
   }
 
   return (
-    <div className='flex h-[calc(100vh-8rem)] gap-4'>
-      {/* Sidebar - Chat History */}
-      {showSidebar && (
-        <div className='w-80 card p-4 flex flex-col'>
-          <div className='flex items-center justify-between mb-4'>
-            <h3 className='font-bold text-gray-800'>💬 Historique</h3>
-            <button
-              onClick={startNewConversation}
-              className='btn-primary flex items-center gap-2 text-sm px-3 py-2'
-              title='Nouvelle conversation'
-            >
-              <MessageSquarePlus size={16} />
-              Nouveau
-            </button>
+    <div className='flex flex-col md:flex-row h-[calc(100vh-8rem)] gap-0 md:gap-4'>
+      {/* Mobile Header with Menu Toggle */}
+      <div className='md:hidden mb-4'>
+        <div className='flex items-center justify-between p-3 bg-senegal-green text-white rounded-lg'>
+          <button
+            onClick={() => setShowSidebar(!showSidebar)}
+            className='px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors text-sm font-semibold'
+          >
+            ☰ Historique
+          </button>
+          <div className='flex items-center gap-2'>
+            <div className='text-xl'>{selectedSubject.icon}</div>
+            <div className='font-semibold text-sm'>{selectedSubject.name}</div>
           </div>
-
-          <div className='flex-1 overflow-y-auto space-y-2'>
-            {conversations.map((conv) => (
-              <div
-                key={conv.id}
-                onClick={() => loadConversation(conv)}
-                className={`p-3 rounded-lg cursor-pointer transition-all hover:bg-gray-100 ${
-                  currentConversationId === conv.id ? 'bg-senegal-green/10 border-2 border-senegal-green' : 'border-2 border-transparent'
-                }`}
-              >
-                <div className='flex items-start justify-between gap-2'>
-                  <div className='flex-1 min-w-0'>
-                    <p className='text-sm font-medium text-gray-800 truncate'>
-                      {getConversationTitle(conv)}
-                    </p>
-                    <div className='flex items-center gap-1 mt-1'>
-                      <Clock size={12} className='text-gray-400' />
-                      <p className='text-xs text-gray-500'>{formatDate(conv.updated_at)}</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      deleteConversation(conv.id)
-                    }}
-                    className='text-gray-400 hover:text-red-500 transition-colors'
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </div>
-            ))}
-
-            {conversations.length === 0 && (
-              <div className='text-center py-8 text-gray-500'>
-                <p className='text-sm'>Aucune conversation</p>
-                <p className='text-xs mt-2'>Commencez une nouvelle conversation!</p>
-              </div>
-            )}
-          </div>
+          <button
+            onClick={() => setShowAllSubjects(true)}
+            className='px-3 py-2 text-xs font-semibold bg-white text-senegal-green rounded-lg'
+          >
+            Changer
+          </button>
         </div>
+      </div>
+
+      {/* Sidebar - Full screen on mobile, side panel on desktop */}
+      {showSidebar && (
+        <>
+          {/* Mobile Overlay */}
+          <div 
+            className='fixed inset-0 bg-black/50 z-40 md:hidden'
+            onClick={() => setShowSidebar(false)}
+          />
+          
+          {/* Sidebar Content */}
+          <div className={`
+            fixed md:relative
+            inset-y-0 left-0
+            w-80 md:w-80
+            bg-white
+            z-50 md:z-0
+            flex flex-col
+            shadow-2xl md:shadow-none
+            transition-transform duration-300
+            card p-4
+            h-full
+          `}>
+            <div className='flex items-center justify-between mb-4'>
+              <h3 className='font-bold text-gray-800'>💬 Historique</h3>
+              <div className='flex gap-2'>
+                <button
+                  onClick={startNewConversation}
+                  className='btn-primary flex items-center gap-2 text-sm px-3 py-2'
+                  title='Nouvelle conversation'
+                >
+                  <MessageSquarePlus size={16} />
+                  <span className='hidden sm:inline'>Nouveau</span>
+                </button>
+                <button
+                  onClick={() => setShowSidebar(false)}
+                  className='md:hidden px-3 py-2 text-gray-500 hover:bg-gray-100 rounded-lg'
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <div className='flex-1 overflow-y-auto space-y-2'>
+              {conversations.map((conv) => (
+                <div
+                  key={conv.id}
+                  onClick={() => {
+                    loadConversation(conv)
+                    setShowSidebar(false)
+                  }}
+                  className={`p-3 rounded-lg cursor-pointer transition-all hover:bg-gray-100 ${
+                    currentConversationId === conv.id ? 'bg-senegal-green/10 border-2 border-senegal-green' : 'border-2 border-transparent'
+                  }`}
+                >
+                  <div className='flex items-start justify-between gap-2'>
+                    <div className='flex-1 min-w-0'>
+                      <p className='text-sm font-medium text-gray-800 truncate'>
+                        {getConversationTitle(conv)}
+                      </p>
+                      <div className='flex items-center gap-1 mt-1'>
+                        <Clock size={12} className='text-gray-400' />
+                        <p className='text-xs text-gray-500'>{formatDate(conv.updated_at)}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        deleteConversation(conv.id)
+                      }}
+                      className='text-gray-400 hover:text-red-500 transition-colors'
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {conversations.length === 0 && (
+                <div className='text-center py-8 text-gray-500'>
+                  <p className='text-sm'>Aucune conversation</p>
+                  <p className='text-xs mt-2'>Commencez une nouvelle conversation!</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
       )}
 
       {/* Main Chat Area */}
-      <div className='flex-1 flex flex-col'>
-        {/* Subject Selector */}
-        <div className='mb-4'>
+      <div className='flex-1 flex flex-col min-w-0'>
+        {/* Desktop Subject Selector */}
+        <div className='hidden md:block mb-4'>
           {showAllSubjects ? (
             <div>
               <div className='flex items-center justify-between mb-3'>
@@ -572,28 +624,62 @@ export default function ChatbotPage() {
           )}
         </div>
 
+        {/* Mobile Subject Selector Modal */}
+        {showAllSubjects && (
+          <div className='md:hidden fixed inset-0 bg-white z-50 p-4 overflow-y-auto'>
+            <div className='flex items-center justify-between mb-4'>
+              <h3 className='text-lg font-bold text-gray-800'>📚 Choisissez votre matière:</h3>
+              <button
+                onClick={() => setShowAllSubjects(false)}
+                className='px-4 py-2 text-sm font-semibold text-senegal-green hover:bg-senegal-green/10 rounded-lg'
+              >
+                ✕ Fermer
+              </button>
+            </div>
+            <div className='grid grid-cols-3 gap-2'>
+              {SUBJECTS.map((subject) => (
+                <button
+                  key={subject.id}
+                  onClick={() => {
+                    setSelectedSubject(subject)
+                    setShowAllSubjects(false)
+                  }}
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    selectedSubject.id === subject.id
+                      ? 'bg-senegal-green text-white border-senegal-green shadow-lg'
+                      : 'bg-white border-gray-200'
+                  }`}
+                >
+                  <div className='text-2xl mb-1'>{subject.icon}</div>
+                  <div className='text-[10px] font-semibold leading-tight'>{subject.name}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Chat Controls */}
-        <div className='flex items-center justify-between mb-4'>
-          <div className='flex items-center gap-2'>
+        <div className='flex items-center justify-between mb-4 flex-wrap gap-2'>
+          <div className='flex items-center gap-2 flex-wrap'>
             {messages.length > 1 && (
               <>
                 <button
                   onClick={exportToWord}
                   disabled={exporting}
-                  className='btn-secondary flex items-center gap-2 text-sm'
+                  className='btn-secondary flex items-center gap-2 text-xs md:text-sm px-2 md:px-3 py-2'
                   title='Exporter en Word'
                 >
-                  <FileText size={16} />
-                  Word
+                  <FileText size={14} />
+                  <span className='hidden sm:inline'>Word</span>
                 </button>
                 <button
                   onClick={exportToPDF}
                   disabled={exporting}
-                  className='btn-secondary flex items-center gap-2 text-sm'
+                  className='btn-secondary flex items-center gap-2 text-xs md:text-sm px-2 md:px-3 py-2'
                   title='Exporter en PDF'
                 >
-                  <Download size={16} />
-                  PDF
+                  <Download size={14} />
+                  <span className='hidden sm:inline'>PDF</span>
                 </button>
               </>
             )}
@@ -601,34 +687,34 @@ export default function ChatbotPage() {
           
           <div className='flex items-center gap-2'>
             {isPremium ? (
-              <span className='flex items-center gap-2 text-senegal-green font-semibold'>
-                <Crown size={20} />
+              <span className='flex items-center gap-2 text-senegal-green font-semibold text-xs md:text-sm'>
+                <Crown size={16} />
                 Premium
               </span>
             ) : (
-              <span className='text-gray-600 text-sm'>
-                {messageCount}/10 messages
+              <span className='text-gray-600 text-xs md:text-sm'>
+                {messageCount}/10
               </span>
             )}
           </div>
         </div>
 
         {/* Messages Area */}
-        <div className='flex-1 overflow-y-auto card mb-4 p-4'>
-          <div className='space-y-4'>
+        <div className='flex-1 overflow-y-auto card mb-4 p-3 md:p-4'>
+          <div className='space-y-3 md:space-y-4'>
             {messages.map((msg, idx) => (
               <div
                 key={idx}
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] p-4 rounded-lg ${
+                  className={`max-w-[85%] md:max-w-[80%] p-3 md:p-4 rounded-lg text-sm md:text-base ${
                     msg.role === 'user'
                       ? 'bg-senegal-green text-white'
                       : 'bg-gray-100 text-gray-900'
                   }`}
                 >
-                  <div className='whitespace-pre-wrap'>{msg.content}</div>
+                  <div className='whitespace-pre-wrap break-words'>{msg.content}</div>
                 </div>
               </div>
             ))}
@@ -666,10 +752,11 @@ export default function ChatbotPage() {
             <div className='flex gap-2'>
               <button
                 onClick={() => setShowImageUpload(!showImageUpload)}
-                className='btn-secondary flex items-center gap-2 text-sm'
+                className='btn-secondary flex items-center gap-2 text-xs md:text-sm px-3 py-2'
               >
-                <Camera size={16} />
-                {showImageUpload ? 'Masquer' : 'Upload Image/PDF'}
+                <Camera size={14} />
+                <span className='hidden sm:inline'>{showImageUpload ? 'Masquer' : 'Upload Image/PDF'}</span>
+                <span className='sm:hidden'>📷</span>
               </button>
             </div>
           )}
@@ -685,16 +772,16 @@ export default function ChatbotPage() {
                 }
               }}
               placeholder='Posez votre question...'
-              className='input-field flex-1 resize-none'
+              className='input-field flex-1 resize-none text-sm md:text-base'
               rows='2'
               disabled={loading}
             />
             <button
               onClick={sendMessage}
               disabled={loading || !inputMessage.trim()}
-              className='btn-primary px-6'
+              className='btn-primary px-4 md:px-6'
             >
-              {loading ? <Loader2 className='animate-spin' size={20} /> : <Send size={20} />}
+              {loading ? <Loader2 className='animate-spin' size={18} /> : <Send size={18} />}
             </button>
           </div>
         </div>
