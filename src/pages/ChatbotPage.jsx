@@ -24,13 +24,17 @@ const SUBJECTS = [
   { id: 'philosophy', name: 'Philosophie', icon: '💭' },
   { id: 'economics', name: 'Économie', icon: '💰' },
   { id: 'programming', name: 'Programmation', icon: '💻' },
-  { id: 'medicine', name: 'Médecine', icon: '⚕️' }
+  { id: 'medicine', name: 'Médecine', icon: '⚕️' },
+  { id: 'law', name: 'Droit', icon: '⚖️' },
+  { id: 'humanities', name: 'Sciences Humaines', icon: '🧠' },
+  { id: 'general', name: 'Questions Générales', icon: '💬' }
 ]
 
 export default function ChatbotPage() {
   const { user, profile } = useAuth()
   const { isPremium, messageCount, canSendMessage, incrementMessageCount } = usePremium()
   const [selectedSubject, setSelectedSubject] = useState(SUBJECTS[0])
+  const [showAllSubjects, setShowAllSubjects] = useState(true)
   const [messages, setMessages] = useState([])
   const [inputMessage, setInputMessage] = useState('')
   const [loading, setLoading] = useState(false)
@@ -53,8 +57,8 @@ export default function ChatbotPage() {
 
   const loadConversationHistory = async () => {
     const { data } = await chatService.getConversationHistory(user.id, selectedSubject.id)
-    if (data && data.length > 0) {
-      setMessages(data[0].messages || [])
+    if (data && data.length > 0 && data[0].messages && data[0].messages.length > 0) {
+      setMessages(data[0].messages)
     } else {
       setMessages([{
         role: 'assistant',
@@ -216,7 +220,6 @@ export default function ChatbotPage() {
         sections: [{
           properties: {},
           children: [
-            // Header
             new Paragraph({
               text: 'EduSen - Plateforme Éducative',
               heading: HeadingLevel.HEADING_1,
@@ -250,14 +253,10 @@ export default function ChatbotPage() {
               ],
               spacing: { after: 400 }
             }),
-            
-            // Divider
             new Paragraph({
               text: '─'.repeat(50),
               spacing: { after: 400 }
             }),
-
-            // Messages
             ...messages.flatMap((msg, idx) => [
               new Paragraph({
                 children: [
@@ -275,8 +274,6 @@ export default function ChatbotPage() {
                 spacing: { after: 200 }
               })
             ]),
-
-            // Footer
             new Paragraph({
               text: '─'.repeat(50),
               spacing: { before: 400, after: 200 }
@@ -320,9 +317,8 @@ export default function ChatbotPage() {
       const doc = new jsPDF()
       let yPosition = 20
 
-      // Header
       doc.setFontSize(20)
-      doc.setTextColor(0, 104, 56) // Senegal green
+      doc.setTextColor(0, 104, 56)
       doc.text('EduSen - Plateforme Éducative', 105, yPosition, { align: 'center' })
       yPosition += 15
 
@@ -335,33 +331,28 @@ export default function ChatbotPage() {
       doc.text(`Date: ${new Date().toLocaleDateString('fr-FR')}`, 20, yPosition)
       yPosition += 15
 
-      // Divider
       doc.setDrawColor(200, 200, 200)
       doc.line(20, yPosition, 190, yPosition)
       yPosition += 10
 
-      // Messages
-      messages.forEach((msg, idx) => {
-        // Check if we need a new page
+      messages.forEach((msg) => {
         if (yPosition > 270) {
           doc.addPage()
           yPosition = 20
         }
 
-        // Label
         doc.setFontSize(11)
         if (msg.role === 'user') {
-          doc.setTextColor(0, 104, 56) // Green for questions
+          doc.setTextColor(0, 104, 56)
           doc.setFont(undefined, 'bold')
           doc.text('QUESTION:', 20, yPosition)
         } else {
-          doc.setTextColor(0, 102, 204) // Blue for answers
+          doc.setTextColor(0, 102, 204)
           doc.setFont(undefined, 'bold')
           doc.text('RÉPONSE:', 20, yPosition)
         }
         yPosition += 7
 
-        // Content
         doc.setTextColor(0, 0, 0)
         doc.setFont(undefined, 'normal')
         doc.setFontSize(10)
@@ -379,7 +370,6 @@ export default function ChatbotPage() {
         yPosition += 5
       })
 
-      // Footer on last page
       const pageCount = doc.internal.getNumberOfPages()
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i)
@@ -405,19 +395,56 @@ export default function ChatbotPage() {
 
   return (
     <div className='flex flex-col h-[calc(100vh-8rem)]'>
+      {/* Collapsible Subject Selector */}
+      <div className='mb-4'>
+        {showAllSubjects ? (
+          <div>
+            <div className='flex items-center justify-between mb-3'>
+              <h3 className='text-lg font-bold text-gray-800'>📚 Choisissez votre matière:</h3>
+              <button
+                onClick={() => setShowAllSubjects(false)}
+                className='px-4 py-2 text-sm font-semibold text-senegal-green hover:bg-senegal-green/10 rounded-lg transition-colors'
+              >
+                Masquer ✕
+              </button>
+            </div>
+            <div className='grid grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-2'>
+              {SUBJECTS.map((subject) => (
+                <button
+                  key={subject.id}
+                  onClick={() => {
+                    setSelectedSubject(subject)
+                    setShowAllSubjects(false)
+                  }}
+                  className={`p-2 rounded-lg border-2 transition-all hover:scale-105 ${
+                    selectedSubject.id === subject.id
+                      ? 'bg-senegal-green text-white border-senegal-green shadow-lg'
+                      : 'bg-white border-gray-200 hover:border-senegal-green'
+                  }`}
+                >
+                  <div className='text-xl mb-1'>{subject.icon}</div>
+                  <div className='text-[10px] font-semibold leading-tight'>{subject.name}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className='flex items-center justify-between p-3 bg-senegal-green text-white rounded-lg'>
+            <div className='flex items-center gap-3'>
+              <div className='text-2xl'>{selectedSubject.icon}</div>
+              <div className='font-semibold'>{selectedSubject.name}</div>
+            </div>
+            <button
+              onClick={() => setShowAllSubjects(true)}
+              className='px-4 py-2 text-sm font-semibold bg-white text-senegal-green rounded-lg hover:bg-gray-100 transition-colors'
+            >
+              Changer de matière
+            </button>
+          </div>
+        )}
+      </div>
+
       <div className='flex items-center justify-between mb-4'>
-        <select
-          value={selectedSubject.id}
-          onChange={(e) => setSelectedSubject(SUBJECTS.find(s => s.id === e.target.value))}
-          className='input-field'
-        >
-          {SUBJECTS.map((subject) => (
-            <option key={subject.id} value={subject.id}>
-              {subject.icon} {subject.name}
-            </option>
-          ))}
-        </select>
-        
         <div className='flex items-center gap-2'>
           {messages.length > 1 && (
             <>
@@ -441,7 +468,9 @@ export default function ChatbotPage() {
               </button>
             </>
           )}
-          
+        </div>
+        
+        <div className='flex items-center gap-2'>
           {isPremium ? (
             <span className='flex items-center gap-2 text-senegal-green font-semibold'>
               <Crown size={20} />
