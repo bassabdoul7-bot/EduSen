@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { usePremium } from '../context/PremiumContext'
 import { chatService } from '../services/chat'
-import { Send, Loader2, Crown, Camera, FileText, Download } from 'lucide-react'
+import { Send, Loader2, Crown, Camera, FileText, Download, Trash2, MessageSquarePlus, Clock } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ImageUpload from '../components/ImageUpload'
 import Tesseract from 'tesseract.js'
@@ -41,6 +41,9 @@ export default function ChatbotPage() {
   const [showImageUpload, setShowImageUpload] = useState(false)
   const [processingImage, setProcessingImage] = useState(false)
   const [exporting, setExporting] = useState(false)
+  const [conversations, setConversations] = useState([])
+  const [currentConversationId, setCurrentConversationId] = useState(null)
+  const [showSidebar, setShowSidebar] = useState(true)
   const messagesEndRef = useRef(null)
 
   const scrollToBottom = () => {
@@ -52,18 +55,76 @@ export default function ChatbotPage() {
   }, [messages])
 
   useEffect(() => {
-    loadConversationHistory()
+    loadAllConversations()
   }, [selectedSubject])
 
-  const loadConversationHistory = async () => {
-    const { data } = await chatService.getConversationHistory(user.id, selectedSubject.id)
-    if (data && data.length > 0 && data[0].messages && data[0].messages.length > 0) {
-      setMessages(data[0].messages)
+  const loadAllConversations = async () => {
+    const { data } = await chatService.getAllConversations(user.id, selectedSubject.id)
+    if (data && data.length > 0) {
+      setConversations(data)
+      // Load the most recent conversation
+      loadConversation(data[0])
+    } else {
+      setConversations([])
+      startNewConversation()
+    }
+  }
+
+  const loadConversation = (conversation) => {
+    setCurrentConversationId(conversation.id)
+    if (conversation.messages && conversation.messages.length > 0) {
+      setMessages(conversation.messages)
     } else {
       setMessages([{
         role: 'assistant',
         content: `Bonjour! Je suis votre tuteur en ${selectedSubject.name}. Comment puis-je vous aider aujourd'hui?`
       }])
+    }
+  }
+
+  const startNewConversation = async () => {
+    const { data, error } = await chatService.createNewConversation(user.id, selectedSubject.id)
+    if (data) {
+      setCurrentConversationId(data.id)
+      setMessages([{
+        role: 'assistant',
+        content: `Bonjour! Je suis votre tuteur en ${selectedSubject.name}. Comment puis-je vous aider aujourd'hui?`
+      }])
+      await loadAllConversations()
+      toast.success('Nouvelle conversation créée!')
+    }
+  }
+
+  const deleteConversation = async (conversationId) => {
+    if (confirm('Voulez-vous vraiment supprimer cette conversation?')) {
+      await chatService.deleteConversation(conversationId)
+      await loadAllConversations()
+      toast.success('Conversation supprimée!')
+    }
+  }
+
+  const getConversationTitle = (conversation) => {
+    if (!conversation.messages || conversation.messages.length === 0) {
+      return 'Nouvelle conversation'
+    }
+    const firstUserMessage = conversation.messages.find(m => m.role === 'user')
+    if (firstUserMessage) {
+      return firstUserMessage.content.substring(0, 40) + (firstUserMessage.content.length > 40 ? '...' : '')
+    }
+    return 'Conversation'
+  }
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffInHours = (now - date) / (1000 * 60 * 60)
+    
+    if (diffInHours < 24) {
+      return 'Aujourd\'hui'
+    } else if (diffInHours < 48) {
+      return 'Hier'
+    } else {
+      return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
     }
   }
 
@@ -189,7 +250,8 @@ export default function ChatbotPage() {
         user.id,
         selectedSubject.id,
         inputMessage,
-        updatedMessages
+        updatedMessages,
+        currentConversationId
       )
 
       if (response.reply) {
@@ -197,6 +259,7 @@ export default function ChatbotPage() {
         if (!isPremium) {
           incrementMessageCount()
         }
+        await loadAllConversations()
       }
     } catch (error) {
       toast.error('Erreur lors de l\'envoi')
@@ -394,176 +457,246 @@ export default function ChatbotPage() {
   }
 
   return (
-    <div className='flex flex-col h-[calc(100vh-8rem)]'>
-      {/* Collapsible Subject Selector */}
-      <div className='mb-4'>
-        {showAllSubjects ? (
-          <div>
-            <div className='flex items-center justify-between mb-3'>
-              <h3 className='text-lg font-bold text-gray-800'>📚 Choisissez votre matière:</h3>
-              <button
-                onClick={() => setShowAllSubjects(false)}
-                className='px-4 py-2 text-sm font-semibold text-senegal-green hover:bg-senegal-green/10 rounded-lg transition-colors'
-              >
-                Masquer ✕
-              </button>
-            </div>
-            <div className='grid grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-2'>
-              {SUBJECTS.map((subject) => (
-                <button
-                  key={subject.id}
-                  onClick={() => {
-                    setSelectedSubject(subject)
-                    setShowAllSubjects(false)
-                  }}
-                  className={`p-2 rounded-lg border-2 transition-all hover:scale-105 ${
-                    selectedSubject.id === subject.id
-                      ? 'bg-senegal-green text-white border-senegal-green shadow-lg'
-                      : 'bg-white border-gray-200 hover:border-senegal-green'
-                  }`}
-                >
-                  <div className='text-xl mb-1'>{subject.icon}</div>
-                  <div className='text-[10px] font-semibold leading-tight'>{subject.name}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className='flex items-center justify-between p-3 bg-senegal-green text-white rounded-lg'>
-            <div className='flex items-center gap-3'>
-              <div className='text-2xl'>{selectedSubject.icon}</div>
-              <div className='font-semibold'>{selectedSubject.name}</div>
-            </div>
+    <div className='flex h-[calc(100vh-8rem)] gap-4'>
+      {/* Sidebar - Chat History */}
+      {showSidebar && (
+        <div className='w-80 card p-4 flex flex-col'>
+          <div className='flex items-center justify-between mb-4'>
+            <h3 className='font-bold text-gray-800'>💬 Historique</h3>
             <button
-              onClick={() => setShowAllSubjects(true)}
-              className='px-4 py-2 text-sm font-semibold bg-white text-senegal-green rounded-lg hover:bg-gray-100 transition-colors'
+              onClick={startNewConversation}
+              className='btn-primary flex items-center gap-2 text-sm px-3 py-2'
+              title='Nouvelle conversation'
             >
-              Changer de matière
+              <MessageSquarePlus size={16} />
+              Nouveau
             </button>
           </div>
-        )}
-      </div>
 
-      <div className='flex items-center justify-between mb-4'>
-        <div className='flex items-center gap-2'>
-          {messages.length > 1 && (
-            <>
-              <button
-                onClick={exportToWord}
-                disabled={exporting}
-                className='btn-secondary flex items-center gap-2 text-sm'
-                title='Exporter en Word'
-              >
-                <FileText size={16} />
-                Word
-              </button>
-              <button
-                onClick={exportToPDF}
-                disabled={exporting}
-                className='btn-secondary flex items-center gap-2 text-sm'
-                title='Exporter en PDF'
-              >
-                <Download size={16} />
-                PDF
-              </button>
-            </>
-          )}
-        </div>
-        
-        <div className='flex items-center gap-2'>
-          {isPremium ? (
-            <span className='flex items-center gap-2 text-senegal-green font-semibold'>
-              <Crown size={20} />
-              Premium
-            </span>
-          ) : (
-            <span className='text-gray-600 text-sm'>
-              {messageCount}/10 messages
-            </span>
-          )}
-        </div>
-      </div>
-
-      <div className='flex-1 overflow-y-auto card mb-4 p-4'>
-        <div className='space-y-4'>
-          {messages.map((msg, idx) => (
-            <div
-              key={idx}
-              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
+          <div className='flex-1 overflow-y-auto space-y-2'>
+            {conversations.map((conv) => (
               <div
-                className={`max-w-[80%] p-4 rounded-lg ${
-                  msg.role === 'user'
-                    ? 'bg-senegal-green text-white'
-                    : 'bg-gray-100 text-gray-900'
+                key={conv.id}
+                onClick={() => loadConversation(conv)}
+                className={`p-3 rounded-lg cursor-pointer transition-all hover:bg-gray-100 ${
+                  currentConversationId === conv.id ? 'bg-senegal-green/10 border-2 border-senegal-green' : 'border-2 border-transparent'
                 }`}
               >
-                <div className='whitespace-pre-wrap'>{msg.content}</div>
+                <div className='flex items-start justify-between gap-2'>
+                  <div className='flex-1 min-w-0'>
+                    <p className='text-sm font-medium text-gray-800 truncate'>
+                      {getConversationTitle(conv)}
+                    </p>
+                    <div className='flex items-center gap-1 mt-1'>
+                      <Clock size={12} className='text-gray-400' />
+                      <p className='text-xs text-gray-500'>{formatDate(conv.updated_at)}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      deleteConversation(conv.id)
+                    }}
+                    className='text-gray-400 hover:text-red-500 transition-colors'
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-          {loading && (
-            <div className='flex justify-start'>
-              <div className='bg-gray-100 p-4 rounded-lg'>
-                <Loader2 className='animate-spin' size={24} />
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-      </div>
+            ))}
 
-      {showImageUpload && isPremium && (
-        <div className='card mb-4 p-4'>
-          {processingImage ? (
-            <div className='text-center py-4'>
-              <Loader2 className='animate-spin mx-auto mb-2' size={32} />
-              <p className='text-sm'>Analyse en cours...</p>
-            </div>
-          ) : (
-            <ImageUpload
-              onImageCapture={handleImageCapture}
-              onPDFUpload={handlePDFUpload}
-            />
-          )}
+            {conversations.length === 0 && (
+              <div className='text-center py-8 text-gray-500'>
+                <p className='text-sm'>Aucune conversation</p>
+                <p className='text-xs mt-2'>Commencez une nouvelle conversation!</p>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      <div className='space-y-2'>
-        {isPremium && (
-          <div className='flex gap-2'>
-            <button
-              onClick={() => setShowImageUpload(!showImageUpload)}
-              className='btn-secondary flex items-center gap-2 text-sm'
-            >
-              <Camera size={16} />
-              {showImageUpload ? 'Masquer' : 'Upload Image/PDF'}
-            </button>
+      {/* Main Chat Area */}
+      <div className='flex-1 flex flex-col'>
+        {/* Subject Selector */}
+        <div className='mb-4'>
+          {showAllSubjects ? (
+            <div>
+              <div className='flex items-center justify-between mb-3'>
+                <h3 className='text-lg font-bold text-gray-800'>📚 Choisissez votre matière:</h3>
+                <button
+                  onClick={() => setShowAllSubjects(false)}
+                  className='px-4 py-2 text-sm font-semibold text-senegal-green hover:bg-senegal-green/10 rounded-lg transition-colors'
+                >
+                  Masquer ✕
+                </button>
+              </div>
+              <div className='grid grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-2'>
+                {SUBJECTS.map((subject) => (
+                  <button
+                    key={subject.id}
+                    onClick={() => {
+                      setSelectedSubject(subject)
+                      setShowAllSubjects(false)
+                    }}
+                    className={`p-2 rounded-lg border-2 transition-all hover:scale-105 ${
+                      selectedSubject.id === subject.id
+                        ? 'bg-senegal-green text-white border-senegal-green shadow-lg'
+                        : 'bg-white border-gray-200 hover:border-senegal-green'
+                    }`}
+                  >
+                    <div className='text-xl mb-1'>{subject.icon}</div>
+                    <div className='text-[10px] font-semibold leading-tight'>{subject.name}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className='flex items-center justify-between p-3 bg-senegal-green text-white rounded-lg'>
+              <div className='flex items-center gap-3'>
+                <button
+                  onClick={() => setShowSidebar(!showSidebar)}
+                  className='px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors'
+                >
+                  {showSidebar ? '◀' : '▶'}
+                </button>
+                <div className='text-2xl'>{selectedSubject.icon}</div>
+                <div className='font-semibold'>{selectedSubject.name}</div>
+              </div>
+              <button
+                onClick={() => setShowAllSubjects(true)}
+                className='px-4 py-2 text-sm font-semibold bg-white text-senegal-green rounded-lg hover:bg-gray-100 transition-colors'
+              >
+                Changer de matière
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Chat Controls */}
+        <div className='flex items-center justify-between mb-4'>
+          <div className='flex items-center gap-2'>
+            {messages.length > 1 && (
+              <>
+                <button
+                  onClick={exportToWord}
+                  disabled={exporting}
+                  className='btn-secondary flex items-center gap-2 text-sm'
+                  title='Exporter en Word'
+                >
+                  <FileText size={16} />
+                  Word
+                </button>
+                <button
+                  onClick={exportToPDF}
+                  disabled={exporting}
+                  className='btn-secondary flex items-center gap-2 text-sm'
+                  title='Exporter en PDF'
+                >
+                  <Download size={16} />
+                  PDF
+                </button>
+              </>
+            )}
+          </div>
+          
+          <div className='flex items-center gap-2'>
+            {isPremium ? (
+              <span className='flex items-center gap-2 text-senegal-green font-semibold'>
+                <Crown size={20} />
+                Premium
+              </span>
+            ) : (
+              <span className='text-gray-600 text-sm'>
+                {messageCount}/10 messages
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Messages Area */}
+        <div className='flex-1 overflow-y-auto card mb-4 p-4'>
+          <div className='space-y-4'>
+            {messages.map((msg, idx) => (
+              <div
+                key={idx}
+                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[80%] p-4 rounded-lg ${
+                    msg.role === 'user'
+                      ? 'bg-senegal-green text-white'
+                      : 'bg-gray-100 text-gray-900'
+                  }`}
+                >
+                  <div className='whitespace-pre-wrap'>{msg.content}</div>
+                </div>
+              </div>
+            ))}
+            {loading && (
+              <div className='flex justify-start'>
+                <div className='bg-gray-100 p-4 rounded-lg'>
+                  <Loader2 className='animate-spin' size={24} />
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        </div>
+
+        {/* Image Upload */}
+        {showImageUpload && isPremium && (
+          <div className='card mb-4 p-4'>
+            {processingImage ? (
+              <div className='text-center py-4'>
+                <Loader2 className='animate-spin mx-auto mb-2' size={32} />
+                <p className='text-sm'>Analyse en cours...</p>
+              </div>
+            ) : (
+              <ImageUpload
+                onImageCapture={handleImageCapture}
+                onPDFUpload={handlePDFUpload}
+              />
+            )}
           </div>
         )}
-        
-        <div className='flex gap-2'>
-          <textarea
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault()
-                sendMessage()
-              }
-            }}
-            placeholder='Posez votre question...'
-            className='input-field flex-1 resize-none'
-            rows='2'
-            disabled={loading}
-          />
-          <button
-            onClick={sendMessage}
-            disabled={loading || !inputMessage.trim()}
-            className='btn-primary px-6'
-          >
-            {loading ? <Loader2 className='animate-spin' size={20} /> : <Send size={20} />}
-          </button>
+
+        {/* Input Area */}
+        <div className='space-y-2'>
+          {isPremium && (
+            <div className='flex gap-2'>
+              <button
+                onClick={() => setShowImageUpload(!showImageUpload)}
+                className='btn-secondary flex items-center gap-2 text-sm'
+              >
+                <Camera size={16} />
+                {showImageUpload ? 'Masquer' : 'Upload Image/PDF'}
+              </button>
+            </div>
+          )}
+          
+          <div className='flex gap-2'>
+            <textarea
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  sendMessage()
+                }
+              }}
+              placeholder='Posez votre question...'
+              className='input-field flex-1 resize-none'
+              rows='2'
+              disabled={loading}
+            />
+            <button
+              onClick={sendMessage}
+              disabled={loading || !inputMessage.trim()}
+              className='btn-primary px-6'
+            >
+              {loading ? <Loader2 className='animate-spin' size={20} /> : <Send size={20} />}
+            </button>
+          </div>
         </div>
       </div>
     </div>
