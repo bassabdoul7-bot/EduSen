@@ -14,6 +14,7 @@ import ForumPage from './pages/ForumPage'
 import MessagesPage from './pages/MessagesPage'
 import ProfilePage from './pages/ProfilePage'
 import PremiumPage from './pages/PremiumPage'
+import SponsorPage from './pages/SponsorPage'
 
 // Layout
 import Layout from './components/shared/Layout'
@@ -37,6 +38,7 @@ function App() {
               <Route path='messages' element={<MessagesPage />} />
               <Route path='profile' element={<ProfilePage />} />
               <Route path='premium' element={<PremiumPage />} />
+              <Route path='sponsor' element={<SponsorPage />} />
             </Route>
           </Routes>
         </Router>
@@ -47,7 +49,7 @@ function App() {
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
-
+  
   if (loading) {
     return (
       <div className='min-h-screen flex items-center justify-center'>
@@ -55,11 +57,11 @@ function ProtectedRoute({ children }) {
       </div>
     )
   }
-
+  
   if (!user) {
     return <Navigate to='/login' />
   }
-
+  
   return children
 }
 

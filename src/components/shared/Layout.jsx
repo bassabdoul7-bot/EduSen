@@ -1,18 +1,19 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { 
-  LayoutDashboard, 
-  MessageSquare, 
-  GraduationCap, 
-  Award, 
-  MessageCircle, 
-  Mail, 
+import {
+  LayoutDashboard,
+  MessageSquare,
+  GraduationCap,
+  Award,
+  MessageCircle,
+  Mail,
   User,
   LogOut,
   Menu,
   X,
   Crown,
-  Star
+  Star,
+  Heart
 } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
@@ -40,6 +41,7 @@ export default function Layout() {
     { path: '/forum', icon: MessageCircle, label: 'Forum' },
     { path: '/messages', icon: Mail, label: 'Messages' },
     { path: '/premium', icon: Crown, label: '👑 Premium' },
+    { path: '/sponsor', icon: Heart, label: '💚 Sponsor' },
     { path: '/profile', icon: User, label: 'Profil' },
   ]
 
