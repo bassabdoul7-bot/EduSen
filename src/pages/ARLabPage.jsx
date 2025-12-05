@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect, useRef } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
+import { OrbitControls, Html } from '@react-three/drei'
 import { arLabService, calculatePH, getIndicatorColor, calculateCurrent } from '../services/arLab'
 import {
   Beaker, ChemicalBottle, Dropper, LabTable, BunsenBurner,
@@ -8,8 +8,28 @@ import {
   PendulumSupport, PendulumMass, PendulumString
 } from '../components/ar/LabEquipment'
 import toast from 'react-hot-toast'
-import { ArrowLeft, PlayCircle, Info, CheckCircle, Camera, Monitor, X } from 'lucide-react'
+import { ArrowLeft, PlayCircle, Info, CheckCircle, Camera, X, Tag } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+
+function Label({ position, text, color = '#00853D', visible = true }) {
+  if (!visible) return null
+  return (
+    <Html position={position} center distanceFactor={1.5}>
+      <div className='flex items-center gap-1 pointer-events-none'>
+        <div 
+          className='px-2 py-1 rounded-lg text-white text-xs font-bold whitespace-nowrap shadow-lg'
+          style={{ backgroundColor: color }}
+        >
+          {text}
+        </div>
+        <div 
+          className='w-0 h-0 border-t-4 border-b-4 border-l-8 border-transparent'
+          style={{ borderLeftColor: color }}
+        />
+      </div>
+    </Html>
+  )
+}
 
 export default function ARLabPage() {
   const navigate = useNavigate()
@@ -123,7 +143,7 @@ export default function ARLabPage() {
   )
 }
 
-function LabScene({ experiment, experimentState }) {
+function LabScene({ experiment, experimentState, showLabels }) {
   return (
     <group>
       <LabTable position={[0, -0.05, 0]} />
@@ -135,10 +155,19 @@ function LabScene({ experiment, experimentState }) {
             fillLevel={experimentState.hclVolume > 0 ? 0.08 : 0}
             color={experimentState.color}
           />
+          <Label position={[0, 0.25, 0]} text="🧪 Becher" color="#7c3aed" visible={showLabels} />
+          
           <ChemicalBottle position={[-0.35, 0.025, 0.1]} label="HCl" color="#ff6b6b" />
+          <Label position={[-0.35, 0.2, 0.1]} text="⚗️ HCl (Acide)" color="#ef4444" visible={showLabels} />
+          
           <ChemicalBottle position={[0.35, 0.025, 0.1]} label="NaOH" color="#4dabf7" />
+          <Label position={[0.35, 0.2, 0.1]} text="⚗️ NaOH (Base)" color="#3b82f6" visible={showLabels} />
+          
           {experimentState.naohVolume > 0 && (
-            <Dropper position={[0, 0.3, 0]} dropping={true} />
+            <>
+              <Dropper position={[0, 0.3, 0]} dropping={true} />
+              <Label position={[0.15, 0.35, 0]} text="💧 Pipette" color="#8b5cf6" visible={showLabels} />
+            </>
           )}
         </>
       )}
@@ -146,6 +175,8 @@ function LabScene({ experiment, experimentState }) {
       {experiment.id === 'combustion' && (
         <>
           <BunsenBurner position={[0, 0.025, 0]} lit={experimentState.bunsenLit} />
+          <Label position={[0, 0.25, 0]} text={experimentState.bunsenLit ? "🔥 Bec Bunsen (allume)" : "🔥 Bec Bunsen"} color="#f97316" visible={showLabels} />
+          
           <mesh position={[0.3, 0.15, 0]} rotation={[0, 0, Math.PI / 4]}>
             <boxGeometry args={[0.15, 0.01, 0.005]} />
             <meshStandardMaterial
@@ -156,6 +187,8 @@ function LabScene({ experiment, experimentState }) {
               emissiveIntensity={experimentState.magnesiumBurning ? 2 : 0}
             />
           </mesh>
+          <Label position={[0.3, 0.25, 0]} text={experimentState.magnesiumBurning ? "✨ Mg (combustion!)" : "🪨 Ruban Magnesium"} color="#a855f7" visible={showLabels} />
+          
           {experimentState.magnesiumBurning && (
             <pointLight position={[0.3, 0.15, 0]} color="#ffffff" intensity={3} distance={1} />
           )}
@@ -165,23 +198,35 @@ function LabScene({ experiment, experimentState }) {
       {experiment.id === 'simple-circuit' && (
         <>
           <CircuitBoard position={[0, 0.01, 0]} />
+          <Label position={[0, -0.05, 0.25]} text="🟩 Plaque circuit" color="#10b981" visible={showLabels} />
+          
           <Battery position={[-0.3, 0.08, 0]} connected={experimentState.batteryConnected} />
+          <Label position={[-0.3, 0.2, 0]} text={experimentState.batteryConnected ? "🔋 Pile 9V (connectee)" : "🔋 Pile 9V"} color="#1e40af" visible={showLabels} />
+          
           <Resistor position={[0, 0.08, 0]} connected={experimentState.resistorConnected} />
+          <Label position={[0, 0.18, 0]} text={experimentState.resistorConnected ? "⚡ Resistance 100Ω (active)" : "⚡ Resistance 100Ω"} color="#c2410c" visible={showLabels} />
+          
           <Bulb position={[0.3, 0.1, 0]} lit={experimentState.bulbLit} />
+          <Label position={[0.3, 0.22, 0]} text={experimentState.bulbLit ? "💡 Ampoule (allumee!)" : "💡 Ampoule"} color="#eab308" visible={showLabels} />
         </>
       )}
 
       {experiment.id === 'pendulum' && (
         <>
           <PendulumSupport position={[0, 0.025, 0]} />
+          <Label position={[0.2, 0.45, 0]} text="🏗️ Support" color="#71717a" visible={showLabels} />
+          
           <PendulumString
             start={[0, 0.425, 0]}
             end={[experimentState.pendulumSwinging ? 0.15 : 0, 0.025, 0]}
           />
+          <Label position={[0.08, 0.25, 0]} text="🧵 Ficelle (L=1m)" color="#1f2937" visible={showLabels} />
+          
           <PendulumMass
             position={[experimentState.pendulumSwinging ? 0.15 : 0, 0.025, 0]}
             swinging={experimentState.pendulumSwinging}
           />
+          <Label position={[experimentState.pendulumSwinging ? 0.15 : 0, -0.05, 0]} text={experimentState.pendulumSwinging ? "⚖️ Masse (oscillation)" : "⚖️ Masse 100g"} color="#dc2626" visible={showLabels} />
         </>
       )}
     </group>
@@ -191,7 +236,7 @@ function LabScene({ experiment, experimentState }) {
 function ARExperimentView({ experiment, onBack }) {
   const [currentStep, setCurrentStep] = useState(0)
   const [arMode, setArMode] = useState(false)
-  const [cameraError, setCameraError] = useState(null)
+  const [showLabels, setShowLabels] = useState(true)
   const videoRef = useRef(null)
   const streamRef = useRef(null)
   const [experimentState, setExperimentState] = useState({
@@ -221,11 +266,9 @@ function ARExperimentView({ experiment, onBack }) {
         videoRef.current.srcObject = stream
       }
       setArMode(true)
-      setCameraError(null)
       toast.success('📷 Mode AR active!')
     } catch (err) {
       console.error('Camera error:', err)
-      setCameraError('Impossible d\'acceder a la camera')
       toast.error('Camera non disponible')
     }
   }
@@ -359,11 +402,17 @@ function ARExperimentView({ experiment, onBack }) {
         </div>
         <div className='flex gap-2'>
           <button 
+            onClick={() => setShowLabels(!showLabels)}
+            className={`p-2 rounded-lg ${showLabels ? 'bg-senegal-green text-white' : 'bg-gray-100'}`}
+            title="Afficher/Masquer les legendes"
+          >
+            <Tag size={20} />
+          </button>
+          <button 
             onClick={() => arMode ? stopCamera() : startCamera()}
-            className={`p-2 rounded-lg flex items-center gap-2 ${arMode ? 'bg-senegal-green text-white' : 'bg-gray-100'}`}
+            className={`p-2 rounded-lg flex items-center gap-2 ${arMode ? 'bg-red-500 text-white' : 'bg-gray-100'}`}
           >
             {arMode ? <X size={20} /> : <Camera size={20} />}
-            <span className='hidden sm:inline'>{arMode ? 'Quitter AR' : 'Mode AR'}</span>
           </button>
           <button onClick={() => setShowInstructions(!showInstructions)} className='btn-secondary'>
             <Info size={20} />
@@ -384,7 +433,6 @@ function ARExperimentView({ experiment, onBack }) {
       )}
 
       <div className='flex-1 relative rounded-lg overflow-hidden'>
-        {/* Camera Background for AR Mode */}
         {arMode && (
           <video
             ref={videoRef}
@@ -395,7 +443,6 @@ function ARExperimentView({ experiment, onBack }) {
           />
         )}
         
-        {/* 3D Canvas - transparent in AR mode */}
         <div className={`absolute inset-0 ${!arMode ? 'bg-gradient-to-b from-gray-50 to-gray-100' : ''}`}>
           <Canvas 
             camera={{ position: [0, 0.5, 1.5], fov: 50 }}
@@ -404,16 +451,21 @@ function ARExperimentView({ experiment, onBack }) {
           >
             <ambientLight intensity={arMode ? 0.8 : 0.6} />
             <directionalLight position={[5, 5, 5]} intensity={1} />
-            <LabScene experiment={experiment} experimentState={experimentState} />
+            <LabScene experiment={experiment} experimentState={experimentState} showLabels={showLabels} />
             <OrbitControls enablePan={false} maxDistance={3} minDistance={0.5} />
           </Canvas>
         </div>
 
-        {/* AR Mode Indicator */}
         {arMode && (
           <div className='absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1'>
             <span className='w-2 h-2 bg-white rounded-full animate-pulse'></span>
             AR LIVE
+          </div>
+        )}
+        
+        {showLabels && !arMode && (
+          <div className='absolute bottom-2 left-2 bg-white/80 backdrop-blur px-2 py-1 rounded text-xs text-gray-600'>
+            🏷️ Legendes actives - Cliquez sur l icone Tag pour masquer
           </div>
         )}
       </div>
