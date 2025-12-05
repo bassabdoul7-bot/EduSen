@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { arLabService, calculatePH, getIndicatorColor, calculateCurrent } from '../services/arLab'
@@ -8,32 +8,8 @@ import {
   PendulumSupport, PendulumMass, PendulumString
 } from '../components/ar/LabEquipment'
 import toast from 'react-hot-toast'
-import { ArrowLeft, PlayCircle, Info, CheckCircle, View, X } from 'lucide-react'
+import { ArrowLeft, PlayCircle, Info, CheckCircle, Camera, Monitor, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-
-// Real lab 3D models from Sketchfab (free, CC licensed)
-const AR_MODELS = {
-  'acid-base': {
-    sketchfabId: 'b8594f7dc7e8442dbaaae7a11da4a962',
-    name: 'Chemistry Glassware',
-    author: 'maxdragonn'
-  },
-  'combustion': {
-    sketchfabId: '5185e41b2beb48fa8f15ca3707f43e10',
-    name: 'Bunsen Burner',
-    author: 'Dreamsoft Innovations'
-  },
-  'simple-circuit': {
-    sketchfabId: '9accb2c5dedd423f96877493767c2309',
-    name: 'Electric Circuit',
-    author: '7D Production'
-  },
-  'pendulum': {
-    sketchfabId: 'fb2a28f1476f455390fa252c59ce5c76',
-    name: 'Lab Equipment Kit',
-    author: 'A9908244'
-  }
-}
 
 export default function ARLabPage() {
   const navigate = useNavigate()
@@ -214,7 +190,10 @@ function LabScene({ experiment, experimentState }) {
 
 function ARExperimentView({ experiment, onBack }) {
   const [currentStep, setCurrentStep] = useState(0)
-  const [showARPreview, setShowARPreview] = useState(false)
+  const [arMode, setArMode] = useState(false)
+  const [cameraError, setCameraError] = useState(null)
+  const videoRef = useRef(null)
+  const streamRef = useRef(null)
   const [experimentState, setExperimentState] = useState({
     hclVolume: 0,
     naohVolume: 0,
@@ -232,7 +211,40 @@ function ARExperimentView({ experiment, onBack }) {
   })
   const [showInstructions, setShowInstructions] = useState(true)
 
-  const arModel = AR_MODELS[experiment.id]
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
+      })
+      streamRef.current = stream
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+      }
+      setArMode(true)
+      setCameraError(null)
+      toast.success('📷 Mode AR active!')
+    } catch (err) {
+      console.error('Camera error:', err)
+      setCameraError('Impossible d\'acceder a la camera')
+      toast.error('Camera non disponible')
+    }
+  }
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop())
+      streamRef.current = null
+    }
+    setArMode(false)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop())
+      }
+    }
+  }, [])
 
   const handleAddHCl = () => {
     setExperimentState(prev => ({ ...prev, hclVolume: 50, pH: 1 }))
@@ -330,7 +342,7 @@ function ARExperimentView({ experiment, onBack }) {
   return (
     <div className='flex flex-col h-[calc(100vh-10rem)]'>
       <div className='flex items-center justify-between mb-4'>
-        <button onClick={onBack} className='btn-secondary'>
+        <button onClick={() => { stopCamera(); onBack(); }} className='btn-secondary'>
           <ArrowLeft size={20} />
         </button>
         <div className='flex-1 mx-4'>
@@ -347,11 +359,11 @@ function ARExperimentView({ experiment, onBack }) {
         </div>
         <div className='flex gap-2'>
           <button 
-            onClick={() => setShowARPreview(true)}
-            className='btn-primary flex items-center gap-2'
+            onClick={() => arMode ? stopCamera() : startCamera()}
+            className={`p-2 rounded-lg flex items-center gap-2 ${arMode ? 'bg-senegal-green text-white' : 'bg-gray-100'}`}
           >
-            <View size={18} />
-            <span className='hidden sm:inline'>Voir en AR</span>
+            {arMode ? <X size={20} /> : <Camera size={20} />}
+            <span className='hidden sm:inline'>{arMode ? 'Quitter AR' : 'Mode AR'}</span>
           </button>
           <button onClick={() => setShowInstructions(!showInstructions)} className='btn-secondary'>
             <Info size={20} />
@@ -360,33 +372,59 @@ function ARExperimentView({ experiment, onBack }) {
       </div>
 
       {showInstructions && (
-        <div className='card p-4 mb-4 bg-blue-50 border-blue-200'>
+        <div className={`card p-4 mb-4 ${arMode ? 'bg-black/50 border-white/20 text-white' : 'bg-blue-50 border-blue-200'}`}>
           <div className='flex items-start gap-3'>
-            <CheckCircle size={20} className='text-blue-600 mt-1 flex-shrink-0' />
+            <CheckCircle size={20} className={`mt-1 flex-shrink-0 ${arMode ? 'text-green-400' : 'text-blue-600'}`} />
             <div>
-              <h3 className='font-bold text-blue-900'>Etape {currentStep + 1}</h3>
-              <p className='text-blue-800'>{experiment.steps[currentStep]}</p>
+              <h3 className={`font-bold ${arMode ? 'text-white' : 'text-blue-900'}`}>Etape {currentStep + 1}</h3>
+              <p className={arMode ? 'text-gray-200' : 'text-blue-800'}>{experiment.steps[currentStep]}</p>
             </div>
           </div>
         </div>
       )}
 
-      <div className='flex-1 relative bg-gradient-to-b from-gray-50 to-gray-100 rounded-lg overflow-hidden'>
-        <Canvas camera={{ position: [0, 0.5, 1.5], fov: 50 }}>
-          <ambientLight intensity={0.6} />
-          <directionalLight position={[5, 5, 5]} intensity={1} />
-          <LabScene experiment={experiment} experimentState={experimentState} />
-          <OrbitControls enablePan={false} maxDistance={3} minDistance={0.5} />
-        </Canvas>
+      <div className='flex-1 relative rounded-lg overflow-hidden'>
+        {/* Camera Background for AR Mode */}
+        {arMode && (
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className='absolute inset-0 w-full h-full object-cover'
+          />
+        )}
+        
+        {/* 3D Canvas - transparent in AR mode */}
+        <div className={`absolute inset-0 ${!arMode ? 'bg-gradient-to-b from-gray-50 to-gray-100' : ''}`}>
+          <Canvas 
+            camera={{ position: [0, 0.5, 1.5], fov: 50 }}
+            gl={{ alpha: arMode }}
+            style={{ background: arMode ? 'transparent' : undefined }}
+          >
+            <ambientLight intensity={arMode ? 0.8 : 0.6} />
+            <directionalLight position={[5, 5, 5]} intensity={1} />
+            <LabScene experiment={experiment} experimentState={experimentState} />
+            <OrbitControls enablePan={false} maxDistance={3} minDistance={0.5} />
+          </Canvas>
+        </div>
+
+        {/* AR Mode Indicator */}
+        {arMode && (
+          <div className='absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1'>
+            <span className='w-2 h-2 bg-white rounded-full animate-pulse'></span>
+            AR LIVE
+          </div>
+        )}
       </div>
 
-      <div className='grid grid-cols-3 gap-3 mt-4'>
+      <div className={`grid grid-cols-3 gap-3 mt-4 ${arMode ? 'bg-black/30 -mx-4 px-4 py-3 -mb-4 rounded-t-xl' : ''}`}>
         {experiment.id === 'acid-base' && (
           <>
-            <button onClick={handleAddHCl} disabled={currentStep > 0} className={`btn-secondary py-3 ${currentStep > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+            <button onClick={handleAddHCl} disabled={currentStep > 0} className={`btn-secondary py-3 ${currentStep > 0 ? 'opacity-50 cursor-not-allowed' : ''} ${arMode ? 'bg-white/90' : ''}`}>
               🧪 Ajouter HCl
             </button>
-            <button onClick={handleAddIndicator} disabled={currentStep < 1 || currentStep > 1} className={`btn-secondary py-3 ${(currentStep < 1 || currentStep > 1) ? 'opacity-50 cursor-not-allowed' : ''}`}>
+            <button onClick={handleAddIndicator} disabled={currentStep < 1 || currentStep > 1} className={`btn-secondary py-3 ${(currentStep < 1 || currentStep > 1) ? 'opacity-50 cursor-not-allowed' : ''} ${arMode ? 'bg-white/90' : ''}`}>
               💧 Indicateur
             </button>
             <button onClick={handleAddNaOH} disabled={currentStep < 2} className={`btn-primary py-3 ${currentStep < 2 ? 'opacity-50 cursor-not-allowed' : ''}`}>
@@ -397,22 +435,22 @@ function ARExperimentView({ experiment, onBack }) {
 
         {experiment.id === 'combustion' && (
           <>
-            <button onClick={handleLightBunsen} disabled={currentStep > 0} className={`btn-secondary py-3 ${currentStep > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+            <button onClick={handleLightBunsen} disabled={currentStep > 0} className={`btn-secondary py-3 ${currentStep > 0 ? 'opacity-50 cursor-not-allowed' : ''} ${arMode ? 'bg-white/90' : ''}`}>
               🔥 Allumer Bunsen
             </button>
             <button onClick={handleApproachMagnesium} disabled={currentStep < 1} className={`btn-primary py-3 ${currentStep < 1 ? 'opacity-50 cursor-not-allowed' : ''}`}>
               ✨ Approcher Mg
             </button>
-            <button disabled className='btn-secondary py-3 opacity-50'>👁️ Observer</button>
+            <button disabled className={`btn-secondary py-3 opacity-50 ${arMode ? 'bg-white/90' : ''}`}>👁️ Observer</button>
           </>
         )}
 
         {experiment.id === 'simple-circuit' && (
           <>
-            <button onClick={handleConnectBattery} disabled={currentStep > 0} className={`btn-secondary py-3 ${currentStep > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+            <button onClick={handleConnectBattery} disabled={currentStep > 0} className={`btn-secondary py-3 ${currentStep > 0 ? 'opacity-50 cursor-not-allowed' : ''} ${arMode ? 'bg-white/90' : ''}`}>
               🔋 Placer Pile
             </button>
-            <button onClick={handleConnectResistor} disabled={currentStep < 1} className={`btn-secondary py-3 ${currentStep < 1 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+            <button onClick={handleConnectResistor} disabled={currentStep < 1} className={`btn-secondary py-3 ${currentStep < 1 ? 'opacity-50 cursor-not-allowed' : ''} ${arMode ? 'bg-white/90' : ''}`}>
               ⚡ Resistance
             </button>
             <button onClick={handleConnectBulb} disabled={currentStep < 2} className={`btn-primary py-3 ${currentStep < 2 ? 'opacity-50 cursor-not-allowed' : ''}`}>
@@ -423,10 +461,10 @@ function ARExperimentView({ experiment, onBack }) {
 
         {experiment.id === 'pendulum' && (
           <>
-            <button onClick={handleAttachString} disabled={currentStep > 0} className={`btn-secondary py-3 ${currentStep > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+            <button onClick={handleAttachString} disabled={currentStep > 0} className={`btn-secondary py-3 ${currentStep > 0 ? 'opacity-50 cursor-not-allowed' : ''} ${arMode ? 'bg-white/90' : ''}`}>
               🎯 Attacher
             </button>
-            <button disabled={currentStep < 1} className={`btn-secondary py-3 ${currentStep < 1 ? 'opacity-50' : ''}`}>
+            <button disabled={currentStep < 1} className={`btn-secondary py-3 ${currentStep < 1 ? 'opacity-50' : ''} ${arMode ? 'bg-white/90' : ''}`}>
               📏 Mesurer
             </button>
             <button onClick={handleSwingPendulum} disabled={currentStep < 1} className={`btn-primary py-3 ${currentStep < 1 ? 'opacity-50 cursor-not-allowed' : ''}`}>
@@ -435,43 +473,6 @@ function ARExperimentView({ experiment, onBack }) {
           </>
         )}
       </div>
-
-      {/* AR Preview Modal using Sketchfab */}
-      {showARPreview && (
-        <div className='fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4'>
-          <div className='bg-white rounded-xl w-full max-w-2xl overflow-hidden'>
-            <div className='flex items-center justify-between p-4 border-b'>
-              <div>
-                <h3 className='text-lg font-bold'>{arModel.name}</h3>
-                <p className='text-sm text-gray-500'>Modele 3D par {arModel.author}</p>
-              </div>
-              <button onClick={() => setShowARPreview(false)} className='p-2 hover:bg-gray-100 rounded-full'>
-                <X size={20} />
-              </button>
-            </div>
-            <div className='h-96'>
-              <iframe 
-                title={arModel.name}
-                className='w-full h-full'
-                frameBorder="0"
-                allowFullScreen
-                allow="autoplay; fullscreen; xr-spatial-tracking"
-                src={`https://sketchfab.com/models/${arModel.sketchfabId}/embed?autostart=1&ui_ar=1&ui_ar_help=1&ui_theme=dark`}
-              />
-            </div>
-            <div className='p-4 bg-gray-50'>
-              <div className='flex items-center gap-2 text-sm text-gray-600 mb-2'>
-                <span>📱</span>
-                <span><strong>iPhone/Android:</strong> Cliquez sur l icone AR (cube) en bas a droite du modele</span>
-              </div>
-              <div className='flex items-center gap-2 text-sm text-gray-600'>
-                <span>🖥️</span>
-                <span><strong>Desktop:</strong> Faites pivoter le modele avec la souris</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
