@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-import '@google/model-viewer'
+// model-viewer loaded via CDN
 import { arLabService, calculatePH, getIndicatorColor, calculateCurrent } from '../services/arLab'
 import {
   Beaker, ChemicalBottle, Dropper, LabTable, BunsenBurner,

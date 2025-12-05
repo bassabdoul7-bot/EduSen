@@ -11,7 +11,6 @@
     "ios": "cap sync ios && cap open ios"
   },
   "dependencies": {
-    "@google/model-viewer": "^4.1.0",
     "@react-three/drei": "^9.88.0",
     "@react-three/fiber": "^8.15.0",
     "@react-three/xr": "^6.6.28",
