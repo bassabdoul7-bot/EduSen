@@ -1,7 +1,6 @@
 ﻿import { useState, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-// model-viewer loaded via CDN
 import { arLabService, calculatePH, getIndicatorColor, calculateCurrent } from '../services/arLab'
 import {
   Beaker, ChemicalBottle, Dropper, LabTable, BunsenBurner,
@@ -12,27 +11,27 @@ import toast from 'react-hot-toast'
 import { ArrowLeft, PlayCircle, Info, CheckCircle, View, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-// Free 3D models for AR preview
+// Real lab 3D models from Sketchfab (free, CC licensed)
 const AR_MODELS = {
   'acid-base': {
-    glb: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb',
-    ios: 'https://modelviewer.dev/shared-assets/models/Astronaut.usdz',
-    name: 'Chemistry Lab'
+    sketchfabId: 'b8594f7dc7e8442dbaaae7a11da4a962',
+    name: 'Chemistry Glassware',
+    author: 'maxdragonn'
   },
   'combustion': {
-    glb: 'https://modelviewer.dev/shared-assets/models/RobotExpressive.glb', 
-    ios: 'https://modelviewer.dev/shared-assets/models/RobotExpressive.usdz',
-    name: 'Bunsen Burner'
+    sketchfabId: '5185e41b2beb48fa8f15ca3707f43e10',
+    name: 'Bunsen Burner',
+    author: 'Dreamsoft Innovations'
   },
   'simple-circuit': {
-    glb: 'https://modelviewer.dev/shared-assets/models/RobotExpressive.glb',
-    ios: 'https://modelviewer.dev/shared-assets/models/RobotExpressive.usdz',
-    name: 'Electric Circuit'
+    sketchfabId: '9accb2c5dedd423f96877493767c2309',
+    name: 'Electric Circuit',
+    author: '7D Production'
   },
   'pendulum': {
-    glb: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb',
-    ios: 'https://modelviewer.dev/shared-assets/models/Astronaut.usdz',
-    name: 'Pendulum'
+    sketchfabId: 'fb2a28f1476f455390fa252c59ce5c76',
+    name: 'Lab Equipment Kit',
+    author: 'A9908244'
   }
 }
 
@@ -437,35 +436,38 @@ function ARExperimentView({ experiment, onBack }) {
         )}
       </div>
 
-      {/* AR Preview Modal */}
+      {/* AR Preview Modal using Sketchfab */}
       {showARPreview && (
         <div className='fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4'>
-          <div className='bg-white rounded-xl w-full max-w-lg overflow-hidden'>
+          <div className='bg-white rounded-xl w-full max-w-2xl overflow-hidden'>
             <div className='flex items-center justify-between p-4 border-b'>
-              <h3 className='text-lg font-bold'>AR Preview - {arModel.name}</h3>
+              <div>
+                <h3 className='text-lg font-bold'>{arModel.name}</h3>
+                <p className='text-sm text-gray-500'>Modele 3D par {arModel.author}</p>
+              </div>
               <button onClick={() => setShowARPreview(false)} className='p-2 hover:bg-gray-100 rounded-full'>
                 <X size={20} />
               </button>
             </div>
             <div className='h-96'>
-              <model-viewer
-                src={arModel.glb}
-                ios-src={arModel.ios}
-                alt={arModel.name}
-                ar
-                ar-modes="webxr scene-viewer quick-look"
-                camera-controls
-                auto-rotate
-                style={{ width: '100%', height: '100%' }}
-              >
-                <button slot="ar-button" className='absolute bottom-4 left-1/2 -translate-x-1/2 bg-senegal-green text-white px-6 py-3 rounded-full font-bold shadow-lg'>
-                  📱 Voir en AR
-                </button>
-              </model-viewer>
+              <iframe 
+                title={arModel.name}
+                className='w-full h-full'
+                frameBorder="0"
+                allowFullScreen
+                allow="autoplay; fullscreen; xr-spatial-tracking"
+                src={`https://sketchfab.com/models/${arModel.sketchfabId}/embed?autostart=1&ui_ar=1&ui_ar_help=1&ui_theme=dark`}
+              />
             </div>
-            <div className='p-4 bg-gray-50 text-sm text-gray-600'>
-              <p>📱 <strong>iPhone:</strong> Appuyez sur "Voir en AR" pour ouvrir en realite augmentee</p>
-              <p>🤖 <strong>Android:</strong> Fonctionne aussi avec Scene Viewer</p>
+            <div className='p-4 bg-gray-50'>
+              <div className='flex items-center gap-2 text-sm text-gray-600 mb-2'>
+                <span>📱</span>
+                <span><strong>iPhone/Android:</strong> Cliquez sur l icone AR (cube) en bas a droite du modele</span>
+              </div>
+              <div className='flex items-center gap-2 text-sm text-gray-600'>
+                <span>🖥️</span>
+                <span><strong>Desktop:</strong> Faites pivoter le modele avec la souris</span>
+              </div>
             </div>
           </div>
         </div>
