@@ -15,6 +15,7 @@ import MessagesPage from './pages/MessagesPage'
 import ProfilePage from './pages/ProfilePage'
 import PremiumPage from './pages/PremiumPage'
 import SponsorPage from './pages/SponsorPage'
+import ARLabPage from './pages/ARLabPage'
 
 // Layout
 import Layout from './components/shared/Layout'
@@ -39,6 +40,7 @@ function App() {
               <Route path='profile' element={<ProfilePage />} />
               <Route path='premium' element={<PremiumPage />} />
               <Route path='sponsor' element={<SponsorPage />} />
+              <Route path='ar-lab' element={<ARLabPage />} />
             </Route>
           </Routes>
         </Router>

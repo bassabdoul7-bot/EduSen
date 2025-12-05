@@ -13,7 +13,8 @@ import {
   X,
   Crown,
   Star,
-  Heart
+  Heart,
+  FlaskConical
 } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
@@ -42,6 +43,7 @@ export default function Layout() {
     { path: '/messages', icon: Mail, label: 'Messages' },
     { path: '/premium', icon: Crown, label: '👑 Premium' },
     { path: '/sponsor', icon: Heart, label: '💚 Sponsor' },
+    { path: '/ar-lab', icon: FlaskConical, label: '🧪 Labo AR' },
     { path: '/profile', icon: User, label: 'Profil' },
   ]
 
