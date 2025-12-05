@@ -443,7 +443,7 @@ function ARExperimentView({ experiment, onBack }) {
           />
         )}
         
-        <div className={`absolute inset-0 ${!arMode ? 'bg-gradient-to-b from-gray-50 to-gray-100' : ''}`}>
+        <div className={`absolute inset-0 ${!arMode ? 'bg-gradient-to-b from-white to-blue-50' : ''}`}>
           <Canvas 
             camera={{ position: [0, 0.5, 1.5], fov: 50 }}
             gl={{ alpha: arMode }}
