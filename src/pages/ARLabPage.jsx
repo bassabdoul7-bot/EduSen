@@ -545,9 +545,9 @@ function CircuitExperiment({ state, setState, setStep, experiment, selectedItem,
       {resistorConnected && <group position={[0, 0.1, -0.05]}><mesh rotation={[0, 0, Math.PI/2]}><cylinderGeometry args={[0.025, 0.025, 0.12, 16]} /><meshStandardMaterial color="#c2410c" emissive={bulbLit?"#f60":"#000"} emissiveIntensity={bulbLit?0.4:0} /></mesh></group>}
       {bulbLit && <group position={[0.28, 0.13, -0.05]}><mesh><sphereGeometry args={[0.04, 32, 32]} /><meshPhysicalMaterial color="#ffc" emissive="#ff0" emissiveIntensity={2} /></mesh><pointLight color="#ff0" intensity={2} distance={1.5} /></group>}
 
-      {!batteryConnected && <ClickableObject position={[-0.35, 0.1, 0.3]} selected={selectedItem === "battery"} enabled={true} onClick={() => setSelectedItem(selectedItem === "battery" ? null : "battery")}><group><mesh><boxGeometry args={[0.06, 0.1, 0.04]} /><meshStandardMaterial color="#1e40af" /></mesh><Html position={[0, 0.08, 0]} center><div className="bg-yellow-400 px-1.5 text-xs font-bold rounded">9V</div></Html></group></ClickableObject>}
-      {!resistorConnected && <ClickableObject position={[0, 0.1, 0.3]} selected={selectedItem === "resistor"} enabled={batteryConnected} onClick={() => setSelectedItem(selectedItem === "resistor" ? null : "resistor")}><group><mesh rotation={[0, 0, Math.PI/2]}><cylinderGeometry args={[0.02, 0.02, 0.1, 16]} /><meshStandardMaterial color="#c2410c" /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-orange-200 px-1.5 text-xs font-bold rounded">100Ω</div></Html></group></ClickableObject>}
-      {!bulbLit && <ClickableObject position={[0.35, 0.12, 0.3]} selected={selectedItem === "bulb"} enabled={resistorConnected} onClick={() => setSelectedItem(selectedItem === "bulb" ? null : "bulb")}><group><mesh><sphereGeometry args={[0.035, 32, 32]} /><meshPhysicalMaterial color="#fff" transparent opacity={0.4} /></mesh></group></ClickableObject>}
+      {!batteryConnected && <ClickableObject position={[-0.35, 0.1, 0.3]} selected={selectedItem === "battery"} enabled={true} onClick={() => setSelectedItem(selectedItem === "battery" ? null : "battery")}><group><mesh><boxGeometry args={[0.06, 0.1, 0.04]} /><meshStandardMaterial color="#1e40af" /></mesh><Html position={[0, 0.08, 0]} center><div className="bg-yellow-400 px-2 py-1 text-xs font-bold rounded">Pile 9V</div></Html></group></ClickableObject>}
+      {!resistorConnected && <ClickableObject position={[0, 0.1, 0.3]} selected={selectedItem === "resistor"} enabled={batteryConnected} onClick={() => setSelectedItem(selectedItem === "resistor" ? null : "resistor")}><group><mesh rotation={[0, 0, Math.PI/2]}><cylinderGeometry args={[0.02, 0.02, 0.1, 16]} /><meshStandardMaterial color="#c2410c" /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-orange-200 px-2 py-1 text-xs font-bold rounded">Resistance 100Ω</div></Html></group></ClickableObject>}
+      {!bulbLit && <ClickableObject position={[0.35, 0.12, 0.3]} selected={selectedItem === "bulb"} enabled={resistorConnected} onClick={() => setSelectedItem(selectedItem === "bulb" ? null : "bulb")}><group><mesh><sphereGeometry args={[0.035, 32, 32]} /><meshPhysicalMaterial color="#fff" transparent opacity={0.4} /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-yellow-100 px-2 py-1 text-xs font-bold rounded">Ampoule</div></Html></group></ClickableObject>}
 
       {batteryConnected && resistorConnected && <Wire start={[-0.2, 0.1, -0.05]} end={[-0.08, 0.1, -0.05]} color={bulbLit?"#0f0":"#c00"} glowing={bulbLit} />}
       {resistorConnected && bulbLit && <Wire start={[0.08, 0.1, -0.05]} end={[0.2, 0.13, -0.05]} color="#0f0" glowing={true} />}
@@ -1307,6 +1307,10 @@ function ExperimentView({ experiment, onBack }) {
     </div>
   )
 }
+
+
+
+
 
 
 

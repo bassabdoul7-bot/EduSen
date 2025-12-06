@@ -105,7 +105,31 @@ const experiments = {
       difficulty: 'Facile',
       level: 'lycee',
       duration: '10 min',
-      steps: ['Placer pile', 'Connecter resistance', 'Connecter ampoule', 'Calculer I']
+      steps: ['Placer pile', 'Connecter resistance', 'Connecter ampoule', 'Calculer I'],
+      classe: 'Seconde',
+      chapter: 'Electricite - Lois fondamentales',
+      materiel: [
+        'Pile 9V: generateur de tension continue',
+        'Resistance 100 Ohms: limite le courant',
+        'Ampoule: convertit electricite en lumiere',
+        'Fils conducteurs: transportent le courant'
+      ],
+      learned: [
+        'Loi d Ohm: U = R x I (tension = resistance x intensite)',
+        'Le courant circule du + vers le - (sens conventionnel)',
+        'En serie: le courant est le meme partout',
+        'La resistance limite l intensite du courant'
+      ],
+      formulas: ['U = R x I', 'I = U / R', 'P = U x I'],
+      realLife: [
+        'Installation electrique de la maison',
+        'Circuits des telephones et ordinateurs',
+        'Eclairage automobile et domestique'
+      ],
+      bacQuestions: [
+        'Calculer l intensite dans un circuit serie',
+        'Determiner la resistance equivalente'
+      ]
     },
     {
       id: 'pendulum',
@@ -250,6 +274,7 @@ export const getIndicatorColor = (pH) => {
   if (pH < 9) return '#ff88aa'
   return '#ff44aa'
 }
+
 
 
 
