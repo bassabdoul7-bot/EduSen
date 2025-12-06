@@ -583,9 +583,9 @@ function PendulumExperiment({ state, setState, setStep, experiment, selectedItem
       <TargetZone position={[0.18, 0.2, -0.15]} label="⚖️" active={selectedItem === "mass" && stringAttached} onClick={() => handleAction("mass")} />
       <TargetZone position={[0.35, 0.2, -0.15]} label="👆 Lancer" active={selectedItem === "swing" && massAttached} onClick={() => handleAction("swing")} />
 
-      <ClickableObject position={[-0.4, 0.08, 0.3]} selected={selectedItem === "string"} enabled={!stringAttached} onClick={() => setSelectedItem(selectedItem === "string" ? null : "string")}><group><mesh rotation={[Math.PI/2, 0, 0]}><torusGeometry args={[0.035, 0.012, 8, 32]} /><meshStandardMaterial color="#8B4513" /></mesh><Html position={[0, 0.07, 0]} center><div className="bg-white px-1.5 py-0.5 rounded text-xs font-bold shadow">L=1m</div></Html></group></ClickableObject>
-      <ClickableObject position={[0, 0.08, 0.3]} selected={selectedItem === "mass"} enabled={stringAttached && !massAttached} onClick={() => setSelectedItem(selectedItem === "mass" ? null : "mass")}><group><mesh><sphereGeometry args={[0.035, 32, 32]} /><meshStandardMaterial color="#dc2626" metalness={0.7} /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-white px-1.5 py-0.5 rounded text-xs font-bold shadow">100g</div></Html></group></ClickableObject>
-      <ClickableObject position={[0.4, 0.08, 0.3]} selected={selectedItem === "swing"} enabled={massAttached && !swinging} onClick={() => setSelectedItem(selectedItem === "swing" ? null : "swing")}><group><mesh><boxGeometry args={[0.05, 0.06, 0.018]} /><meshStandardMaterial color="#f59e0b" /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-yellow-400 px-1.5 py-0.5 rounded text-xs font-bold">👆</div></Html></group></ClickableObject>
+      <ClickableObject position={[-0.4, 0.08, 0.3]} selected={selectedItem === "string"} enabled={!stringAttached} onClick={() => setSelectedItem(selectedItem === "string" ? null : "string")}><group><mesh rotation={[Math.PI/2, 0, 0]}><torusGeometry args={[0.035, 0.012, 8, 32]} /><meshStandardMaterial color="#8B4513" /></mesh><Html position={[0, 0.07, 0]} center><div className="bg-white px-2 py-1 rounded text-xs font-bold shadow">Ficelle L=1m</div></Html></group></ClickableObject>
+      <ClickableObject position={[0, 0.08, 0.3]} selected={selectedItem === "mass"} enabled={stringAttached && !massAttached} onClick={() => setSelectedItem(selectedItem === "mass" ? null : "mass")}><group><mesh><sphereGeometry args={[0.035, 32, 32]} /><meshStandardMaterial color="#dc2626" metalness={0.7} /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-red-100 px-2 py-1 rounded text-xs font-bold shadow">Masse 100g</div></Html></group></ClickableObject>
+      <ClickableObject position={[0.4, 0.08, 0.3]} selected={selectedItem === "swing"} enabled={massAttached && !swinging} onClick={() => setSelectedItem(selectedItem === "swing" ? null : "swing")}><group><mesh><boxGeometry args={[0.05, 0.06, 0.018]} /><meshStandardMaterial color="#f59e0b" /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-yellow-400 px-2 py-1 rounded text-xs font-bold">Lancer</div></Html></group></ClickableObject>
 
       {swinging && <Html position={[0.45, 0.4, 0]} center><div className="bg-blue-900 text-white p-2 rounded text-xs"><div className="font-bold">T = 2π√(L/g)</div><div className="text-lg text-yellow-300">T ≈ 2.01s</div></div></Html>}
       
@@ -1307,6 +1307,10 @@ function ExperimentView({ experiment, onBack }) {
     </div>
   )
 }
+
+
+
+
 
 
 

@@ -138,7 +138,31 @@ const experiments = {
       difficulty: 'Facile',
       level: 'lycee',
       duration: '12 min',
-      steps: ['Attacher ficelle', 'Fixer masse', 'Lancer oscillation', 'Mesurer periode']
+      steps: ['Attacher ficelle', 'Fixer masse', 'Lancer oscillation', 'Mesurer periode'],
+      classe: 'Terminale S',
+      chapter: 'Mecanique - Oscillations',
+      materiel: [
+        'Support avec potence: maintient le pendule',
+        'Ficelle inextensible: relie la masse au support',
+        'Masse spherique: objet oscillant (bille)',
+        'Chronometre: mesure la periode T'
+      ],
+      learned: [
+        'La periode T depend de la longueur L et de g',
+        'T ne depend PAS de la masse (isochronisme)',
+        'Formule: T = 2*pi*sqrt(L/g)',
+        'Valable pour petites oscillations (< 10 degres)'
+      ],
+      formulas: ['T = 2*pi*sqrt(L/g)', 'g = 4*pi^2*L/T^2', 'f = 1/T'],
+      realLife: [
+        'Horloges a balancier (precision)',
+        'Sismographes (detection tremblements)',
+        'Mesure de la gravite locale'
+      ],
+      bacQuestions: [
+        'Calculer la periode d un pendule',
+        'Determiner g a partir des mesures'
+      ]
     },
     {
       id: 'double-slit',
@@ -274,6 +298,7 @@ export const getIndicatorColor = (pH) => {
   if (pH < 9) return '#ff88aa'
   return '#ff44aa'
 }
+
 
 
 
