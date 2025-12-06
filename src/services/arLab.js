@@ -9,7 +9,24 @@ const experiments = {
       difficulty: 'Facile',
       level: 'lycee',
       duration: '10 min',
-      steps: ['Verser HCl', 'Ajouter indicateur', 'Ajouter NaOH', 'Observer neutralisation']
+      steps: ['Verser HCl', 'Ajouter indicateur', 'Ajouter NaOH', 'Observer neutralisation'],
+      classe: 'Terminale S',
+      chapter: 'Reactions acido-basiques',
+      learned: [
+        'Le point d equivalence: n(acide) = n(base)',
+        'L indicateur colore change au pH de virage',
+        'Calcul de concentration: C = n/V'
+      ],
+      formulas: ['pH = -log[H+]', 'C1.V1 = C2.V2', 'n = C x V'],
+      realLife: [
+        'Controle qualite en industrie alimentaire',
+        'Analyse de l eau potable',
+        'Tests medicaux (acidite du sang)'
+      ],
+      bacQuestions: [
+        'Calculer la concentration d une solution acide',
+        'Determiner le volume a l equivalence'
+      ]
     },
     {
       id: 'combustion',
@@ -18,7 +35,32 @@ const experiments = {
       difficulty: 'Moyen',
       level: 'lycee',
       duration: '8 min',
-      steps: ['Allumer bec Bunsen', 'Approcher magnesium', 'Observer combustion', 'Noter MgO']
+      steps: ['Allumer bec Bunsen', 'Approcher magnesium', 'Observer combustion', 'Noter MgO'],
+      classe: 'Seconde',
+      chapter: 'Transformations chimiques',
+      materiel: [
+        'Bec Bunsen: bruleur a gaz pour chauffer',
+        'Pince metallique: tenir le magnesium en securite',
+        'Ruban de magnesium (Mg): metal leger et reactif',
+        'Briquet: allumer le bec Bunsen'
+      ],
+      learned: [
+        'La combustion necessite un combustible (Mg) et du dioxygene (O2 de l air)',
+        'Le dioxygene O2 represente 21% de l air que nous respirons',
+        'Reaction exothermique: produit lumiere intense et chaleur',
+        'Le magnesium brule avec une flamme blanche eclatante',
+        'Produit final: oxyde de magnesium MgO (poudre blanche)'
+      ],
+      formulas: ['2Mg + O2 -> 2MgO'],
+      realLife: [
+        'Feux d artifice et fusees eclairantes',
+        'Soudure industrielle',
+        'Flashs photographiques anciens'
+      ],
+      bacQuestions: [
+        'Ecrire et equilibrer l equation de combustion',
+        'Identifier reactifs et produits'
+      ]
     },
     {
       id: 'spectrophotometry',
@@ -103,7 +145,24 @@ const experiments = {
       difficulty: 'Facile',
       level: 'lycee',
       duration: '15 min',
-      steps: ['Preparer lame', 'Ajouter colorant', 'Placer lamelle', 'Observer x10', 'Observer x40']
+      steps: ['Preparer lame', 'Ajouter colorant', 'Placer lamelle', 'Observer x10', 'Observer x40'],
+      classe: 'Seconde',
+      chapter: 'La cellule - unite du vivant',
+      learned: [
+        'La cellule est l unite de base du vivant',
+        'Cellule vegetale: paroi, chloroplastes, vacuole',
+        'Le noyau contient l information genetique'
+      ],
+      formulas: ['Grossissement = Oculaire x Objectif'],
+      realLife: [
+        'Diagnostic medical (analyse de sang)',
+        'Recherche sur le cancer',
+        'Controle qualite alimentaire'
+      ],
+      bacQuestions: [
+        'Identifier les organites d une cellule',
+        'Comparer cellule animale et vegetale'
+      ]
     },
     {
       id: 'photosynthesis',
@@ -112,7 +171,24 @@ const experiments = {
       difficulty: 'Moyen',
       level: 'lycee',
       duration: '20 min',
-      steps: ['Preparer elodee', 'Placer sous lumiere', 'Observer bulles O2', 'Comparer obscurite']
+      steps: ['Preparer elodee', 'Placer sous lumiere', 'Observer bulles O2', 'Comparer obscurite'],
+      classe: 'Seconde',
+      chapter: 'Metabolisme cellulaire',
+      learned: [
+        'La photosynthese produit O2 et glucose',
+        'Elle necessite lumiere, CO2 et eau',
+        'Les chloroplastes sont le siege de la reaction'
+      ],
+      formulas: ['6CO2 + 6H2O + lumiere -> C6H12O6 + 6O2'],
+      realLife: [
+        'Production agricole et rendement',
+        'Cycle du carbone et climat',
+        'Biocarburants et energie verte'
+      ],
+      bacQuestions: [
+        'Expliquer le role de la lumiere',
+        'Schema du mecanisme de photosynthese'
+      ]
     },
     {
       id: 'gel-electrophoresis',
@@ -167,4 +243,13 @@ export const getIndicatorColor = (pH) => {
   if (pH < 9) return '#ff88aa'
   return '#ff44aa'
 }
+
+
+
+
+
+
+
+
+
 

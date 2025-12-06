@@ -397,9 +397,9 @@ function Wire({ start, end, color = "#f00", glowing = false }) {
   return <mesh ref={ref}><tubeGeometry args={[curve, 16, 0.008, 8, false]} /><meshStandardMaterial color={color} emissive={glowing ? color : "#000"} emissiveIntensity={glowing ? 0.5 : 0} /></mesh>
 }
 
-function StepsPanel({ steps, currentStep, expanded, onToggle }) {
+function StepsPanel({ steps, currentStep, expanded, onToggle, isComplete, experiment }) {
   return (
-    <div className="absolute top-2 right-2 z-20 max-w-[200px]">
+    <div className="absolute top-2 right-2 z-50 max-w-[200px] pointer-events-auto">
       <div className="rounded-xl shadow-lg overflow-hidden bg-white/95">
         <button onClick={onToggle} className="w-full px-2 py-1.5 flex items-center justify-between bg-gray-50">
           <span className="font-bold text-xs flex items-center gap-1"><List size={14} /> {currentStep+1}/{steps.length}</span>
@@ -411,16 +411,44 @@ function StepsPanel({ steps, currentStep, expanded, onToggle }) {
             <span>{step}</span>
           </div>
         ))}</div>}
+        {isComplete && experiment && (
+          <div className="p-2 bg-green-50 border-t text-xs space-y-2">
+            <div className="font-bold text-green-700">✅ Termine!</div>
+            {experiment.materiel && <div><span className="font-semibold">🔧 Materiel:</span><ul className="ml-2">{experiment.materiel.map((m,i) => <li key={i} className="text-gray-500">{m}</li>)}</ul></div>}{experiment.learned && <div><span className="font-semibold">🎯 Appris:</span><ul className="ml-2">{experiment.learned.map((l,i) => <li key={i} className="text-gray-600">{l}</li>)}</ul></div>}
+            {experiment.formulas && <div><span className="font-semibold">📐 Formules:</span>{experiment.formulas.map((f,i) => <div key={i} className="text-blue-600 font-mono ml-2">{f}</div>)}</div>}
+            {experiment.realLife && <div><span className="font-semibold">🌍 Vie reelle:</span><ul className="ml-2">{experiment.realLife.map((r,i) => <li key={i} className="text-gray-600">{r}</li>)}</ul></div>}
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
-function CompletionBanner({ text }) { return <Html position={[0, 0.4, 0]} center><div className="bg-green-500 text-white px-3 py-2 rounded-lg font-bold animate-bounce shadow-xl">{text}</div></Html> }
+function CompletionBanner({ text, experiment }) { 
+  return (
+    <Html position={[0.4, 0.35, 0.3]} center>
+      <div className="bg-white rounded-lg shadow-xl text-left w-56 overflow-hidden">
+        <div className="bg-green-500 text-white px-3 py-2">
+          <div className="font-bold text-sm">{text}</div>
+        </div>
+        {experiment && experiment.learned && (
+          <div className="p-2 text-xs space-y-1 max-h-40 overflow-y-auto">
+            <div className="font-bold text-green-700">🎯 Appris:</div>
+            {experiment.learned.map((l,i) => <div key={i} className="text-gray-600">• {l}</div>)}
+            {experiment.formulas && <div className="font-bold text-blue-700 mt-1">📐 Formules:</div>}
+            {experiment.formulas && experiment.formulas.map((f,i) => <div key={i} className="text-blue-600 font-mono">{f}</div>)}
+            {experiment.realLife && <div className="font-bold text-yellow-700 mt-1">🌍 Vie reelle:</div>}
+            {experiment.realLife && experiment.realLife.map((r,i) => <div key={i} className="text-gray-600">• {r}</div>)}
+          </div>
+        )}
+      </div>
+    </Html>
+  )
+}
 
 // ============ EXPERIMENTS ============
 
-function AcidBaseExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+function AcidBaseExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary }) {
   const { hclVolume, indicatorAdded, pH, color, neutralized } = state
   const handlePour = (type) => {
     if (type === "hcl" && selectedItem === "hcl") { setState(p => ({ ...p, hclVolume: 50, pH: 1 })); setSelectedItem(null); setStep(1); toast.success("🧪 HCl!") }
@@ -454,12 +482,12 @@ function AcidBaseExperiment({ state, setState, setStep, experiment, selectedItem
         <group><mesh><cylinderGeometry args={[0.04, 0.04, 0.12, 16]} /><meshStandardMaterial color="#4dabf7" /></mesh><mesh position={[0, 0.07, 0]}><cylinderGeometry args={[0.025, 0.025, 0.02, 16]} /><meshStandardMaterial color="#333" /></mesh><Html position={[0, 0.1, 0]} center><div className="bg-white px-1.5 py-0.5 rounded text-xs font-bold shadow">NaOH</div></Html></group>
       </ClickableObject>
 
-      {neutralized && <CompletionBanner text="✅ Neutralisation reussie!" />}
+      
     </group>
   )
 }
 
-function CombustionExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+function CombustionExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary }) {
   const { bunsenLit, magnesiumBurning } = state
   const handleAction = (a) => {
     if (a === "lighter" && selectedItem === "lighter") { setState(p => ({ ...p, bunsenLit: true })); setSelectedItem(null); setStep(1); toast.success("🔥 Allume!") }
@@ -472,13 +500,14 @@ function CombustionExperiment({ state, setState, setStep, experiment, selectedIt
         <mesh position={[0, 0.02, 0]}><cylinderGeometry args={[0.08, 0.08, 0.04, 16]} /><meshStandardMaterial color="#333" metalness={0.9} /></mesh>
         <mesh position={[0, 0.15, 0]}><cylinderGeometry args={[0.03, 0.03, 0.22, 16]} /><meshStandardMaterial color="#444" metalness={0.8} /></mesh>
         <mesh position={[0, 0.28, 0]}><cylinderGeometry args={[0.038, 0.032, 0.05, 16]} /><meshStandardMaterial color="#333" metalness={0.9} /></mesh>
+        <Html position={[0, -0.02, 0.1]} center><div className="bg-gray-800 text-white px-2 py-1 rounded text-xs">Bec Bunsen</div></Html>
         {bunsenLit && <>
           <mesh position={[0, 0.38, 0]}><coneGeometry args={[0.04, 0.15, 16]} /><meshStandardMaterial color="#ff6600" emissive="#ff6600" emissiveIntensity={2} transparent opacity={0.9} /></mesh>
           <mesh position={[0, 0.35, 0]}><coneGeometry args={[0.022, 0.1, 16]} /><meshStandardMaterial color="#3b82f6" emissive="#3b82f6" emissiveIntensity={1.5} transparent opacity={0.7} /></mesh>
           <pointLight position={[0, 0.35, 0]} color="#ff6600" intensity={2} distance={1.5} />
         </>}
       </group>
-
+      {magnesiumBurning && <group position={[0, 0.5, -0.1]}><mesh><sphereGeometry args={[0.06, 16, 16]} /><meshBasicMaterial color="#fff" /></mesh><pointLight color="#fff" intensity={8} distance={3} /><Html position={[0.12, 0, 0]} center><div className="bg-white text-gray-800 px-2 py-1 rounded text-xs shadow">MgO (oxyde)</div></Html></group>}
       {magnesiumBurning && <group position={[0, 0.5, -0.1]}><mesh><sphereGeometry args={[0.06, 16, 16]} /><meshBasicMaterial color="#fff" /></mesh><pointLight color="#fff" intensity={8} distance={3} /></group>}
 
       <TargetZone position={[0, 0.32, -0.1]} label="🔥 Allumer" active={selectedItem === "lighter"} onClick={() => handleAction("lighter")} />
@@ -488,15 +517,15 @@ function CombustionExperiment({ state, setState, setStep, experiment, selectedIt
         <group><mesh><boxGeometry args={[0.03, 0.08, 0.018]} /><meshStandardMaterial color="#e74c3c" /></mesh><Html position={[0, 0.07, 0]} center><div className="bg-red-500 text-white px-1.5 py-0.5 rounded text-xs font-bold">🔥</div></Html></group>
       </ClickableObject>
       <ClickableObject position={[0.4, 0.08, 0.3]} selected={selectedItem === "magnesium"} enabled={bunsenLit && !magnesiumBurning} onClick={() => setSelectedItem(selectedItem === "magnesium" ? null : "magnesium")}>
-        <group><mesh rotation={[0, 0, 0.3]}><boxGeometry args={[0.15, 0.012, 0.006]} /><meshStandardMaterial color="#ccc" metalness={0.95} /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-gray-200 px-1.5 py-0.5 rounded text-xs font-bold">Mg</div></Html></group>
+        <group><mesh rotation={[0, 0, 0.3]}><boxGeometry args={[0.15, 0.012, 0.006]} /><meshStandardMaterial color="#ccc" metalness={0.95} /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-gray-200 px-2 py-1 rounded text-xs font-bold">Ruban Mg</div></Html></group>
       </ClickableObject>
 
-      {magnesiumBurning && <CompletionBanner text="✅ 2Mg + O₂ → 2MgO" />}
+      
     </group>
   )
 }
 
-function CircuitExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+function CircuitExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary }) {
   const { batteryConnected, resistorConnected, bulbLit } = state
   const handlePlace = (item) => {
     if (item === "battery" && selectedItem === "battery") { setState(p => ({ ...p, batteryConnected: true })); setSelectedItem(null); setStep(1); toast.success("🔋 Pile!") }
@@ -523,12 +552,12 @@ function CircuitExperiment({ state, setState, setStep, experiment, selectedItem,
       {batteryConnected && resistorConnected && <Wire start={[-0.2, 0.1, -0.05]} end={[-0.08, 0.1, -0.05]} color={bulbLit?"#0f0":"#c00"} glowing={bulbLit} />}
       {resistorConnected && bulbLit && <Wire start={[0.08, 0.1, -0.05]} end={[0.2, 0.13, -0.05]} color="#0f0" glowing={true} />}
 
-      {bulbLit && <CompletionBanner text="✅ I = U/R = 0.09A" />}
+      
     </group>
   )
 }
 
-function PendulumExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+function PendulumExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary }) {
   const { stringAttached, massAttached, swinging, period } = state
   const pendulumRef = useRef()
   useFrame((s) => { if (swinging && pendulumRef.current) pendulumRef.current.rotation.z = Math.sin(s.clock.elapsedTime * Math.PI) * 0.4 })
@@ -559,14 +588,14 @@ function PendulumExperiment({ state, setState, setStep, experiment, selectedItem
       <ClickableObject position={[0.4, 0.08, 0.3]} selected={selectedItem === "swing"} enabled={massAttached && !swinging} onClick={() => setSelectedItem(selectedItem === "swing" ? null : "swing")}><group><mesh><boxGeometry args={[0.05, 0.06, 0.018]} /><meshStandardMaterial color="#f59e0b" /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-yellow-400 px-1.5 py-0.5 rounded text-xs font-bold">👆</div></Html></group></ClickableObject>
 
       {swinging && <Html position={[0.45, 0.4, 0]} center><div className="bg-blue-900 text-white p-2 rounded text-xs"><div className="font-bold">T = 2π√(L/g)</div><div className="text-lg text-yellow-300">T ≈ 2.01s</div></div></Html>}
-      {swinging && <CompletionBanner text="✅ Periode mesuree!" />}
+      
     </group>
   )
 }
 
 // BIOLOGY EXPERIMENTS
 
-function CellObservationExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+function CellObservationExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary }) {
   const { slideReady, stainAdded, coverslipOn, focusedLow, focusedHigh } = state
   const handleAction = (a) => {
     if (a === "slide" && selectedItem === "slide") { setState(p => ({ ...p, slideReady: true })); setSelectedItem(null); setStep(1); toast.success("🔬 Lame prete!") }
@@ -614,12 +643,12 @@ function CellObservationExperiment({ state, setState, setStep, experiment, selec
       <ClickableObject position={[0.5, 0.06, 0.3]} selected={selectedItem === "focus40"} enabled={focusedLow && !focusedHigh} onClick={() => setSelectedItem("focus40")}><group><mesh><cylinderGeometry args={[0.018, 0.018, 0.035, 16]} /><meshStandardMaterial color="#444" /></mesh><Html position={[0, 0.04, 0]} center><div className="bg-gray-800 text-white px-1 py-0.5 rounded text-xs font-bold">x40</div></Html></group></ClickableObject>
 
       {focusedHigh && <Html position={[-0.4, 0.3, 0]} center><div className="bg-purple-900 text-white p-2 rounded text-xs"><div className="font-bold">Cellule vegetale</div><div>• Noyau</div><div>• Cytoplasme</div><div>• Membrane</div></div></Html>}
-      {focusedHigh && <CompletionBanner text="✅ Cellules observees!" />}
+      
     </group>
   )
 }
 
-function PhotosynthesisExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+function PhotosynthesisExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary }) {
   const { plantReady, lightOn, bubblesVisible, darkCompared } = state
   const bubbleRef = useRef()
   useFrame((s) => { if (bubbleRef.current && bubblesVisible) bubbleRef.current.position.y = 0.15 + Math.sin(s.clock.elapsedTime * 3) * 0.02 })
@@ -653,12 +682,12 @@ function PhotosynthesisExperiment({ state, setState, setStep, experiment, select
       <ClickableObject position={[0.4, 0.08, 0.3]} selected={selectedItem === "compare"} enabled={bubblesVisible && !darkCompared} onClick={() => setSelectedItem("compare")}><group><mesh><boxGeometry args={[0.05, 0.04, 0.03]} /><meshStandardMaterial color="#333" /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-gray-700 text-white px-1 py-0.5 rounded text-xs font-bold">Obscur</div></Html></group></ClickableObject>
 
       {darkCompared && <Html position={[0.4, 0.3, 0]} center><div className="bg-green-900 text-white p-2 rounded text-xs"><div className="font-bold">Photosynthese</div><div>Lumiere → O2 ✓</div><div>Obscurite → Pas O2</div><div className="text-yellow-300">6CO2 + 6H2O → C6H12O6 + 6O2</div></div></Html>}
-      {darkCompared && <CompletionBanner text="✅ Photosynthese demontree!" />}
+      
     </group>
   )
 }
 
-function GelElectrophoresisExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+function GelElectrophoresisExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary }) {
   const { gelReady, dnaLoaded, powerOn, migrating, stained, uvOn } = state
   const [migrationProgress, setMigrationProgress] = useState(0)
   
@@ -729,12 +758,12 @@ function GelElectrophoresisExperiment({ state, setState, setStep, experiment, se
       <ClickableObject position={[0.45, 0.06, 0.3]} selected={selectedItem === "uv"} enabled={stained && !uvOn} onClick={() => setSelectedItem("uv")}><group><mesh><cylinderGeometry args={[0.02, 0.025, 0.08, 16]} /><meshStandardMaterial color="#1e1b4b" /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-indigo-900 text-white px-1 py-0.5 rounded text-xs font-bold">UV</div></Html></group></ClickableObject>
 
       {uvOn && <Html position={[0, 0.35, 0]} center><div className="bg-indigo-900 text-white p-2 rounded text-xs"><div className="font-bold text-orange-400">🧬 Resultat</div><div>Piste 1: 3 bandes</div><div>Piste 2: 2 bandes</div><div>Piste 3: 3 bandes</div><div>Piste 4: 1 bande</div></div></Html>}
-      {uvOn && <CompletionBanner text="✅ Electrophorese complete!" />}
+      
     </group>
   )
 }
 
-function MicroscopyExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+function MicroscopyExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary }) {
   const { slidePrep, stainApplied, coverOn, positioned, focus10, focus40 } = state
   
   const handleAction = (a) => {
@@ -794,7 +823,7 @@ function MicroscopyExperiment({ state, setState, setStep, experiment, selectedIt
       <ClickableObject position={[0.5, 0.06, 0.3]} selected={selectedItem === "x40"} enabled={focus10 && !focus40} onClick={() => setSelectedItem("x40")}><group><mesh><cylinderGeometry args={[0.015, 0.015, 0.04, 16]} /><meshStandardMaterial color="#444" /></mesh><Html position={[0, 0.04, 0]} center><div className="bg-gray-800 text-white px-1 py-0.5 rounded text-xs font-bold">x40</div></Html></group></ClickableObject>
 
       {focus40 && <Html position={[-0.35, 0.35, 0]} center><div className="bg-purple-900 text-white p-2 rounded text-xs"><div className="font-bold">Coloration Gram</div><div className="text-purple-300">Violet = Gram+</div><div className="text-pink-300">Rose = Gram-</div></div></Html>}
-      {focus40 && <CompletionBanner text="✅ Bacteries identifiees!" />}
+      
     </group>
   )
 }
@@ -857,7 +886,7 @@ function DoubleSlitExperiment({ state, setState, setStep, experiment, selectedIt
 
       {fringesVisible && <Html position={[0, 0.4, 0]} center><div className="bg-purple-900 text-white p-2 rounded text-xs">
         <div className="font-bold">Interference</div><div>i = lambda * D / a</div></div></Html>}
-      {fringesVisible && <CompletionBanner text="Franges d'interference!" />}
+      
     </group>
   )
 }
@@ -915,7 +944,7 @@ function RLCCircuitExperiment({ state, setState, setStep, experiment, selectedIt
       <ClickableObject position={[0.4, 0.05, 0.3]} selected={selectedItem === "oscillo"} enabled={gbfConnected && !oscilloConnected} onClick={() => setSelectedItem("oscillo")}><group><mesh><boxGeometry args={[0.07, 0.05, 0.04]} /><meshStandardMaterial color="#2a2a2a" /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-gray-800 text-white px-1 rounded text-xs">Oscillo</div></Html></group></ClickableObject>
 
       {resonanceFound && <Html position={[0, 0.45, 0]} center><div className="bg-blue-900 text-white p-2 rounded text-xs"><div className="font-bold">Resonance!</div><div>f0 = 1/(2pi*sqrt(LC))</div><div>f0 = 1000 Hz</div></div></Html>}
-      {resonanceFound && <CompletionBanner text="Resonance trouvee!" />}
+      
     </group>
   )
 }
@@ -973,7 +1002,7 @@ function PhotoelectricExperiment({ state, setState, setStep, experiment, selecte
       <ClickableObject position={[0.1, 0.05, 0.3]} selected={selectedItem === "light"} enabled={circuitConnected && !lightOn} onClick={() => setSelectedItem("light")}><group><mesh><sphereGeometry args={[0.025, 16, 16]} /><meshStandardMaterial color="#ffff00" emissive="#ffff00" emissiveIntensity={0.5} /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-yellow-400 px-1 rounded text-xs">UV</div></Html></group></ClickableObject>
 
       {thresholdFound && <Html position={[0, 0.5, 0]} center><div className="bg-indigo-900 text-white p-2 rounded text-xs"><div className="font-bold">Effet photoelectrique</div><div>f0 = {threshold} THz</div><div>E = h*f - W</div></div></Html>}
-      {thresholdFound && <CompletionBanner text="Seuil photoelectrique!" />}
+      
     </group>
   )
 }
@@ -1022,7 +1051,7 @@ function GalvanicCellExperiment({ state, setState, setStep, experiment, selected
       <ClickableObject position={[0.2, 0.05, 0.3]} selected={selectedItem === "voltmeter"} enabled={saltBridgeConnected && !voltmeterConnected} onClick={() => setSelectedItem("voltmeter")}><group><mesh><boxGeometry args={[0.05, 0.03, 0.02]} /><meshStandardMaterial color="#222" /></mesh><Html position={[0, 0.04, 0]} center><div className="bg-gray-800 text-white px-1 rounded text-xs">V</div></Html></group></ClickableObject>
 
       {emfMeasured && <Html position={[0, 0.4, 0]} center><div className="bg-orange-900 text-white p-2 rounded text-xs"><div className="font-bold">Pile Daniell</div><div>E = E(Cu) - E(Zn)</div><div>E = 0.34 - (-0.76) = 1.10 V</div></div></Html>}
-      {emfMeasured && <CompletionBanner text="Pile galvanique complete!" />}
+      
     </group>
   )
 }
@@ -1079,7 +1108,7 @@ function ChromatographyExperiment({ state, setState, setStep, experiment, select
       <ClickableObject position={[0.1, 0.05, 0.3]} selected={selectedItem === "eluant"} enabled={sampleDeposited && !eluantAdded} onClick={() => setSelectedItem("eluant")}><group><mesh><cylinderGeometry args={[0.02, 0.02, 0.06, 16]} /><meshStandardMaterial color="#a8d8ea" transparent opacity={0.7} /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-blue-300 px-1 rounded text-xs">Eluant</div></Html></group></ClickableObject>
 
       {rfCalculated && <Html position={[0, 0.35, 0]} center><div className="bg-green-900 text-white p-2 rounded text-xs"><div className="font-bold">Resultats CCM</div><div>Jaune: Rf = 0.85</div><div>Vert: Rf = 0.65</div><div>Orange: Rf = 0.45</div></div></Html>}
-      {rfCalculated && <CompletionBanner text="Chromatographie complete!" />}
+      
     </group>
   )
 }
@@ -1096,6 +1125,42 @@ function PlaceholderExperiment({ name }) {
         </div>
       </Html>
     </group>
+  )
+}
+
+// ============ SUMMARY MODAL ============
+function ExperimentSummaryModal({ experiment, onClose, onRetry }) {
+  if (!experiment) return null
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-t-2xl">
+          <h2 className="text-xl font-bold">Experience Terminee!</h2>
+          <p className="text-green-100">{experiment.name}</p>
+        </div>
+        <div className="p-6 space-y-4">
+          <div className="flex flex-wrap gap-2">
+            <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">{experiment.classe || experiment.level}</span>
+            <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">{experiment.chapter || 'Sciences'}</span>
+          </div>
+          {experiment.learned && <div><h3 className="font-bold mb-2">Ce que tu as appris</h3><ul className="space-y-1">{experiment.learned.map((item, i) => <li key={i} className="text-gray-600 text-sm">{item}</li>)}</ul></div>}
+          {experiment.formulas && <div><h3 className="font-bold mb-2">Formules</h3><div className="bg-gray-50 p-3 rounded">{experiment.formulas.map((f, i) => <code key={i} className="block text-blue-600">{f}</code>)}</div></div>}
+          {experiment.realLife && <div><h3 className="font-bold mb-2">Vie reelle</h3><ul>{experiment.realLife.map((item, i) => <li key={i} className="text-gray-600 text-sm">{item}</li>)}</ul></div>}
+          {experiment.bacQuestions && <div><h3 className="font-bold mb-2">Questions BAC</h3><ul>{experiment.bacQuestions.map((q, i) => <li key={i} className="text-gray-600 text-sm italic">{q}</li>)}</ul></div>}
+        </div>
+        <div className="p-4 bg-gray-50 rounded-b-2xl flex justify-between">
+          <button onClick={onRetry} className="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">Refaire</button>
+          <button onClick={onClose} className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Terminer</button>
+        </div>
+      </div>
+      {showSummary && (
+        <ExperimentSummaryModal 
+          experiment={experiment}
+          onClose={() => { setShowSummary(false); setExperiment(null) }}
+          onRetry={() => { setShowSummary(false); setStep(0); setExperimentState({}) }}
+        />
+      )}
+    </div>
   )
 }
 
@@ -1144,6 +1209,7 @@ export default function ARLabPage() {
 function ExperimentView({ experiment, onBack }) {
   const [step, setStep] = useState(0)
   const [arMode, setArMode] = useState(false)
+  const [showSummary, setShowSummary] = useState(false)
   const [stepsOpen, setStepsOpen] = useState(true)
   const [selectedItem, setSelectedItem] = useState(null)
   const videoRef = useRef(null)
@@ -1166,7 +1232,7 @@ function ExperimentView({ experiment, onBack }) {
   useEffect(() => () => streamRef.current?.getTracks().forEach(t => t.stop()), [])
 
   const renderExperiment = () => {
-    const props = { state, setState, setStep, experiment, selectedItem, setSelectedItem }
+    const props = { state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary }
     switch(experiment.id) {
       case "acid-base": return <AcidBaseExperiment {...props} />
       case "combustion": return <CombustionExperiment {...props} />
@@ -1236,11 +1302,53 @@ function ExperimentView({ experiment, onBack }) {
           </Canvas>
         </div>
         {arMode && <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-bold flex items-center gap-1"><span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />AR</div>}
-        <StepsPanel steps={experiment.steps} currentStep={step} expanded={stepsOpen} onToggle={() => setStepsOpen(!stepsOpen)} />
+        <StepsPanel steps={experiment.steps} currentStep={step} expanded={stepsOpen} onToggle={() => setStepsOpen(!stepsOpen)} isComplete={step >= experiment.steps.length - 1} experiment={experiment} />
       </div>
     </div>
   )
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
