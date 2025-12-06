@@ -564,6 +564,241 @@ function PendulumExperiment({ state, setState, setStep, experiment, selectedItem
   )
 }
 
+// BIOLOGY EXPERIMENTS
+
+function CellObservationExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+  const { slideReady, stainAdded, coverslipOn, focusedLow, focusedHigh } = state
+  const handleAction = (a) => {
+    if (a === "slide" && selectedItem === "slide") { setState(p => ({ ...p, slideReady: true })); setSelectedItem(null); setStep(1); toast.success("🔬 Lame prete!") }
+    else if (a === "stain" && selectedItem === "stain") { setState(p => ({ ...p, stainAdded: true })); setSelectedItem(null); setStep(2); toast.success("🎨 Colorant!") }
+    else if (a === "coverslip" && selectedItem === "coverslip") { setState(p => ({ ...p, coverslipOn: true })); setSelectedItem(null); setStep(3); toast.success("📋 Lamelle!") }
+    else if (a === "focus10" && selectedItem === "focus10") { setState(p => ({ ...p, focusedLow: true })); setSelectedItem(null); setStep(4); toast.success("🔍 x10!") }
+    else if (a === "focus40" && selectedItem === "focus40") { setState(p => ({ ...p, focusedHigh: true })); setSelectedItem(null); setStep(experiment.steps.length - 1); toast.success("🔬 x40!") }
+  }
+  return (
+    <group>
+      {/* Microscope */}
+      <group position={[0.15, 0, -0.1]}>
+        <mesh position={[0, 0.03, 0]}><boxGeometry args={[0.22, 0.05, 0.18]} /><meshStandardMaterial color="#222" /></mesh>
+        <mesh position={[-0.08, 0.2, 0]}><boxGeometry args={[0.05, 0.35, 0.05]} /><meshStandardMaterial color="#333" /></mesh>
+        <mesh position={[0.02, 0.38, 0]} rotation={[0.4, 0, 0]}><cylinderGeometry args={[0.035, 0.045, 0.14, 16]} /><meshStandardMaterial color="#222" /></mesh>
+        <mesh position={[0, 0.1, 0]}><boxGeometry args={[0.16, 0.015, 0.14]} /><meshStandardMaterial color="#444" /></mesh>
+        <mesh position={[0, 0.15, 0]}><cylinderGeometry args={[0.025, 0.02, 0.06, 16]} /><meshStandardMaterial color="#333" /></mesh>
+        {coverslipOn && <mesh position={[0, 0.11, 0]}><boxGeometry args={[0.07, 0.003, 0.025]} /><meshPhysicalMaterial color="#aaddff" transparent opacity={0.5} /></mesh>}
+      </group>
+      
+      {/* Microscope view */}
+      {focusedLow && <Html position={[0.17, 0.5, 0]} center>
+        <div className="bg-white rounded-full w-16 h-16 border-4 border-gray-800 flex items-center justify-center overflow-hidden">
+          {focusedHigh ? (
+            <div className="relative w-full h-full bg-blue-50">
+              <div className="absolute w-6 h-8 bg-purple-200 rounded-full top-1 left-1 border border-purple-400"></div>
+              <div className="absolute w-2 h-2 bg-purple-700 rounded-full top-4 left-3"></div>
+              <div className="absolute w-5 h-7 bg-purple-200 rounded-full top-6 left-8 border border-purple-400"></div>
+              <div className="absolute w-2 h-2 bg-purple-700 rounded-full top-9 left-10"></div>
+            </div>
+          ) : <div className="text-purple-400 text-2xl">●●●</div>}
+        </div>
+      </Html>}
+
+      <TargetZone position={[-0.25, 0.08, 0]} label="🔬 Lame" active={selectedItem === "slide"} onClick={() => handleAction("slide")} />
+      <TargetZone position={[-0.25, 0.15, 0]} label="🎨 Colorant" active={selectedItem === "stain" && slideReady} onClick={() => handleAction("stain")} />
+      <TargetZone position={[-0.25, 0.22, 0]} label="📋 Lamelle" active={selectedItem === "coverslip" && stainAdded} onClick={() => handleAction("coverslip")} />
+      <TargetZone position={[0.15, 0.18, 0]} label="🔍 x10" active={selectedItem === "focus10" && coverslipOn} onClick={() => handleAction("focus10")} />
+      <TargetZone position={[0.15, 0.25, 0]} label="🔬 x40" active={selectedItem === "focus40" && focusedLow} onClick={() => handleAction("focus40")} />
+
+      <ClickableObject position={[-0.45, 0.06, 0.3]} selected={selectedItem === "slide"} enabled={!slideReady} onClick={() => setSelectedItem("slide")}><group><mesh><boxGeometry args={[0.07, 0.003, 0.025]} /><meshPhysicalMaterial color="#fff" transparent opacity={0.4} /></mesh><Html position={[0, 0.04, 0]} center><div className="bg-white px-1 py-0.5 rounded text-xs font-bold shadow">Lame</div></Html></group></ClickableObject>
+      <ClickableObject position={[-0.2, 0.06, 0.3]} selected={selectedItem === "stain"} enabled={slideReady && !stainAdded} onClick={() => setSelectedItem("stain")}><group><mesh><cylinderGeometry args={[0.018, 0.018, 0.06, 16]} /><meshStandardMaterial color="#3b82f6" /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-blue-500 text-white px-1 py-0.5 rounded text-xs font-bold">Bleu</div></Html></group></ClickableObject>
+      <ClickableObject position={[0.05, 0.06, 0.3]} selected={selectedItem === "coverslip"} enabled={stainAdded && !coverslipOn} onClick={() => setSelectedItem("coverslip")}><group><mesh><boxGeometry args={[0.03, 0.002, 0.03]} /><meshPhysicalMaterial color="#fff" transparent opacity={0.3} /></mesh><Html position={[0, 0.04, 0]} center><div className="bg-gray-200 px-1 py-0.5 rounded text-xs font-bold">Lamelle</div></Html></group></ClickableObject>
+      <ClickableObject position={[0.3, 0.06, 0.3]} selected={selectedItem === "focus10"} enabled={coverslipOn && !focusedLow} onClick={() => setSelectedItem("focus10")}><group><mesh><cylinderGeometry args={[0.022, 0.022, 0.025, 16]} /><meshStandardMaterial color="#666" /></mesh><Html position={[0, 0.04, 0]} center><div className="bg-gray-600 text-white px-1 py-0.5 rounded text-xs font-bold">x10</div></Html></group></ClickableObject>
+      <ClickableObject position={[0.5, 0.06, 0.3]} selected={selectedItem === "focus40"} enabled={focusedLow && !focusedHigh} onClick={() => setSelectedItem("focus40")}><group><mesh><cylinderGeometry args={[0.018, 0.018, 0.035, 16]} /><meshStandardMaterial color="#444" /></mesh><Html position={[0, 0.04, 0]} center><div className="bg-gray-800 text-white px-1 py-0.5 rounded text-xs font-bold">x40</div></Html></group></ClickableObject>
+
+      {focusedHigh && <Html position={[-0.4, 0.3, 0]} center><div className="bg-purple-900 text-white p-2 rounded text-xs"><div className="font-bold">Cellule vegetale</div><div>• Noyau</div><div>• Cytoplasme</div><div>• Membrane</div></div></Html>}
+      {focusedHigh && <CompletionBanner text="✅ Cellules observees!" />}
+    </group>
+  )
+}
+
+function PhotosynthesisExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+  const { plantReady, lightOn, bubblesVisible, darkCompared } = state
+  const bubbleRef = useRef()
+  useFrame((s) => { if (bubbleRef.current && bubblesVisible) bubbleRef.current.position.y = 0.15 + Math.sin(s.clock.elapsedTime * 3) * 0.02 })
+  
+  const handleAction = (a) => {
+    if (a === "plant" && selectedItem === "plant") { setState(p => ({ ...p, plantReady: true })); setSelectedItem(null); setStep(1); toast.success("🌿 Elodee prete!") }
+    else if (a === "light" && selectedItem === "light") { setState(p => ({ ...p, lightOn: true })); setSelectedItem(null); setStep(2); toast.success("💡 Lumiere!"); setTimeout(() => { setState(p => ({ ...p, bubblesVisible: true })); toast.success("🫧 Bulles O2!") }, 2000) }
+    else if (a === "compare" && selectedItem === "compare") { setState(p => ({ ...p, darkCompared: true })); setSelectedItem(null); setStep(experiment.steps.length - 1); toast.success("📊 Compare!") }
+  }
+  return (
+    <group>
+      {/* Beaker with water and plant */}
+      <group position={[0, 0.08, -0.1]}>
+        <mesh><cylinderGeometry args={[0.1, 0.08, 0.18, 32, 1, true]} /><meshPhysicalMaterial color="#fff" transparent opacity={0.2} side={THREE.DoubleSide} /></mesh>
+        <mesh position={[0, -0.02, 0]}><cylinderGeometry args={[0.08, 0.07, 0.12, 32]} /><meshStandardMaterial color="#a8d8ea" transparent opacity={0.6} /></mesh>
+        {plantReady && <mesh position={[0, 0, 0]}><cylinderGeometry args={[0.008, 0.008, 0.14, 8]} /><meshStandardMaterial color="#228B22" /></mesh>}
+        {plantReady && <mesh position={[0.02, 0.03, 0]}><sphereGeometry args={[0.025, 8, 8]} /><meshStandardMaterial color="#32CD32" /></mesh>}
+        {plantReady && <mesh position={[-0.02, 0.01, 0]}><sphereGeometry args={[0.02, 8, 8]} /><meshStandardMaterial color="#228B22" /></mesh>}
+        {bubblesVisible && <group ref={bubbleRef}><mesh><sphereGeometry args={[0.008, 8, 8]} /><meshStandardMaterial color="#fff" transparent opacity={0.7} /></mesh><mesh position={[0.02, 0.02, 0]}><sphereGeometry args={[0.005, 8, 8]} /><meshStandardMaterial color="#fff" transparent opacity={0.7} /></mesh><mesh position={[-0.015, 0.03, 0]}><sphereGeometry args={[0.006, 8, 8]} /><meshStandardMaterial color="#fff" transparent opacity={0.7} /></mesh></group>}
+      </group>
+      
+      {/* Lamp */}
+      {lightOn && <group position={[-0.35, 0.2, -0.1]}><mesh><sphereGeometry args={[0.05, 16, 16]} /><meshStandardMaterial color="#fff" emissive="#ffd700" emissiveIntensity={2} /></mesh><pointLight color="#ffd700" intensity={2} distance={1} /></group>}
+
+      <TargetZone position={[0, 0.12, -0.1]} label="🌿 Plante" active={selectedItem === "plant"} onClick={() => handleAction("plant")} />
+      <TargetZone position={[-0.35, 0.2, -0.1]} label="💡 Lumiere" active={selectedItem === "light" && plantReady} onClick={() => handleAction("light")} />
+      <TargetZone position={[0.35, 0.15, -0.1]} label="📊 Comparer" active={selectedItem === "compare" && bubblesVisible} onClick={() => handleAction("compare")} />
+
+      <ClickableObject position={[-0.4, 0.08, 0.3]} selected={selectedItem === "plant"} enabled={!plantReady} onClick={() => setSelectedItem("plant")}><group><mesh><cylinderGeometry args={[0.006, 0.006, 0.1, 8]} /><meshStandardMaterial color="#228B22" /></mesh><mesh position={[0, 0.04, 0]}><sphereGeometry args={[0.02, 8, 8]} /><meshStandardMaterial color="#32CD32" /></mesh><Html position={[0, 0.08, 0]} center><div className="bg-green-500 text-white px-1 py-0.5 rounded text-xs font-bold">Elodee</div></Html></group></ClickableObject>
+      <ClickableObject position={[0, 0.08, 0.3]} selected={selectedItem === "light"} enabled={plantReady && !lightOn} onClick={() => setSelectedItem("light")}><group><mesh><sphereGeometry args={[0.03, 16, 16]} /><meshStandardMaterial color="#ffd700" /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-yellow-400 px-1 py-0.5 rounded text-xs font-bold">Lampe</div></Html></group></ClickableObject>
+      <ClickableObject position={[0.4, 0.08, 0.3]} selected={selectedItem === "compare"} enabled={bubblesVisible && !darkCompared} onClick={() => setSelectedItem("compare")}><group><mesh><boxGeometry args={[0.05, 0.04, 0.03]} /><meshStandardMaterial color="#333" /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-gray-700 text-white px-1 py-0.5 rounded text-xs font-bold">Obscur</div></Html></group></ClickableObject>
+
+      {darkCompared && <Html position={[0.4, 0.3, 0]} center><div className="bg-green-900 text-white p-2 rounded text-xs"><div className="font-bold">Photosynthese</div><div>Lumiere → O2 ✓</div><div>Obscurite → Pas O2</div><div className="text-yellow-300">6CO2 + 6H2O → C6H12O6 + 6O2</div></div></Html>}
+      {darkCompared && <CompletionBanner text="✅ Photosynthese demontree!" />}
+    </group>
+  )
+}
+
+function GelElectrophoresisExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+  const { gelReady, dnaLoaded, powerOn, migrating, stained, uvOn } = state
+  const [migrationProgress, setMigrationProgress] = useState(0)
+  
+  useEffect(() => {
+    if (migrating && migrationProgress < 100) {
+      const timer = setTimeout(() => setMigrationProgress(p => Math.min(100, p + 5)), 200)
+      return () => clearTimeout(timer)
+    }
+    if (migrationProgress >= 100 && !stained) {
+      setState(p => ({ ...p, migrating: false }))
+      toast.success("⚡ Migration complete!")
+      setStep(4)
+    }
+  }, [migrating, migrationProgress])
+
+  const handleAction = (a) => {
+    if (a === "gel" && selectedItem === "gel") { setState(p => ({ ...p, gelReady: true })); setSelectedItem(null); setStep(1); toast.success("🧪 Gel pret!") }
+    else if (a === "dna" && selectedItem === "dna") { setState(p => ({ ...p, dnaLoaded: true })); setSelectedItem(null); setStep(2); toast.success("🧬 ADN charge!") }
+    else if (a === "power" && selectedItem === "power") { setState(p => ({ ...p, powerOn: true, migrating: true })); setSelectedItem(null); setStep(3); toast.success("⚡ Migration!") }
+    else if (a === "stain" && selectedItem === "stain") { setState(p => ({ ...p, stained: true })); setSelectedItem(null); setStep(5); toast.success("🎨 Colore!") }
+    else if (a === "uv" && selectedItem === "uv") { setState(p => ({ ...p, uvOn: true })); setSelectedItem(null); setStep(experiment.steps.length - 1); toast.success("🔦 UV!") }
+  }
+
+  return (
+    <group>
+      {/* Electrophoresis chamber */}
+      <group position={[0, 0.06, -0.1]}>
+        <mesh><boxGeometry args={[0.35, 0.08, 0.2]} /><meshStandardMaterial color="#333" /></mesh>
+        <mesh position={[0, 0.045, 0]}><boxGeometry args={[0.32, 0.01, 0.17]} /><meshPhysicalMaterial color="#a8d8ea" transparent opacity={0.5} /></mesh>
+        {gelReady && <mesh position={[0, 0.05, 0]}><boxGeometry args={[0.25, 0.015, 0.12]} /><meshStandardMaterial color="#f0f0f0" transparent opacity={0.8} /></mesh>}
+        {dnaLoaded && <group position={[-0.08, 0.06, 0]}>
+          {[0, 0.04, 0.08, 0.12].map((x, i) => <mesh key={i} position={[x, 0, 0]}><boxGeometry args={[0.015, 0.005, 0.02]} /><meshStandardMaterial color="#3b82f6" /></mesh>)}
+        </group>}
+        {migrating && <group position={[-0.08, 0.058, 0]}>
+          {[0, 0.04, 0.08, 0.12].map((x, i) => <mesh key={i} position={[x, -migrationProgress * 0.0008, 0]}><boxGeometry args={[0.015, 0.004, 0.015]} /><meshStandardMaterial color="#3b82f6" /></mesh>)}
+        </group>}
+        {stained && !uvOn && <group position={[-0.08, 0.058, 0]}>
+          {[0, 0.04, 0.08, 0.12].map((x, i) => {
+            const bands = i === 0 ? [0.02, 0.04, 0.06] : i === 1 ? [0.03, 0.05] : i === 2 ? [0.02, 0.05, 0.07] : [0.04]
+            return bands.map((y, j) => <mesh key={`${i}-${j}`} position={[x, -y, 0]}><boxGeometry args={[0.012, 0.004, 0.015]} /><meshStandardMaterial color="#4a5568" /></mesh>)
+          })}
+        </group>}
+        {uvOn && <group position={[-0.08, 0.058, 0]}>
+          {[0, 0.04, 0.08, 0.12].map((x, i) => {
+            const bands = i === 0 ? [0.02, 0.04, 0.06] : i === 1 ? [0.03, 0.05] : i === 2 ? [0.02, 0.05, 0.07] : [0.04]
+            return bands.map((y, j) => <mesh key={`${i}-${j}`} position={[x, -y, 0]}><boxGeometry args={[0.012, 0.004, 0.015]} /><meshStandardMaterial color="#f97316" emissive="#f97316" emissiveIntensity={1.5} /></mesh>)
+          })}
+        </group>}
+        {powerOn && <Html position={[0.2, 0.06, 0]} center><div className="bg-red-500 text-white px-1 rounded text-xs animate-pulse">⚡ {migrationProgress}%</div></Html>}
+      </group>
+
+      {/* Power supply */}
+      <group position={[0.35, 0.05, -0.1]}>
+        <mesh><boxGeometry args={[0.12, 0.08, 0.1]} /><meshStandardMaterial color="#1a1a1a" /></mesh>
+        <Html position={[0, 0.02, 0.06]} center><div className={`text-xs px-1 rounded ${powerOn ? 'bg-green-500' : 'bg-gray-600'} text-white`}>{powerOn ? '120V' : 'OFF'}</div></Html>
+      </group>
+
+      <TargetZone position={[0, 0.1, -0.1]} label="🧪 Gel" active={selectedItem === "gel"} onClick={() => handleAction("gel")} />
+      <TargetZone position={[-0.08, 0.12, -0.1]} label="🧬 ADN" active={selectedItem === "dna" && gelReady} onClick={() => handleAction("dna")} />
+      <TargetZone position={[0.35, 0.1, -0.1]} label="⚡ Power" active={selectedItem === "power" && dnaLoaded} onClick={() => handleAction("power")} />
+      <TargetZone position={[0.15, 0.12, -0.1]} label="🎨 Colorer" active={selectedItem === "stain" && !migrating && migrationProgress >= 100} onClick={() => handleAction("stain")} />
+      <TargetZone position={[-0.2, 0.15, -0.1]} label="🔦 UV" active={selectedItem === "uv" && stained} onClick={() => handleAction("uv")} />
+
+      <ClickableObject position={[-0.45, 0.06, 0.3]} selected={selectedItem === "gel"} enabled={!gelReady} onClick={() => setSelectedItem("gel")}><group><mesh><boxGeometry args={[0.06, 0.04, 0.04]} /><meshStandardMaterial color="#f0f0f0" transparent opacity={0.7} /></mesh><Html position={[0, 0.04, 0]} center><div className="bg-gray-200 px-1 py-0.5 rounded text-xs font-bold">Gel</div></Html></group></ClickableObject>
+      <ClickableObject position={[-0.25, 0.06, 0.3]} selected={selectedItem === "dna"} enabled={gelReady && !dnaLoaded} onClick={() => setSelectedItem("dna")}><group><mesh><cylinderGeometry args={[0.012, 0.012, 0.05, 16]} /><meshStandardMaterial color="#3b82f6" /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-blue-500 text-white px-1 py-0.5 rounded text-xs font-bold">ADN</div></Html></group></ClickableObject>
+      <ClickableObject position={[0, 0.06, 0.3]} selected={selectedItem === "power"} enabled={dnaLoaded && !powerOn} onClick={() => setSelectedItem("power")}><group><mesh><boxGeometry args={[0.04, 0.03, 0.03]} /><meshStandardMaterial color="#ef4444" /></mesh><Html position={[0, 0.04, 0]} center><div className="bg-red-500 text-white px-1 py-0.5 rounded text-xs font-bold">ON</div></Html></group></ClickableObject>
+      <ClickableObject position={[0.25, 0.06, 0.3]} selected={selectedItem === "stain"} enabled={!migrating && migrationProgress >= 100 && !stained} onClick={() => setSelectedItem("stain")}><group><mesh><cylinderGeometry args={[0.015, 0.015, 0.05, 16]} /><meshStandardMaterial color="#8b5cf6" /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-purple-500 text-white px-1 py-0.5 rounded text-xs font-bold">EtBr</div></Html></group></ClickableObject>
+      <ClickableObject position={[0.45, 0.06, 0.3]} selected={selectedItem === "uv"} enabled={stained && !uvOn} onClick={() => setSelectedItem("uv")}><group><mesh><cylinderGeometry args={[0.02, 0.025, 0.08, 16]} /><meshStandardMaterial color="#1e1b4b" /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-indigo-900 text-white px-1 py-0.5 rounded text-xs font-bold">UV</div></Html></group></ClickableObject>
+
+      {uvOn && <Html position={[0, 0.35, 0]} center><div className="bg-indigo-900 text-white p-2 rounded text-xs"><div className="font-bold text-orange-400">🧬 Resultat</div><div>Piste 1: 3 bandes</div><div>Piste 2: 2 bandes</div><div>Piste 3: 3 bandes</div><div>Piste 4: 1 bande</div></div></Html>}
+      {uvOn && <CompletionBanner text="✅ Electrophorese complete!" />}
+    </group>
+  )
+}
+
+function MicroscopyExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+  const { slidePrep, stainApplied, coverOn, positioned, focus10, focus40 } = state
+  
+  const handleAction = (a) => {
+    if (a === "slide" && selectedItem === "slide") { setState(p => ({ ...p, slidePrep: true })); setSelectedItem(null); setStep(1); toast.success("🔬 Lame preparee!") }
+    else if (a === "stain" && selectedItem === "stain") { setState(p => ({ ...p, stainApplied: true })); setSelectedItem(null); setStep(2); toast.success("🎨 Coloration Gram!") }
+    else if (a === "cover" && selectedItem === "cover") { setState(p => ({ ...p, coverOn: true })); setSelectedItem(null); setStep(3); toast.success("📋 Lamelle placee!") }
+    else if (a === "position" && selectedItem === "position") { setState(p => ({ ...p, positioned: true })); setSelectedItem(null); setStep(4); toast.success("🎯 Positionne!") }
+    else if (a === "x10" && selectedItem === "x10") { setState(p => ({ ...p, focus10: true })); setSelectedItem(null); setStep(5); toast.success("🔍 Focus x10!") }
+    else if (a === "x40" && selectedItem === "x40") { setState(p => ({ ...p, focus40: true })); setSelectedItem(null); setStep(experiment.steps.length - 1); toast.success("🔬 Focus x40!") }
+  }
+
+  return (
+    <group>
+      {/* Advanced Microscope */}
+      <group position={[0.15, 0, -0.1]}>
+        <mesh position={[0, 0.04, 0]}><boxGeometry args={[0.28, 0.06, 0.22]} /><meshStandardMaterial color="#1a1a1a" /></mesh>
+        <mesh position={[-0.1, 0.25, 0]}><boxGeometry args={[0.06, 0.4, 0.06]} /><meshStandardMaterial color="#2a2a2a" /></mesh>
+        <mesh position={[0.02, 0.45, 0]} rotation={[0.5, 0, 0]}><cylinderGeometry args={[0.04, 0.05, 0.16, 16]} /><meshStandardMaterial color="#1a1a1a" /></mesh>
+        <mesh position={[0.02, 0.12, 0]}><boxGeometry args={[0.2, 0.02, 0.18]} /><meshStandardMaterial color="#3a3a3a" /></mesh>
+        {/* Objective turret */}
+        <group position={[0.02, 0.18, 0]}>
+          <mesh><cylinderGeometry args={[0.04, 0.04, 0.03, 16]} /><meshStandardMaterial color="#333" /></mesh>
+          <mesh position={[0, -0.04, 0]}><cylinderGeometry args={[0.015, 0.012, 0.05, 16]} /><meshStandardMaterial color="#444" /></mesh>
+        </group>
+        {/* Light source */}
+        <mesh position={[0.02, 0.01, 0]}><cylinderGeometry args={[0.03, 0.03, 0.02, 16]} /><meshStandardMaterial color="#fff" emissive={positioned ? "#ffffcc" : "#000"} emissiveIntensity={0.5} /></mesh>
+        {coverOn && positioned && <mesh position={[0.02, 0.13, 0]}><boxGeometry args={[0.075, 0.003, 0.026]} /><meshPhysicalMaterial color="#aaddff" transparent opacity={0.5} /></mesh>}
+      </group>
+
+      {/* Microscope view */}
+      {focus10 && <Html position={[0.17, 0.55, 0]} center>
+        <div className="bg-white rounded-full w-20 h-20 border-4 border-gray-800 flex items-center justify-center overflow-hidden">
+          {focus40 ? (
+            <div className="relative w-full h-full bg-purple-50">
+              <div className="absolute w-3 h-5 bg-purple-600 rounded-full top-2 left-2"></div>
+              <div className="absolute w-4 h-3 bg-pink-400 rounded-full top-8 left-6"></div>
+              <div className="absolute w-3 h-4 bg-purple-600 rounded-full top-4 left-12"></div>
+              <div className="absolute w-2 h-4 bg-pink-400 rounded-full top-10 left-3"></div>
+              <div className="absolute w-3 h-2 bg-purple-600 rounded-full top-12 left-10"></div>
+            </div>
+          ) : <div className="text-purple-300 text-3xl">•••</div>}
+        </div>
+      </Html>}
+
+      <TargetZone position={[-0.2, 0.1, 0]} label="🔬 Lame" active={selectedItem === "slide"} onClick={() => handleAction("slide")} />
+      <TargetZone position={[-0.2, 0.17, 0]} label="🎨 Gram" active={selectedItem === "stain" && slidePrep} onClick={() => handleAction("stain")} />
+      <TargetZone position={[-0.2, 0.24, 0]} label="📋 Lamelle" active={selectedItem === "cover" && stainApplied} onClick={() => handleAction("cover")} />
+      <TargetZone position={[0.17, 0.15, 0]} label="🎯 Placer" active={selectedItem === "position" && coverOn} onClick={() => handleAction("position")} />
+      <TargetZone position={[0.17, 0.22, 0]} label="🔍 x10" active={selectedItem === "x10" && positioned} onClick={() => handleAction("x10")} />
+      <TargetZone position={[0.17, 0.29, 0]} label="🔬 x40" active={selectedItem === "x40" && focus10} onClick={() => handleAction("x40")} />
+
+      <ClickableObject position={[-0.45, 0.06, 0.3]} selected={selectedItem === "slide"} enabled={!slidePrep} onClick={() => setSelectedItem("slide")}><group><mesh><boxGeometry args={[0.075, 0.004, 0.026]} /><meshPhysicalMaterial color="#fff" transparent opacity={0.4} /></mesh><Html position={[0, 0.04, 0]} center><div className="bg-white px-1 py-0.5 rounded text-xs font-bold shadow">Lame</div></Html></group></ClickableObject>
+      <ClickableObject position={[-0.25, 0.06, 0.3]} selected={selectedItem === "stain"} enabled={slidePrep && !stainApplied} onClick={() => setSelectedItem("stain")}><group><mesh><cylinderGeometry args={[0.015, 0.015, 0.05, 16]} /><meshStandardMaterial color="#8b5cf6" /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-purple-500 text-white px-1 py-0.5 rounded text-xs font-bold">Gram</div></Html></group></ClickableObject>
+      <ClickableObject position={[-0.05, 0.06, 0.3]} selected={selectedItem === "cover"} enabled={stainApplied && !coverOn} onClick={() => setSelectedItem("cover")}><group><mesh><boxGeometry args={[0.025, 0.002, 0.025]} /><meshPhysicalMaterial color="#fff" transparent opacity={0.3} /></mesh><Html position={[0, 0.04, 0]} center><div className="bg-gray-200 px-1 py-0.5 rounded text-xs font-bold">Lamelle</div></Html></group></ClickableObject>
+      <ClickableObject position={[0.15, 0.06, 0.3]} selected={selectedItem === "position"} enabled={coverOn && !positioned} onClick={() => setSelectedItem("position")}><group><mesh><boxGeometry args={[0.04, 0.02, 0.04]} /><meshStandardMaterial color="#22c55e" /></mesh><Html position={[0, 0.04, 0]} center><div className="bg-green-500 text-white px-1 py-0.5 rounded text-xs font-bold">Placer</div></Html></group></ClickableObject>
+      <ClickableObject position={[0.35, 0.06, 0.3]} selected={selectedItem === "x10"} enabled={positioned && !focus10} onClick={() => setSelectedItem("x10")}><group><mesh><cylinderGeometry args={[0.02, 0.02, 0.03, 16]} /><meshStandardMaterial color="#666" /></mesh><Html position={[0, 0.04, 0]} center><div className="bg-gray-600 text-white px-1 py-0.5 rounded text-xs font-bold">x10</div></Html></group></ClickableObject>
+      <ClickableObject position={[0.5, 0.06, 0.3]} selected={selectedItem === "x40"} enabled={focus10 && !focus40} onClick={() => setSelectedItem("x40")}><group><mesh><cylinderGeometry args={[0.015, 0.015, 0.04, 16]} /><meshStandardMaterial color="#444" /></mesh><Html position={[0, 0.04, 0]} center><div className="bg-gray-800 text-white px-1 py-0.5 rounded text-xs font-bold">x40</div></Html></group></ClickableObject>
+
+      {focus40 && <Html position={[-0.35, 0.35, 0]} center><div className="bg-purple-900 text-white p-2 rounded text-xs"><div className="font-bold">Coloration Gram</div><div className="text-purple-300">Violet = Gram+</div><div className="text-pink-300">Rose = Gram-</div></div></Html>}
+      {focus40 && <CompletionBanner text="✅ Bacteries identifiees!" />}
+    </group>
+  )
+}
+
 // Placeholder for other experiments - they'll show "en construction" message
 function PlaceholderExperiment({ name }) {
   return (
@@ -634,6 +869,8 @@ function ExperimentView({ experiment, onBack }) {
     bunsenLit: false, magnesiumBurning: false,
     batteryConnected: false, resistorConnected: false, bulbLit: false, current: 0,
     stringAttached: false, massAttached: false, swinging: false, period: 0,
+    slideReady: false, stainAdded: false, coverslipOn: false, focusedLow: false, focusedHigh: false,
+    plantReady: false, lightOn: false, bubblesVisible: false, darkCompared: false,
   }
   const [state, setState] = useState(initialState)
 
@@ -650,6 +887,11 @@ function ExperimentView({ experiment, onBack }) {
       case "combustion": return <CombustionExperiment {...props} />
       case "simple-circuit": return <CircuitExperiment {...props} />
       case "pendulum": return <PendulumExperiment {...props} />
+      case "cell-observation": return <CellObservationExperiment {...props} />
+      case "photosynthesis": return <PhotosynthesisExperiment {...props} />
+      case "gel-electrophoresis": return <GelElectrophoresisExperiment {...props} />
+      case "microscopy": return <MicroscopyExperiment {...props} />
+      case "enzyme-kinetics": return <EnzymeKineticsExperiment {...props} />
       default: return <PlaceholderExperiment name={experiment.name} />
     }
   }
@@ -708,3 +950,10 @@ function ExperimentView({ experiment, onBack }) {
     </div>
   )
 }
+
+
+
+
+
+
+

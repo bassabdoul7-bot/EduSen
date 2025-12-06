@@ -97,6 +97,24 @@ const experiments = {
   ],
   biology: [
     {
+      id: 'cell-observation',
+      name: 'Observation Cellulaire',
+      description: 'Observer des cellules vegetales au microscope',
+      difficulty: 'Facile',
+      level: 'lycee',
+      duration: '15 min',
+      steps: ['Preparer lame', 'Ajouter colorant', 'Placer lamelle', 'Observer x10', 'Observer x40']
+    },
+    {
+      id: 'photosynthesis',
+      name: 'Photosynthese',
+      description: 'Mise en evidence de la photosynthese',
+      difficulty: 'Moyen',
+      level: 'lycee',
+      duration: '20 min',
+      steps: ['Preparer elodee', 'Placer sous lumiere', 'Observer bulles O2', 'Comparer obscurite']
+    },
+    {
       id: 'gel-electrophoresis',
       name: 'Electrophorese sur Gel',
       description: 'Separation fragments ADN',
@@ -149,3 +167,4 @@ export const getIndicatorColor = (pH) => {
   if (pH < 9) return '#ff88aa'
   return '#ff44aa'
 }
+
