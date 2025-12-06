@@ -473,13 +473,13 @@ function AcidBaseExperiment({ state, setState, setStep, experiment, selectedItem
 
       {/* Bottles on shelf */}
       <ClickableObject position={[-0.4, 0.1, 0.3]} selected={selectedItem === "hcl"} enabled={!hclVolume} onClick={() => setSelectedItem(selectedItem === "hcl" ? null : "hcl")}>
-        <group><mesh><cylinderGeometry args={[0.04, 0.04, 0.12, 16]} /><meshStandardMaterial color="#ff6b6b" /></mesh><mesh position={[0, 0.07, 0]}><cylinderGeometry args={[0.025, 0.025, 0.02, 16]} /><meshStandardMaterial color="#333" /></mesh><Html position={[0, 0.1, 0]} center><div className="bg-white px-1.5 py-0.5 rounded text-xs font-bold shadow">HCl</div></Html></group>
+        <group><mesh><cylinderGeometry args={[0.04, 0.04, 0.12, 16]} /><meshStandardMaterial color="#ff6b6b" /></mesh><mesh position={[0, 0.07, 0]}><cylinderGeometry args={[0.025, 0.025, 0.02, 16]} /><meshStandardMaterial color="#333" /></mesh><Html position={[0, 0.12, 0]} center><div className="bg-white px-2 py-1 rounded text-xs font-bold shadow">HCl (Acide)</div></Html></group>
       </ClickableObject>
       <ClickableObject position={[0, 0.08, 0.3]} selected={selectedItem === "indicator"} enabled={hclVolume > 0 && !indicatorAdded} onClick={() => setSelectedItem(selectedItem === "indicator" ? null : "indicator")}>
-        <group><mesh><cylinderGeometry args={[0.028, 0.028, 0.08, 16]} /><meshStandardMaterial color="#9b59b6" /></mesh><mesh position={[0, 0.05, 0]}><cylinderGeometry args={[0.018, 0.018, 0.015, 16]} /><meshStandardMaterial color="#333" /></mesh><Html position={[0, 0.08, 0]} center><div className="bg-white px-1.5 py-0.5 rounded text-xs font-bold shadow">Ind</div></Html></group>
+        <group><mesh><cylinderGeometry args={[0.028, 0.028, 0.08, 16]} /><meshStandardMaterial color="#9b59b6" /></mesh><mesh position={[0, 0.05, 0]}><cylinderGeometry args={[0.018, 0.018, 0.015, 16]} /><meshStandardMaterial color="#333" /></mesh><Html position={[0, 0.1, 0]} center><div className="bg-purple-100 px-2 py-1 rounded text-xs font-bold shadow">Indicateur</div></Html></group>
       </ClickableObject>
       <ClickableObject position={[0.4, 0.1, 0.3]} selected={selectedItem === "naoh"} enabled={indicatorAdded && !neutralized} onClick={() => setSelectedItem(selectedItem === "naoh" ? null : "naoh")}>
-        <group><mesh><cylinderGeometry args={[0.04, 0.04, 0.12, 16]} /><meshStandardMaterial color="#4dabf7" /></mesh><mesh position={[0, 0.07, 0]}><cylinderGeometry args={[0.025, 0.025, 0.02, 16]} /><meshStandardMaterial color="#333" /></mesh><Html position={[0, 0.1, 0]} center><div className="bg-white px-1.5 py-0.5 rounded text-xs font-bold shadow">NaOH</div></Html></group>
+        <group><mesh><cylinderGeometry args={[0.04, 0.04, 0.12, 16]} /><meshStandardMaterial color="#4dabf7" /></mesh><mesh position={[0, 0.07, 0]}><cylinderGeometry args={[0.025, 0.025, 0.02, 16]} /><meshStandardMaterial color="#333" /></mesh><Html position={[0, 0.12, 0]} center><div className="bg-blue-100 px-2 py-1 rounded text-xs font-bold shadow">NaOH (Base)</div></Html></group>
       </ClickableObject>
 
       
@@ -1307,6 +1307,10 @@ function ExperimentView({ experiment, onBack }) {
     </div>
   )
 }
+
+
+
+
 
 
 

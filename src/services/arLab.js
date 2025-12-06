@@ -12,6 +12,13 @@ const experiments = {
       steps: ['Verser HCl', 'Ajouter indicateur', 'Ajouter NaOH', 'Observer neutralisation'],
       classe: 'Terminale S',
       chapter: 'Reactions acido-basiques',
+      materiel: [
+        'Becher: recipient en verre pour contenir les solutions',
+        'Burette: tube gradue pour verser NaOH goutte a goutte',
+        'Solution HCl: acide chlorhydrique (corrosif)',
+        'Solution NaOH: hydroxyde de sodium (base forte)',
+        'Phenolphtaleine: indicateur colore (incolore/rose)'
+      ],
       learned: [
         'Le point d equivalence: n(acide) = n(base)',
         'L indicateur colore change au pH de virage',
@@ -243,6 +250,7 @@ export const getIndicatorColor = (pH) => {
   if (pH < 9) return '#ff88aa'
   return '#ff44aa'
 }
+
 
 
 
