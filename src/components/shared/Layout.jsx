@@ -12,7 +12,6 @@ import {
   Menu,
   X,
   Crown,
-  Star,
   Heart,
   FlaskConical
 } from 'lucide-react'
@@ -27,65 +26,65 @@ export default function Layout() {
   const handleSignOut = async () => {
     const { error } = await signOut()
     if (!error) {
-      toast.success('Déconnecté avec succès')
+      toast.success('Deconnecte avec succes')
       navigate('/login')
     } else {
-      toast.error('Erreur lors de la déconnexion')
+      toast.error('Erreur lors de la deconnexion')
     }
   }
 
   const navItems = [
     { path: '/', icon: LayoutDashboard, label: 'Tableau de bord' },
     { path: '/chatbot', icon: MessageSquare, label: 'Tuteur IA' },
+    { path: '/ar-lab', icon: FlaskConical, label: 'Labo Virtuel' },
     { path: '/admissions', icon: GraduationCap, label: 'Admissions' },
     { path: '/scholarships', icon: Award, label: 'Bourses' },
     { path: '/forum', icon: MessageCircle, label: 'Forum' },
     { path: '/messages', icon: Mail, label: 'Messages' },
-    { path: '/premium', icon: Crown, label: '👑 Premium' },
-    { path: '/sponsor', icon: Heart, label: '💚 Sponsor' },
-    { path: '/ar-lab', icon: FlaskConical, label: '🧪 Labo AR' },
+    { path: '/premium', icon: Crown, label: 'Premium' },
+    { path: '/sponsor', icon: Heart, label: 'Sponsor' },
     { path: '/profile', icon: User, label: 'Profil' },
   ]
 
   return (
-    <div className='min-h-screen bg-gray-50'>
-      <header className='bg-white shadow-sm sticky top-0 z-40'>
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='flex justify-between items-center h-16'>
-            <div className='flex items-center'>
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow-sm sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className='lg:hidden mr-2 p-2 rounded-md hover:bg-gray-100'
+                className="lg:hidden mr-2 p-2 rounded-md hover:bg-gray-100"
               >
                 {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
-              <div className='flex items-center space-x-2'>
-                <div className='w-8 h-8 bg-gradient-to-br from-senegal-green via-senegal-yellow to-senegal-red rounded-lg flex items-center justify-center'>
-                  <Star size={14} className='text-senegal-green fill-senegal-green' />
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-senegal-green via-senegal-yellow to-senegal-red rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">E</span>
                 </div>
-                <span className='text-xl font-bold text-senegal-green'>EduSen</span>
+                <span className="text-xl font-bold text-senegal-green">EduSen</span>
               </div>
             </div>
 
-            <div className='flex items-center space-x-4'>
-              <span className='text-sm text-gray-600 hidden sm:block'>
-                {profile?.full_name || 'Étudiant'}
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-600 hidden sm:block">
+                {profile?.full_name || 'Etudiant'}
               </span>
               <button
                 onClick={handleSignOut}
-                className='flex items-center space-x-2 text-gray-600 hover:text-senegal-red transition-colors'
+                className="flex items-center space-x-2 text-gray-600 hover:text-senegal-red transition-colors"
               >
                 <LogOut size={20} />
-                <span className='hidden sm:inline'>Déconnexion</span>
+                <span className="hidden sm:inline">Deconnexion</span>
               </button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className='flex'>
+      <div className="flex">
         <aside className={(sidebarOpen ? 'translate-x-0' : '-translate-x-full') + ' lg:translate-x-0 fixed lg:sticky top-16 left-0 z-30 w-64 h-[calc(100vh-4rem)] bg-white shadow-lg transition-transform duration-300 ease-in-out'}>
-          <nav className='p-4 space-y-2'>
+          <nav className="p-4 space-y-2">
             {navItems.map((item) => (
               <NavLink
                 key={item.path}
@@ -107,8 +106,8 @@ export default function Layout() {
           </nav>
         </aside>
 
-        <main className='flex-1 p-4 lg:p-8'>
-          <div className='max-w-7xl mx-auto'>
+        <main className="flex-1 p-4 lg:p-8">
+          <div className="max-w-7xl mx-auto">
             <Outlet />
           </div>
         </main>
@@ -116,7 +115,7 @@ export default function Layout() {
 
       {sidebarOpen && (
         <div
-          className='fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden'
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         ></div>
       )}

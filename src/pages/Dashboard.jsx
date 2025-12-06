@@ -1,11 +1,12 @@
 import { useAuth } from '../context/AuthContext'
-import { 
-  MessageSquare, 
-  GraduationCap, 
-  Award, 
+import {
+  MessageSquare,
+  GraduationCap,
+  Award,
   MessageCircle,
   TrendingUp,
-  BookOpen
+  BookOpen,
+  FlaskConical
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -15,28 +16,35 @@ export default function Dashboard() {
   const quickLinks = [
     {
       title: 'Tuteur IA',
-      description: 'Posez vos questions et obtenez de l aide',
+      description: 'Posez vos questions et obtenez de l\'aide',
       icon: MessageSquare,
       link: '/chatbot',
       color: 'from-blue-500 to-blue-600'
     },
     {
-      title: 'Admissions',
-      description: 'Universités à l étranger',
-      icon: GraduationCap,
-      link: '/admissions',
-      color: 'from-purple-500 to-purple-600'
+      title: 'Labo Virtuel',
+      description: '50+ experiences scientifiques en 3D',
+      icon: FlaskConical,
+      link: '/ar-lab',
+      color: 'from-pink-500 to-rose-600'
     },
     {
       title: 'Bourses',
-      description: 'Trouvez des opportunités',
+      description: 'Trouvez des opportunites',
       icon: Award,
       link: '/scholarships',
       color: 'from-yellow-500 to-yellow-600'
     },
     {
+      title: 'Admissions',
+      description: 'Universites a l\'etranger',
+      icon: GraduationCap,
+      link: '/admissions',
+      color: 'from-purple-500 to-purple-600'
+    },
+    {
       title: 'Forum',
-      description: 'Discutez avec d autres étudiants',
+      description: 'Discutez avec d\'autres etudiants',
       icon: MessageCircle,
       link: '/forum',
       color: 'from-green-500 to-green-600'
@@ -47,14 +55,14 @@ export default function Dashboard() {
     <div className="space-y-8">
       <div className="card bg-gradient-to-r from-senegal-green to-green-600 text-white">
         <h1 className="text-3xl font-bold mb-2">
-          Bienvenue, {profile?.full_name || 'Étudiant'}! 👋
+          Bienvenue, {profile?.full_name || 'Etudiant'}! 👋
         </h1>
         <p className="text-green-100">
-          Que souhaitez-vous faire aujourd hui?
+          Que souhaitez-vous faire aujourd'hui?
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         {quickLinks.map((item) => (
           <Link
             key={item.title}
@@ -82,7 +90,7 @@ export default function Dashboard() {
               <span className="font-semibold text-senegal-green">0</span>
             </div>
             <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-              <span className="text-gray-600">Bourses sauvegardées</span>
+              <span className="text-gray-600">Bourses sauvegardees</span>
               <span className="font-semibold text-senegal-green">0</span>
             </div>
             <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
@@ -100,17 +108,17 @@ export default function Dashboard() {
           <div className="space-y-4">
             <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
               <p className="text-sm text-gray-700">
-                💡 Utilisez le tuteur IA pour obtenir des explications détaillées sur vos devoirs
+                💡 Utilisez le tuteur IA pour obtenir des explications detaillees sur vos devoirs
+              </p>
+            </div>
+            <div className="p-4 bg-pink-50 rounded-lg border-l-4 border-pink-500">
+              <p className="text-sm text-gray-700">
+                🔬 Testez le Labo Virtuel - faites des experiences sans equipement!
               </p>
             </div>
             <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
               <p className="text-sm text-gray-700">
-                🎓 Vérifiez les nouvelles bourses disponibles chaque semaine
-              </p>
-            </div>
-            <div className="p-4 bg-purple-50 rounded-lg border-l-4 border-purple-500">
-              <p className="text-sm text-gray-700">
-                👥 Rejoignez le forum pour partager et apprendre avec d autres étudiants
+                🎓 Verifiez les nouvelles bourses disponibles chaque semaine
               </p>
             </div>
           </div>

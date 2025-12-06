@@ -799,6 +799,291 @@ function MicroscopyExperiment({ state, setState, setStep, experiment, selectedIt
   )
 }
 
+function DoubleSlitExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+  const { laserOn, slitsAligned, screenPlaced, fringesVisible } = state
+  
+  const handleAction = (a) => {
+    if (a === "laser" && selectedItem === "laser") { 
+      setState(p => ({ ...p, laserOn: true })); setSelectedItem(null); setStep(1); toast.success("Laser allume!") 
+    }
+    else if (a === "slits" && selectedItem === "slits") { 
+      setState(p => ({ ...p, slitsAligned: true })); setSelectedItem(null); setStep(2); toast.success("Fentes alignees!") 
+    }
+    else if (a === "screen" && selectedItem === "screen") { 
+      setState(p => ({ ...p, screenPlaced: true })); setSelectedItem(null); setStep(3); toast.success("Ecran place!") 
+    }
+    else if (a === "observe" && screenPlaced) { 
+      setState(p => ({ ...p, fringesVisible: true })); setStep(experiment.steps.length - 1); toast.success("Franges visibles!") 
+    }
+  }
+
+  return (
+    <group>
+      <group position={[-0.4, 0.1, 0]}>
+        <mesh><boxGeometry args={[0.12, 0.06, 0.06]} /><meshStandardMaterial color="#333" /></mesh>
+        {laserOn && <mesh position={[0.3, 0, 0]}><boxGeometry args={[0.5, 0.008, 0.008]} /><meshStandardMaterial color="#ff0000" emissive="#ff0000" emissiveIntensity={2} /></mesh>}
+      </group>
+      
+      {slitsAligned && <group position={[0, 0.1, 0]}>
+        <mesh><boxGeometry args={[0.02, 0.15, 0.08]} /><meshStandardMaterial color="#222" /></mesh>
+      </group>}
+      
+      {screenPlaced && <group position={[0.4, 0.1, 0]}>
+        <mesh><boxGeometry args={[0.02, 0.2, 0.15]} /><meshStandardMaterial color="#fff" /></mesh>
+        {fringesVisible && <Html position={[0.02, 0, 0]} center>
+          <div className="flex space-x-1">
+            {[...Array(7)].map((_, i) => <div key={i} className={`w-1 h-12 ${i % 2 === 0 ? 'bg-red-500' : 'bg-red-900'}`} style={{opacity: 1 - Math.abs(i-3)*0.2}}></div>)}
+          </div>
+        </Html>}
+      </group>}
+
+      <TargetZone position={[-0.4, 0.15, 0]} label="Laser" active={selectedItem === "laser"} onClick={() => handleAction("laser")} />
+      <TargetZone position={[0, 0.2, 0]} label="Fentes" active={selectedItem === "slits" && laserOn} onClick={() => handleAction("slits")} />
+      <TargetZone position={[0.4, 0.2, 0]} label="Ecran" active={selectedItem === "screen" && slitsAligned} onClick={() => handleAction("screen")} />
+      <TargetZone position={[0.4, 0.3, 0]} label="Observer" active={screenPlaced && !fringesVisible} onClick={() => handleAction("observe")} />
+
+      <ClickableObject position={[-0.4, 0.05, 0.3]} selected={selectedItem === "laser"} enabled={!laserOn} onClick={() => setSelectedItem("laser")}>
+        <group><mesh><boxGeometry args={[0.08, 0.04, 0.04]} /><meshStandardMaterial color="#aa0000" /></mesh>
+        <Html position={[0, 0.04, 0]} center><div className="bg-red-600 text-white px-1 rounded text-xs">Laser</div></Html></group>
+      </ClickableObject>
+      <ClickableObject position={[-0.15, 0.05, 0.3]} selected={selectedItem === "slits"} enabled={laserOn && !slitsAligned} onClick={() => setSelectedItem("slits")}>
+        <group><mesh><boxGeometry args={[0.02, 0.08, 0.04]} /><meshStandardMaterial color="#333" /></mesh>
+        <Html position={[0, 0.06, 0]} center><div className="bg-gray-700 text-white px-1 rounded text-xs">Fentes</div></Html></group>
+      </ClickableObject>
+      <ClickableObject position={[0.15, 0.05, 0.3]} selected={selectedItem === "screen"} enabled={slitsAligned && !screenPlaced} onClick={() => setSelectedItem("screen")}>
+        <group><mesh><boxGeometry args={[0.02, 0.1, 0.08]} /><meshStandardMaterial color="#eee" /></mesh>
+        <Html position={[0, 0.07, 0]} center><div className="bg-gray-200 px-1 rounded text-xs">Ecran</div></Html></group>
+      </ClickableObject>
+
+      {fringesVisible && <Html position={[0, 0.4, 0]} center><div className="bg-purple-900 text-white p-2 rounded text-xs">
+        <div className="font-bold">Interference</div><div>i = lambda * D / a</div></div></Html>}
+      {fringesVisible && <CompletionBanner text="Franges d'interference!" />}
+    </group>
+  )
+}
+
+function RLCCircuitExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+  const { rConnected, lConnected, cConnected, gbfConnected, oscilloConnected, resonanceFound } = state
+  const [frequency, setFrequency] = useState(500)
+  
+  const handleAction = (a) => {
+    if (a === "R" && selectedItem === "R") { setState(p => ({ ...p, rConnected: true })); setSelectedItem(null); setStep(1); toast.success("R connecte!") }
+    else if (a === "L" && selectedItem === "L") { setState(p => ({ ...p, lConnected: true })); setSelectedItem(null); setStep(2); toast.success("L connecte!") }
+    else if (a === "C" && selectedItem === "C") { setState(p => ({ ...p, cConnected: true })); setSelectedItem(null); setStep(3); toast.success("C connecte!") }
+    else if (a === "gbf" && selectedItem === "gbf") { setState(p => ({ ...p, gbfConnected: true })); setSelectedItem(null); setStep(4); toast.success("GBF connecte!") }
+    else if (a === "oscillo" && selectedItem === "oscillo") { setState(p => ({ ...p, oscilloConnected: true })); setSelectedItem(null); setStep(5); toast.success("Oscillo connecte!") }
+    else if (a === "resonance" && frequency > 950 && frequency < 1050) { setState(p => ({ ...p, resonanceFound: true })); setStep(experiment.steps.length - 1); toast.success("Resonance a f0!") }
+  }
+
+  return (
+    <group>
+      <group position={[-0.3, 0.08, -0.1]}>
+        <mesh><boxGeometry args={[0.2, 0.12, 0.15]} /><meshStandardMaterial color="#1a1a1a" /></mesh>
+        <Html position={[0, 0.03, 0.08]} center><div className="bg-black text-green-400 px-2 py-1 font-mono text-xs">{frequency} Hz</div></Html>
+      </group>
+      
+      <group position={[0.3, 0.08, -0.1]}>
+        <mesh><boxGeometry args={[0.22, 0.15, 0.12]} /><meshStandardMaterial color="#2a2a2a" /></mesh>
+        {oscilloConnected && <Html position={[0, 0.02, 0.07]} center>
+          <div className="bg-black w-16 h-10 flex items-center justify-center">
+            <svg width="50" height="30"><path d={`M0,15 Q12,${resonanceFound ? 0 : 10} 25,15 T50,15`} fill="none" stroke="#00ff00" strokeWidth="2"/></svg>
+          </div>
+        </Html>}
+      </group>
+
+      <group position={[0, 0.06, 0]}>
+        {rConnected && <mesh position={[-0.12, 0, 0]}><boxGeometry args={[0.06, 0.025, 0.025]} /><meshStandardMaterial color="#8B4513" /></mesh>}
+        {lConnected && <mesh position={[0, 0, 0]}><cylinderGeometry args={[0.02, 0.02, 0.06, 16]} rotation={[0, 0, Math.PI/2]} /><meshStandardMaterial color="#cd7f32" /></mesh>}
+        {cConnected && <mesh position={[0.12, 0, 0]}><cylinderGeometry args={[0.025, 0.025, 0.015, 16]} /><meshStandardMaterial color="#4169e1" /></mesh>}
+      </group>
+
+      {oscilloConnected && <Html position={[0, 0.25, 0.2]} center>
+        <input type="range" min="100" max="2000" value={frequency} onChange={(e) => setFrequency(Number(e.target.value))} className="w-32" />
+      </Html>}
+
+      <TargetZone position={[-0.12, 0.12, 0]} label="R" active={selectedItem === "R"} onClick={() => handleAction("R")} />
+      <TargetZone position={[0, 0.12, 0]} label="L" active={selectedItem === "L" && rConnected} onClick={() => handleAction("L")} />
+      <TargetZone position={[0.12, 0.12, 0]} label="C" active={selectedItem === "C" && lConnected} onClick={() => handleAction("C")} />
+      <TargetZone position={[-0.3, 0.18, -0.1]} label="GBF" active={selectedItem === "gbf" && cConnected} onClick={() => handleAction("gbf")} />
+      <TargetZone position={[0.3, 0.2, -0.1]} label="Oscillo" active={selectedItem === "oscillo" && gbfConnected} onClick={() => handleAction("oscillo")} />
+      {oscilloConnected && <TargetZone position={[0, 0.35, 0]} label="f0?" active={!resonanceFound} onClick={() => handleAction("resonance")} />}
+
+      <ClickableObject position={[-0.4, 0.05, 0.3]} selected={selectedItem === "R"} enabled={!rConnected} onClick={() => setSelectedItem("R")}><group><mesh><boxGeometry args={[0.05, 0.02, 0.02]} /><meshStandardMaterial color="#8B4513" /></mesh><Html position={[0, 0.03, 0]} center><div className="bg-orange-800 text-white px-1 rounded text-xs">R</div></Html></group></ClickableObject>
+      <ClickableObject position={[-0.2, 0.05, 0.3]} selected={selectedItem === "L"} enabled={rConnected && !lConnected} onClick={() => setSelectedItem("L")}><group><mesh><cylinderGeometry args={[0.015, 0.015, 0.04, 16]} rotation={[0, 0, Math.PI/2]} /><meshStandardMaterial color="#cd7f32" /></mesh><Html position={[0, 0.04, 0]} center><div className="bg-yellow-700 text-white px-1 rounded text-xs">L</div></Html></group></ClickableObject>
+      <ClickableObject position={[0, 0.05, 0.3]} selected={selectedItem === "C"} enabled={lConnected && !cConnected} onClick={() => setSelectedItem("C")}><group><mesh><cylinderGeometry args={[0.02, 0.02, 0.015, 16]} /><meshStandardMaterial color="#4169e1" /></mesh><Html position={[0, 0.04, 0]} center><div className="bg-blue-600 text-white px-1 rounded text-xs">C</div></Html></group></ClickableObject>
+      <ClickableObject position={[0.2, 0.05, 0.3]} selected={selectedItem === "gbf"} enabled={cConnected && !gbfConnected} onClick={() => setSelectedItem("gbf")}><group><mesh><boxGeometry args={[0.06, 0.04, 0.04]} /><meshStandardMaterial color="#333" /></mesh><Html position={[0, 0.04, 0]} center><div className="bg-gray-700 text-white px-1 rounded text-xs">GBF</div></Html></group></ClickableObject>
+      <ClickableObject position={[0.4, 0.05, 0.3]} selected={selectedItem === "oscillo"} enabled={gbfConnected && !oscilloConnected} onClick={() => setSelectedItem("oscillo")}><group><mesh><boxGeometry args={[0.07, 0.05, 0.04]} /><meshStandardMaterial color="#2a2a2a" /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-gray-800 text-white px-1 rounded text-xs">Oscillo</div></Html></group></ClickableObject>
+
+      {resonanceFound && <Html position={[0, 0.45, 0]} center><div className="bg-blue-900 text-white p-2 rounded text-xs"><div className="font-bold">Resonance!</div><div>f0 = 1/(2pi*sqrt(LC))</div><div>f0 = 1000 Hz</div></div></Html>}
+      {resonanceFound && <CompletionBanner text="Resonance trouvee!" />}
+    </group>
+  )
+}
+
+function PhotoelectricExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+  const { cathodePlaced, circuitConnected, lightOn, frequencyVarying, currentMeasured, thresholdFound } = state
+  const [freq, setFreq] = useState(300)
+  const [current, setCurrent] = useState(0)
+  const threshold = 500
+  
+  useEffect(() => {
+    if (lightOn && frequencyVarying) {
+      setCurrent(freq > threshold ? Math.floor((freq - threshold) * 0.1) : 0)
+    }
+  }, [freq, lightOn, frequencyVarying])
+
+  const handleAction = (a) => {
+    if (a === "cathode" && selectedItem === "cathode") { setState(p => ({ ...p, cathodePlaced: true })); setSelectedItem(null); setStep(1); toast.success("Cathode placee!") }
+    else if (a === "circuit" && selectedItem === "circuit") { setState(p => ({ ...p, circuitConnected: true })); setSelectedItem(null); setStep(2); toast.success("Circuit connecte!") }
+    else if (a === "light" && selectedItem === "light") { setState(p => ({ ...p, lightOn: true })); setSelectedItem(null); setStep(3); toast.success("Lumiere allumee!") }
+    else if (a === "vary" && lightOn) { setState(p => ({ ...p, frequencyVarying: true })); setStep(4); toast.success("Variez la frequence!") }
+    else if (a === "measure" && frequencyVarying) { setState(p => ({ ...p, currentMeasured: true })); setStep(5); toast.success("Courant mesure!") }
+    else if (a === "threshold" && current === 0 && freq < threshold + 50 && freq > threshold - 50) { setState(p => ({ ...p, thresholdFound: true })); setStep(experiment.steps.length - 1); toast.success("Seuil trouve!") }
+  }
+
+  return (
+    <group>
+      <group position={[0, 0.08, -0.1]}>
+        <mesh><cylinderGeometry args={[0.1, 0.1, 0.15, 32, 1, true]} /><meshPhysicalMaterial color="#aaa" transparent opacity={0.3} side={THREE.DoubleSide} /></mesh>
+        {cathodePlaced && <mesh position={[-0.05, 0, 0]}><boxGeometry args={[0.04, 0.08, 0.08]} /><meshStandardMaterial color="#666" metalness={0.8} /></mesh>}
+        {lightOn && <pointLight position={[-0.2, 0.1, 0]} color={freq > 600 ? "#8800ff" : freq > 500 ? "#0044ff" : "#00ff00"} intensity={1} distance={0.5} />}
+      </group>
+
+      {circuitConnected && <group position={[0.3, 0.06, -0.1]}>
+        <mesh><boxGeometry args={[0.1, 0.06, 0.06]} /><meshStandardMaterial color="#222" /></mesh>
+        <Html position={[0, 0.02, 0.04]} center><div className="bg-black text-green-400 font-mono text-xs px-1">{current} uA</div></Html>
+      </group>}
+
+      {frequencyVarying && <Html position={[0, 0.3, 0.2]} center>
+        <div className="bg-white p-2 rounded shadow">
+          <div className="text-xs mb-1">f: {freq} THz</div>
+          <input type="range" min="200" max="800" value={freq} onChange={(e) => setFreq(Number(e.target.value))} className="w-24" />
+        </div>
+      </Html>}
+
+      <TargetZone position={[-0.05, 0.15, -0.1]} label="Cathode" active={selectedItem === "cathode"} onClick={() => handleAction("cathode")} />
+      <TargetZone position={[0.3, 0.12, -0.1]} label="Circuit" active={selectedItem === "circuit" && cathodePlaced} onClick={() => handleAction("circuit")} />
+      <TargetZone position={[-0.25, 0.15, -0.1]} label="Lumiere" active={selectedItem === "light" && circuitConnected} onClick={() => handleAction("light")} />
+      {lightOn && <TargetZone position={[0, 0.22, 0]} label="Varier f" active={!frequencyVarying} onClick={() => handleAction("vary")} />}
+      {frequencyVarying && <TargetZone position={[0.3, 0.18, -0.1]} label="Mesurer I" active={!currentMeasured} onClick={() => handleAction("measure")} />}
+      {currentMeasured && current === 0 && <TargetZone position={[0, 0.4, 0]} label="Seuil?" active={!thresholdFound} onClick={() => handleAction("threshold")} />}
+
+      <ClickableObject position={[-0.4, 0.05, 0.3]} selected={selectedItem === "cathode"} enabled={!cathodePlaced} onClick={() => setSelectedItem("cathode")}><group><mesh><boxGeometry args={[0.03, 0.05, 0.05]} /><meshStandardMaterial color="#888" metalness={0.8} /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-gray-500 text-white px-1 rounded text-xs">Zn</div></Html></group></ClickableObject>
+      <ClickableObject position={[-0.15, 0.05, 0.3]} selected={selectedItem === "circuit"} enabled={cathodePlaced && !circuitConnected} onClick={() => setSelectedItem("circuit")}><group><mesh><boxGeometry args={[0.05, 0.03, 0.03]} /><meshStandardMaterial color="#222" /></mesh><Html position={[0, 0.04, 0]} center><div className="bg-gray-800 text-white px-1 rounded text-xs">Ampere</div></Html></group></ClickableObject>
+      <ClickableObject position={[0.1, 0.05, 0.3]} selected={selectedItem === "light"} enabled={circuitConnected && !lightOn} onClick={() => setSelectedItem("light")}><group><mesh><sphereGeometry args={[0.025, 16, 16]} /><meshStandardMaterial color="#ffff00" emissive="#ffff00" emissiveIntensity={0.5} /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-yellow-400 px-1 rounded text-xs">UV</div></Html></group></ClickableObject>
+
+      {thresholdFound && <Html position={[0, 0.5, 0]} center><div className="bg-indigo-900 text-white p-2 rounded text-xs"><div className="font-bold">Effet photoelectrique</div><div>f0 = {threshold} THz</div><div>E = h*f - W</div></div></Html>}
+      {thresholdFound && <CompletionBanner text="Seuil photoelectrique!" />}
+    </group>
+  )
+}
+
+function GalvanicCellExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+  const { znPlaced, cuPlaced, saltBridgeConnected, voltmeterConnected, emfMeasured } = state
+
+  const handleAction = (a) => {
+    if (a === "zn" && selectedItem === "zn") { setState(p => ({ ...p, znPlaced: true })); setSelectedItem(null); setStep(1); toast.success("Zn place!") }
+    else if (a === "cu" && selectedItem === "cu") { setState(p => ({ ...p, cuPlaced: true })); setSelectedItem(null); setStep(2); toast.success("Cu place!") }
+    else if (a === "bridge" && selectedItem === "bridge") { setState(p => ({ ...p, saltBridgeConnected: true })); setSelectedItem(null); setStep(3); toast.success("Pont salin!") }
+    else if (a === "voltmeter" && selectedItem === "voltmeter") { setState(p => ({ ...p, voltmeterConnected: true })); setSelectedItem(null); setStep(4); toast.success("Voltmetre connecte!") }
+    else if (a === "measure" && voltmeterConnected) { setState(p => ({ ...p, emfMeasured: true })); setStep(experiment.steps.length - 1); toast.success("E = 1.10 V!") }
+  }
+
+  return (
+    <group>
+      <group position={[-0.15, 0.05, -0.1]}>
+        <mesh><cylinderGeometry args={[0.06, 0.06, 0.1, 32]} /><meshPhysicalMaterial color="#add8e6" transparent opacity={0.5} /></mesh>
+        {znPlaced && <mesh position={[0, 0, 0]}><boxGeometry args={[0.03, 0.12, 0.01]} /><meshStandardMaterial color="#a0a0a0" metalness={0.9} /></mesh>}
+        <Html position={[0, -0.08, 0]} center><div className="text-xs bg-blue-100 px-1 rounded">ZnSO4</div></Html>
+      </group>
+
+      <group position={[0.15, 0.05, -0.1]}>
+        <mesh><cylinderGeometry args={[0.06, 0.06, 0.1, 32]} /><meshPhysicalMaterial color="#87CEEB" transparent opacity={0.5} /></mesh>
+        {cuPlaced && <mesh position={[0, 0, 0]}><boxGeometry args={[0.03, 0.12, 0.01]} /><meshStandardMaterial color="#b87333" metalness={0.9} /></mesh>}
+        <Html position={[0, -0.08, 0]} center><div className="text-xs bg-blue-100 px-1 rounded">CuSO4</div></Html>
+      </group>
+
+      {saltBridgeConnected && <mesh position={[0, 0.08, -0.1]} rotation={[0, 0, Math.PI/2]}><cylinderGeometry args={[0.015, 0.015, 0.25, 16]} /><meshStandardMaterial color="#f5f5dc" /></mesh>}
+
+      {voltmeterConnected && <group position={[0, 0.2, -0.1]}>
+        <mesh><boxGeometry args={[0.1, 0.06, 0.04]} /><meshStandardMaterial color="#222" /></mesh>
+        <Html position={[0, 0, 0.03]} center><div className="bg-black text-green-400 font-mono text-xs">{emfMeasured ? '1.10' : '0.00'} V</div></Html>
+      </group>}
+
+      <TargetZone position={[-0.15, 0.12, -0.1]} label="Zn" active={selectedItem === "zn"} onClick={() => handleAction("zn")} />
+      <TargetZone position={[0.15, 0.12, -0.1]} label="Cu" active={selectedItem === "cu" && znPlaced} onClick={() => handleAction("cu")} />
+      <TargetZone position={[0, 0.15, -0.1]} label="Pont" active={selectedItem === "bridge" && cuPlaced} onClick={() => handleAction("bridge")} />
+      <TargetZone position={[0, 0.22, -0.1]} label="Voltmetre" active={selectedItem === "voltmeter" && saltBridgeConnected} onClick={() => handleAction("voltmeter")} />
+      {voltmeterConnected && <TargetZone position={[0, 0.28, -0.1]} label="Mesurer E" active={!emfMeasured} onClick={() => handleAction("measure")} />}
+
+      <ClickableObject position={[-0.4, 0.05, 0.3]} selected={selectedItem === "zn"} enabled={!znPlaced} onClick={() => setSelectedItem("zn")}><group><mesh><boxGeometry args={[0.025, 0.06, 0.008]} /><meshStandardMaterial color="#a0a0a0" metalness={0.9} /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-gray-400 px-1 rounded text-xs">Zn</div></Html></group></ClickableObject>
+      <ClickableObject position={[-0.2, 0.05, 0.3]} selected={selectedItem === "cu"} enabled={znPlaced && !cuPlaced} onClick={() => setSelectedItem("cu")}><group><mesh><boxGeometry args={[0.025, 0.06, 0.008]} /><meshStandardMaterial color="#b87333" metalness={0.9} /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-orange-600 text-white px-1 rounded text-xs">Cu</div></Html></group></ClickableObject>
+      <ClickableObject position={[0, 0.05, 0.3]} selected={selectedItem === "bridge"} enabled={cuPlaced && !saltBridgeConnected} onClick={() => setSelectedItem("bridge")}><group><mesh rotation={[0, 0, Math.PI/2]}><cylinderGeometry args={[0.01, 0.01, 0.08, 16]} /><meshStandardMaterial color="#f5f5dc" /></mesh><Html position={[0, 0.04, 0]} center><div className="bg-yellow-100 px-1 rounded text-xs">KNO3</div></Html></group></ClickableObject>
+      <ClickableObject position={[0.2, 0.05, 0.3]} selected={selectedItem === "voltmeter"} enabled={saltBridgeConnected && !voltmeterConnected} onClick={() => setSelectedItem("voltmeter")}><group><mesh><boxGeometry args={[0.05, 0.03, 0.02]} /><meshStandardMaterial color="#222" /></mesh><Html position={[0, 0.04, 0]} center><div className="bg-gray-800 text-white px-1 rounded text-xs">V</div></Html></group></ClickableObject>
+
+      {emfMeasured && <Html position={[0, 0.4, 0]} center><div className="bg-orange-900 text-white p-2 rounded text-xs"><div className="font-bold">Pile Daniell</div><div>E = E(Cu) - E(Zn)</div><div>E = 0.34 - (-0.76) = 1.10 V</div></div></Html>}
+      {emfMeasured && <CompletionBanner text="Pile galvanique complete!" />}
+    </group>
+  )
+}
+
+function ChromatographyExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+  const { extractReady, sampleDeposited, eluantAdded, migrating, rfCalculated } = state
+  const [migrationProgress, setMigrationProgress] = useState(0)
+
+  useEffect(() => {
+    if (migrating && migrationProgress < 100) {
+      const timer = setTimeout(() => setMigrationProgress(p => p + 5), 200)
+      return () => clearTimeout(timer)
+    }
+    if (migrationProgress >= 100 && migrating) {
+      setState(p => ({ ...p, migrating: false }))
+      toast.success("Migration terminee!")
+      setStep(4)
+    }
+  }, [migrating, migrationProgress])
+
+  const handleAction = (a) => {
+    if (a === "extract" && selectedItem === "extract") { setState(p => ({ ...p, extractReady: true })); setSelectedItem(null); setStep(1); toast.success("Extrait pret!") }
+    else if (a === "deposit" && selectedItem === "deposit") { setState(p => ({ ...p, sampleDeposited: true })); setSelectedItem(null); setStep(2); toast.success("Echantillon depose!") }
+    else if (a === "eluant" && selectedItem === "eluant") { setState(p => ({ ...p, eluantAdded: true, migrating: true })); setSelectedItem(null); setStep(3); toast.success("Migration!") }
+    else if (a === "calculate" && !migrating && migrationProgress >= 100) { setState(p => ({ ...p, rfCalculated: true })); setStep(experiment.steps.length - 1); toast.success("Rf calcule!") }
+  }
+
+  return (
+    <group>
+      <group position={[0, 0.08, -0.1]}>
+        <mesh><cylinderGeometry args={[0.08, 0.08, 0.18, 32, 1, true]} /><meshPhysicalMaterial color="#fff" transparent opacity={0.3} side={THREE.DoubleSide} /></mesh>
+        {eluantAdded && <mesh position={[0, -0.07, 0]}><cylinderGeometry args={[0.075, 0.075, 0.03, 32]} /><meshStandardMaterial color="#a8d8ea" transparent opacity={0.6} /></mesh>}
+        
+        <mesh position={[0, 0, 0.02]}><boxGeometry args={[0.06, 0.15, 0.003]} /><meshStandardMaterial color="#f5f5f5" /></mesh>
+        
+        {sampleDeposited && <mesh position={[0, -0.05, 0.025]}><sphereGeometry args={[0.008, 16, 16]} /><meshStandardMaterial color="#228B22" /></mesh>}
+        
+        {migrating && migrationProgress > 0 && <group position={[0, -0.05 + migrationProgress * 0.001, 0.025]}>
+          <mesh position={[-0.012, 0, 0]}><sphereGeometry args={[0.006, 8, 8]} /><meshStandardMaterial color="#ffff00" /></mesh>
+          <mesh position={[0, migrationProgress * 0.0005, 0]}><sphereGeometry args={[0.006, 8, 8]} /><meshStandardMaterial color="#228B22" /></mesh>
+          <mesh position={[0.012, migrationProgress * 0.0008, 0]}><sphereGeometry args={[0.005, 8, 8]} /><meshStandardMaterial color="#ff6600" /></mesh>
+        </group>}
+      </group>
+
+      {migrating && <Html position={[0.15, 0.1, 0]} center><div className="bg-blue-500 text-white px-2 py-1 rounded text-xs animate-pulse">{migrationProgress}%</div></Html>}
+
+      <TargetZone position={[-0.2, 0.1, 0]} label="Extrait" active={selectedItem === "extract"} onClick={() => handleAction("extract")} />
+      <TargetZone position={[0, 0.05, 0]} label="Deposer" active={selectedItem === "deposit" && extractReady} onClick={() => handleAction("deposit")} />
+      <TargetZone position={[0, 0.18, 0]} label="Eluant" active={selectedItem === "eluant" && sampleDeposited} onClick={() => handleAction("eluant")} />
+      {!migrating && migrationProgress >= 100 && <TargetZone position={[0.2, 0.15, 0]} label="Calculer Rf" active={!rfCalculated} onClick={() => handleAction("calculate")} />}
+
+      <ClickableObject position={[-0.4, 0.05, 0.3]} selected={selectedItem === "extract"} enabled={!extractReady} onClick={() => setSelectedItem("extract")}><group><mesh><cylinderGeometry args={[0.015, 0.015, 0.05, 16]} /><meshStandardMaterial color="#228B22" /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-green-600 text-white px-1 rounded text-xs">Extrait</div></Html></group></ClickableObject>
+      <ClickableObject position={[-0.15, 0.05, 0.3]} selected={selectedItem === "deposit"} enabled={extractReady && !sampleDeposited} onClick={() => setSelectedItem("deposit")}><group><mesh><cylinderGeometry args={[0.008, 0.003, 0.04, 16]} /><meshStandardMaterial color="#666" /></mesh><Html position={[0, 0.04, 0]} center><div className="bg-gray-600 text-white px-1 rounded text-xs">Pipette</div></Html></group></ClickableObject>
+      <ClickableObject position={[0.1, 0.05, 0.3]} selected={selectedItem === "eluant"} enabled={sampleDeposited && !eluantAdded} onClick={() => setSelectedItem("eluant")}><group><mesh><cylinderGeometry args={[0.02, 0.02, 0.06, 16]} /><meshStandardMaterial color="#a8d8ea" transparent opacity={0.7} /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-blue-300 px-1 rounded text-xs">Eluant</div></Html></group></ClickableObject>
+
+      {rfCalculated && <Html position={[0, 0.35, 0]} center><div className="bg-green-900 text-white p-2 rounded text-xs"><div className="font-bold">Resultats CCM</div><div>Jaune: Rf = 0.85</div><div>Vert: Rf = 0.65</div><div>Orange: Rf = 0.45</div></div></Html>}
+      {rfCalculated && <CompletionBanner text="Chromatographie complete!" />}
+    </group>
+  )
+}
+
 // Placeholder for other experiments - they'll show "en construction" message
 function PlaceholderExperiment({ name }) {
   return (
@@ -892,6 +1177,12 @@ function ExperimentView({ experiment, onBack }) {
       case "gel-electrophoresis": return <GelElectrophoresisExperiment {...props} />
       case "microscopy": return <MicroscopyExperiment {...props} />
       case "enzyme-kinetics": return <EnzymeKineticsExperiment {...props} />
+      case "double-slit": return <DoubleSlitExperiment {...props} />
+      case "rlc-circuit": return <RLCCircuitExperiment {...props} />
+      case "photoelectric": return <PhotoelectricExperiment {...props} />
+      case "spectrophotometry": return <SpectrophotometryExperiment {...props} />
+      case "galvanic-cell": return <GalvanicCellExperiment {...props} />
+      case "chromatography": return <ChromatographyExperiment {...props} />
       default: return <PlaceholderExperiment name={experiment.name} />
     }
   }
@@ -950,6 +1241,13 @@ function ExperimentView({ experiment, onBack }) {
     </div>
   )
 }
+
+
+
+
+
+
+
 
 
 
