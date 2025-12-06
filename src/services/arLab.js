@@ -203,6 +203,13 @@ const experiments = {
       steps: ['Preparer lame', 'Ajouter colorant', 'Placer lamelle', 'Observer x10', 'Observer x40'],
       classe: 'Seconde',
       chapter: 'La cellule - unite du vivant',
+      materiel: [
+        'Microscope optique: grossit jusqu a 400x',
+        'Lame porte-objet: support en verre pour l echantillon',
+        'Lamelle couvre-objet: protege l echantillon',
+        'Bleu de methylene: colorant pour le noyau',
+        'Oignon ou elodee: source de cellules vegetales'
+      ],
       learned: [
         'La cellule est l unite de base du vivant',
         'Cellule vegetale: paroi, chloroplastes, vacuole',
@@ -229,6 +236,13 @@ const experiments = {
       steps: ['Preparer elodee', 'Placer sous lumiere', 'Observer bulles O2', 'Comparer obscurite'],
       classe: 'Seconde',
       chapter: 'Metabolisme cellulaire',
+      materiel: [
+        'Elodee (plante aquatique): produit O2 visible',
+        'Becher avec eau: milieu aquatique',
+        'Lampe: source de lumiere pour la reaction',
+        'Entonnoir + tube: collecte les bulles d O2',
+        'Boite noire: pour comparer avec obscurite'
+      ],
       learned: [
         'La photosynthese produit O2 et glucose',
         'Elle necessite lumiere, CO2 et eau',
@@ -298,6 +312,8 @@ export const getIndicatorColor = (pH) => {
   if (pH < 9) return '#ff88aa'
   return '#ff44aa'
 }
+
+
 
 
 
