@@ -207,6 +207,40 @@ const experiments = {
       ]
     },
     {
+      id: 'parallel-circuit',
+      name: 'Circuit en Parallele',
+      description: 'Loi des noeuds et resistances en parallele',
+      difficulty: 'Moyen',
+      level: 'lycee',
+      duration: '15 min',
+      steps: ['Placer pile', 'Connecter R1', 'Connecter R2 en parallele', 'Connecter ampoules', 'Mesurer I total'],
+      classe: 'Premiere S',
+      chapter: 'Electricite - Circuits en derivation',
+      materiel: [
+        'Pile 9V: generateur de tension continue',
+        'Resistance R1 (100 Ohms): premiere branche',
+        'Resistance R2 (200 Ohms): deuxieme branche',
+        'Deux ampoules: montees en parallele',
+        'Amperemetre: mesure le courant total'
+      ],
+      learned: [
+        'En parallele: la tension est la meme partout',
+        'Loi des noeuds: I_total = I1 + I2',
+        'Resistance equivalente: 1/Req = 1/R1 + 1/R2',
+        'Si une branche casse, l autre fonctionne encore'
+      ],
+      formulas: ['1/Req = 1/R1 + 1/R2', 'I_total = I1 + I2', 'U = U1 = U2'],
+      realLife: [
+        'Prises electriques de la maison (toutes en parallele)',
+        'Guirlandes LED modernes',
+        'Circuits de securite automobile'
+      ],
+      bacQuestions: [
+        'Calculer la resistance equivalente en parallele',
+        'Appliquer la loi des noeuds'
+      ]
+    },
+    {
       id: 'pendulum',
       name: 'Pendule Simple',
       description: 'Mesure periode T = 2pi*sqrt(L/g)',
@@ -537,6 +571,7 @@ export const getIndicatorColor = (pH) => {
   if (pH < 9) return '#ff88aa'
   return '#ff44aa'
 }
+
 
 
 

@@ -557,6 +557,53 @@ function CircuitExperiment({ state, setState, setStep, experiment, selectedItem,
   )
 }
 
+function ParallelCircuitExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary }) {
+  const { batteryPlaced, r1Connected, r2Connected, bulb1Lit, bulb2Lit } = state
+  const handlePlace = (item) => {
+    if (item === "battery" && selectedItem === "battery") { setState(p => ({ ...p, batteryPlaced: true })); setSelectedItem(null); setStep(1); toast.success("🔋 Pile connectee!") }
+    else if (item === "r1" && selectedItem === "r1" && batteryPlaced) { setState(p => ({ ...p, r1Connected: true, bulb1Lit: true })); setSelectedItem(null); setStep(2); toast.success("⚡ R1 = 100Ω") }
+    else if (item === "r2" && selectedItem === "r2" && r1Connected) { setState(p => ({ ...p, r2Connected: true, bulb2Lit: true })); setSelectedItem(null); setStep(4); toast.success("⚡ R2 = 200Ω"); setTimeout(() => setStep(experiment.steps.length - 1), 1500) }
+  }
+  const iTotal = r2Connected ? 0.135 : (r1Connected ? 0.09 : 0)
+  return (
+    <group>
+      {/* Circuit board */}
+      <mesh position={[0, 0.02, -0.05]}><boxGeometry args={[1, 0.02, 0.5]} /><meshStandardMaterial color="#1a5c32" /></mesh>
+      <Html position={[0, 0.02, 0.3]} center><div className="bg-gray-800 text-white px-2 py-1 rounded text-xs">Circuit Parallele</div></Html>
+
+      {/* Battery position */}
+      <TargetZone position={[-0.35, 0.06, -0.05]} label="🔋" active={selectedItem === "battery"} onClick={() => handlePlace("battery")} />
+      {batteryPlaced && <group position={[-0.35, 0.1, -0.05]}><mesh><boxGeometry args={[0.08, 0.14, 0.05]} /><meshStandardMaterial color="#1e40af" /></mesh><mesh position={[0.03, 0.08, 0]}><cylinderGeometry args={[0.015, 0.015, 0.025, 16]} /><meshStandardMaterial color="#dc2626" /></mesh><Html position={[0, 0.1, 0]} center><div className="bg-yellow-400 px-2 py-1 text-xs font-bold rounded">9V</div></Html></group>}
+
+      {/* Branch 1 - R1 + Bulb 1 */}
+      <TargetZone position={[0.1, 0.15, -0.15]} label="R1" active={selectedItem === "r1" && batteryPlaced} onClick={() => handlePlace("r1")} />
+      {r1Connected && <>
+        <group position={[0.1, 0.1, -0.15]}><mesh rotation={[0, 0, Math.PI/2]}><cylinderGeometry args={[0.025, 0.025, 0.1, 16]} /><meshStandardMaterial color="#c2410c" emissive={bulb1Lit?"#f60":"#000"} emissiveIntensity={0.3} /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-orange-200 px-2 py-1 text-xs font-bold rounded">R1=100Ω</div></Html></group>
+        <group position={[0.3, 0.12, -0.15]}><mesh><sphereGeometry args={[0.04, 32, 32]} /><meshPhysicalMaterial color={bulb1Lit?"#ffc":"#fff"} emissive={bulb1Lit?"#ff0":"#000"} emissiveIntensity={bulb1Lit?2:0} /></mesh>{bulb1Lit && <pointLight color="#ff0" intensity={1.5} distance={1} />}<Html position={[0, 0.07, 0]} center><div className="bg-yellow-100 px-2 py-1 text-xs font-bold rounded">L1</div></Html></group>
+        <Wire start={[-0.25, 0.1, -0.15]} end={[0.02, 0.1, -0.15]} color={bulb1Lit?"#0f0":"#c00"} glowing={bulb1Lit} />
+        <Wire start={[0.18, 0.1, -0.15]} end={[0.26, 0.12, -0.15]} color={bulb1Lit?"#0f0":"#c00"} glowing={bulb1Lit} />
+      </>}
+
+      {/* Branch 2 - R2 + Bulb 2 */}
+      <TargetZone position={[0.1, 0.15, 0.05]} label="R2" active={selectedItem === "r2" && r1Connected} onClick={() => handlePlace("r2")} />
+      {r2Connected && <>
+        <group position={[0.1, 0.1, 0.05]}><mesh rotation={[0, 0, Math.PI/2]}><cylinderGeometry args={[0.025, 0.025, 0.1, 16]} /><meshStandardMaterial color="#7c3aed" emissive={bulb2Lit?"#a78bfa":"#000"} emissiveIntensity={0.3} /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-purple-200 px-2 py-1 text-xs font-bold rounded">R2=200Ω</div></Html></group>
+        <group position={[0.3, 0.12, 0.05]}><mesh><sphereGeometry args={[0.04, 32, 32]} /><meshPhysicalMaterial color={bulb2Lit?"#ffc":"#fff"} emissive={bulb2Lit?"#ff0":"#000"} emissiveIntensity={bulb2Lit?1.5:0} /></mesh>{bulb2Lit && <pointLight color="#ff0" intensity={1} distance={0.8} />}<Html position={[0, 0.07, 0]} center><div className="bg-yellow-100 px-2 py-1 text-xs font-bold rounded">L2</div></Html></group>
+        <Wire start={[-0.25, 0.1, 0.05]} end={[0.02, 0.1, 0.05]} color={bulb2Lit?"#0f0":"#c00"} glowing={bulb2Lit} />
+        <Wire start={[0.18, 0.1, 0.05]} end={[0.26, 0.12, 0.05]} color={bulb2Lit?"#0f0":"#c00"} glowing={bulb2Lit} />
+      </>}
+
+      {/* Clickable items */}
+      {!batteryPlaced && <ClickableObject position={[-0.4, 0.1, 0.35]} selected={selectedItem === "battery"} enabled={true} onClick={() => setSelectedItem(selectedItem === "battery" ? null : "battery")}><group><mesh><boxGeometry args={[0.06, 0.1, 0.04]} /><meshStandardMaterial color="#1e40af" /></mesh><Html position={[0, 0.08, 0]} center><div className="bg-yellow-400 px-2 py-1 text-xs font-bold rounded">Pile 9V</div></Html></group></ClickableObject>}
+      {!r1Connected && <ClickableObject position={[-0.1, 0.1, 0.35]} selected={selectedItem === "r1"} enabled={batteryPlaced} onClick={() => setSelectedItem(selectedItem === "r1" ? null : "r1")}><group><mesh rotation={[0, 0, Math.PI/2]}><cylinderGeometry args={[0.02, 0.02, 0.08, 16]} /><meshStandardMaterial color="#c2410c" /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-orange-200 px-2 py-1 text-xs font-bold rounded">R1 100Ω</div></Html></group></ClickableObject>}
+      {!r2Connected && <ClickableObject position={[0.2, 0.1, 0.35]} selected={selectedItem === "r2"} enabled={r1Connected} onClick={() => setSelectedItem(selectedItem === "r2" ? null : "r2")}><group><mesh rotation={[0, 0, Math.PI/2]}><cylinderGeometry args={[0.02, 0.02, 0.08, 16]} /><meshStandardMaterial color="#7c3aed" /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-purple-200 px-2 py-1 text-xs font-bold rounded">R2 200Ω</div></Html></group></ClickableObject>}
+
+      {/* Current display */}
+      {r1Connected && <Html position={[0.45, 0.25, 0]} center><div className="bg-blue-900 text-white p-2 rounded text-xs"><div className="font-bold">Loi des noeuds</div><div className="text-yellow-300">I = I1 + I2</div><div className="text-lg text-green-300">I = {iTotal.toFixed(3)}A</div>{r2Connected && <div className="text-xs mt-1">1/Req = 1/100 + 1/200<br/>Req = 66.7Ω</div>}</div></Html>}
+    </group>
+  )
+}
+
 function PendulumExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary }) {
   const { stringAttached, massAttached, swinging, period } = state
   const pendulumRef = useRef()
@@ -1219,6 +1266,7 @@ function ExperimentView({ experiment, onBack }) {
     hclVolume: 0, naohVolume: 0, indicatorAdded: false, pH: 1, color: "#ff6b6b", neutralized: false,
     bunsenLit: false, magnesiumBurning: false,
     batteryConnected: false, resistorConnected: false, bulbLit: false, current: 0,
+    batteryPlaced: false, r1Connected: false, r2Connected: false, bulb1Lit: false, bulb2Lit: false,
     stringAttached: false, massAttached: false, swinging: false, period: 0,
     slideReady: false, stainAdded: false, coverslipOn: false, focusedLow: false, focusedHigh: false,
     plantReady: false, lightOn: false, bubblesVisible: false, darkCompared: false,
@@ -1237,7 +1285,7 @@ function ExperimentView({ experiment, onBack }) {
       case "acid-base": return <AcidBaseExperiment {...props} />
       case "combustion": return <CombustionExperiment {...props} />
       case "simple-circuit": return <CircuitExperiment {...props} />
-      case "pendulum": return <PendulumExperiment {...props} />
+      case "parallel-circuit": return <ParallelCircuitExperiment {...props} />
       case "cell-observation": return <CellObservationExperiment {...props} />
       case "photosynthesis": return <PhotosynthesisExperiment {...props} />
       case "gel-electrophoresis": return <GelElectrophoresisExperiment {...props} />
@@ -1307,6 +1355,10 @@ function ExperimentView({ experiment, onBack }) {
     </div>
   )
 }
+
+
+
+
 
 
 
