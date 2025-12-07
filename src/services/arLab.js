@@ -36,6 +36,40 @@ const experiments = {
       ]
     },
     {
+      id: 'electrolysis',
+      name: 'Electrolyse de l Eau',
+      description: 'Decomposition de l eau en H2 et O2',
+      difficulty: 'Moyen',
+      level: 'lycee',
+      duration: '20 min',
+      steps: ['Remplir cuve', 'Placer electrodes', 'Connecter generateur', 'Observer bulles', 'Identifier gaz'],
+      classe: 'Premiere S',
+      chapter: 'Reactions d oxydoreduction',
+      materiel: [
+        'Cuve a electrolyse: contient l eau',
+        'Electrodes de graphite: anode et cathode',
+        'Generateur DC: fournit le courant',
+        'Tubes a essai: collectent les gaz',
+        'Eau + sulfate de sodium: electrolyte'
+      ],
+      learned: [
+        'L eau se decompose en H2 et O2',
+        'Cathode (-): reduction, produit H2',
+        'Anode (+): oxydation, produit O2',
+        'Volume H2 = 2x Volume O2'
+      ],
+      formulas: ['2H2O -> 2H2 + O2', 'Cathode: 2H+ + 2e- -> H2', 'Anode: 2OH- -> H2O + 1/2O2 + 2e-'],
+      realLife: [
+        'Production hydrogene vert',
+        'Piles a combustible',
+        'Industrie chimique'
+      ],
+      bacQuestions: [
+        'Ecrire les demi-equations',
+        'Calculer le volume de gaz produit'
+      ]
+    },
+    {
       id: 'combustion',
       name: 'Combustion du Magnesium',
       description: 'Reaction de combustion vive avec lumiere intense',
@@ -204,6 +238,39 @@ const experiments = {
       bacQuestions: [
         'Calculer l intensite dans un circuit serie',
         'Determiner la resistance equivalente'
+      ]
+    },
+    {
+      id: 'free-fall',
+      name: 'Chute Libre',
+      description: 'Etude du mouvement sous l effet de la gravite',
+      difficulty: 'Facile',
+      level: 'lycee',
+      duration: '15 min',
+      steps: ['Placer bille', 'Lacher bille', 'Mesurer temps', 'Calculer g', 'Verifier formule'],
+      classe: 'Seconde',
+      chapter: 'Mecanique - Mouvement',
+      materiel: [
+        'Bille metallique: objet en chute',
+        'Electroaimant: maintient et lache la bille',
+        'Chronometre electronique: mesure le temps',
+        'Regle graduee: mesure la hauteur'
+      ],
+      learned: [
+        'En chute libre, seule la gravite agit',
+        'Acceleration g = 9.81 m/s2',
+        'Vitesse augmente lineairement: v = gt',
+        'Distance parcourue: h = 1/2 gt2'
+      ],
+      formulas: ['h = 1/2 * g * t^2', 'v = g * t', 'g = 2h / t^2'],
+      realLife: [
+        'Parachutisme',
+        'Calcul trajectoire satellites',
+        'Sports (saut en hauteur)'
+      ],
+      bacQuestions: [
+        'Calculer le temps de chute',
+        'Determiner g experimentalement'
       ]
     },
     {
@@ -406,6 +473,39 @@ const experiments = {
       bacQuestions: [
         'Identifier les organites d une cellule',
         'Comparer cellule animale et vegetale'
+      ]
+    },
+    {
+      id: 'germination',
+      name: 'Germination des Graines',
+      description: 'Etudier les conditions de germination',
+      difficulty: 'Facile',
+      level: 'lycee',
+      duration: '15 min',
+      steps: ['Preparer graines', 'Ajouter eau', 'Placer a la lumiere', 'Observer radicule', 'Comparer conditions'],
+      classe: 'Seconde',
+      chapter: 'Reproduction des vegetaux',
+      materiel: [
+        'Graines de haricot: faciles a observer',
+        'Coton humide: support de germination',
+        'Boites de Petri: contiennent les graines',
+        'Eau: essentielle a la germination'
+      ],
+      learned: [
+        'Germination necessite: eau, O2, temperature',
+        'La lumiere n est pas necessaire au debut',
+        'Radicule sort en premier (racine)',
+        'Puis la tigelle (tige)'
+      ],
+      formulas: ['Taux germination = (graines germees / total) x 100'],
+      realLife: [
+        'Agriculture et semis',
+        'Industrie des semences',
+        'Jardinage domestique'
+      ],
+      bacQuestions: [
+        'Conditions necessaires a la germination',
+        'Role des reserves de la graine'
       ]
     },
     {
@@ -842,6 +942,9 @@ export const getIndicatorColor = (pH) => {
   if (pH < 9) return '#ff88aa'
   return '#ff44aa'
 }
+
+
+
 
 
 
