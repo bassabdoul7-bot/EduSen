@@ -1161,6 +1161,414 @@ function ChromatographyExperiment({ state, setState, setStep, experiment, select
 }
 
 // Placeholder for other experiments - they'll show "en construction" message
+function SolarPanelExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+  const { panelPlaced, meterConnected, measuring, angle, voltage } = state
+  const [currentAngle, setCurrentAngle] = useState(45)
+  const calculateVoltage = (a) => (12 * Math.sin(a * Math.PI / 180)).toFixed(1)
+  
+  const handleAction = (action) => {
+    if (action === "panel" && selectedItem === "panel") { setState(p => ({ ...p, panelPlaced: true })); setSelectedItem(null); setStep(1); toast.success("☀️ Panneau place!") }
+    else if (action === "meter" && selectedItem === "meter" && panelPlaced) { setState(p => ({ ...p, meterConnected: true, measuring: true, voltage: calculateVoltage(45) })); setSelectedItem(null); setStep(2); toast.success("📊 Multimetre connecte!") }
+    else if (action === "optimize" && measuring) { setCurrentAngle(90); setState(p => ({ ...p, angle: 90, voltage: "12.0" })); setStep(experiment.steps.length - 1); toast.success("✨ Rendement optimal a 90°!") }
+  }
+  
+  return (
+    <group>
+      {/* Sun lamp */}
+      <group position={[0, 0.8, -0.3]}>
+        <mesh><sphereGeometry args={[0.1, 32, 32]} /><meshBasicMaterial color="#ffdd00" /></mesh>
+        <pointLight color="#ffdd00" intensity={3} distance={2} />
+        <Html position={[0, 0.15, 0]} center><div className="bg-yellow-400 px-2 py-1 rounded text-xs font-bold">☀️ Soleil</div></Html>
+      </group>
+
+      {/* Solar panel */}
+      {panelPlaced && <group position={[0, 0.2, 0]} rotation={[-(90 - currentAngle) * Math.PI / 180, 0, 0]}>
+        <mesh><boxGeometry args={[0.4, 0.3, 0.02]} /><meshStandardMaterial color="#1e3a5f" metalness={0.8} /></mesh>
+        <mesh position={[0, 0, 0.011]}><boxGeometry args={[0.35, 0.25, 0.005]} /><meshStandardMaterial color="#4a90d9" metalness={0.9} /></mesh>
+        <Html position={[0, 0.2, 0]} center><div className="bg-blue-900 text-white px-2 py-1 rounded text-xs">Panneau {currentAngle}°</div></Html>
+      </group>}
+
+      {/* Multimeter */}
+      {meterConnected && <group position={[0.35, 0.15, 0.2]}>
+        <mesh><boxGeometry args={[0.1, 0.15, 0.03]} /><meshStandardMaterial color="#333" /></mesh>
+        <Html position={[0, 0, 0.02]} center><div className="bg-green-500 text-white px-2 py-1 rounded text-sm font-mono">{voltage}V</div></Html>
+        <Html position={[0, -0.12, 0]} center><div className="bg-gray-700 text-white px-2 py-1 rounded text-xs">Multimetre</div></Html>
+      </group>}
+
+      {/* Target zones */}
+      <TargetZone position={[0, 0.2, 0]} label="☀️ Panneau" active={selectedItem === "panel"} onClick={() => handleAction("panel")} />
+      {panelPlaced && <TargetZone position={[0.35, 0.15, 0.2]} label="📊 Connecter" active={selectedItem === "meter"} onClick={() => handleAction("meter")} />}
+      {measuring && <TargetZone position={[0, 0.4, 0]} label="📐 Optimiser 90°" active={true} onClick={() => handleAction("optimize")} />}
+
+      {/* Clickable items */}
+      {!panelPlaced && <ClickableObject position={[-0.4, 0.1, 0.3]} selected={selectedItem === "panel"} enabled={true} onClick={() => setSelectedItem(selectedItem === "panel" ? null : "panel")}><group><mesh><boxGeometry args={[0.15, 0.1, 0.01]} /><meshStandardMaterial color="#1e3a5f" /></mesh><Html position={[0, 0.08, 0]} center><div className="bg-blue-100 px-2 py-1 rounded text-xs font-bold">Panneau</div></Html></group></ClickableObject>}
+      {!meterConnected && panelPlaced && <ClickableObject position={[0.4, 0.1, 0.3]} selected={selectedItem === "meter"} enabled={true} onClick={() => setSelectedItem(selectedItem === "meter" ? null : "meter")}><group><mesh><boxGeometry args={[0.06, 0.08, 0.02]} /><meshStandardMaterial color="#333" /></mesh><Html position={[0, 0.07, 0]} center><div className="bg-gray-200 px-2 py-1 rounded text-xs font-bold">Multimetre</div></Html></group></ClickableObject>}
+
+      {/* Info display */}
+      {measuring && <Html position={[-0.4, 0.4, 0]} center><div className="bg-blue-900 text-white p-2 rounded text-xs"><div className="font-bold">Effet Photovoltaique</div><div className="text-yellow-300">P = U × I</div><div className="text-green-300">Angle: {currentAngle}°</div></div></Html>}
+    </group>
+  )
+}
+
+function SoilNPKExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+  const { sampleTaken, nTested, pTested, kTested } = state
+  const [results, setResults] = useState({ n: 0, p: 0, k: 0 })
+  
+  const handleAction = (action) => {
+    if (action === "sample" && selectedItem === "sample") { setState(p => ({ ...p, sampleTaken: true })); setSelectedItem(null); setStep(1); toast.success("🌍 Echantillon preleve!") }
+    else if (action === "testN" && sampleTaken && !nTested) { setState(p => ({ ...p, nTested: true })); setResults(r => ({ ...r, n: 45 })); setStep(2); toast.success("N = 45 mg/kg") }
+    else if (action === "testP" && nTested && !pTested) { setState(p => ({ ...p, pTested: true })); setResults(r => ({ ...r, p: 28 })); setStep(3); toast.success("P = 28 mg/kg") }
+    else if (action === "testK" && pTested && !kTested) { setState(p => ({ ...p, kTested: true })); setResults(r => ({ ...r, k: 62 })); setStep(experiment.steps.length - 1); toast.success("K = 62 mg/kg - Sol fertile!") }
+  }
+  
+  return (
+    <group>
+      {/* Soil sample */}
+      <group position={[-0.2, 0.08, 0]}>
+        <mesh><cylinderGeometry args={[0.08, 0.08, 0.1, 32]} /><meshStandardMaterial color="#8B4513" /></mesh>
+        <Html position={[0, -0.08, 0]} center><div className="bg-amber-800 text-white px-2 py-1 rounded text-xs">Sol</div></Html>
+      </group>
+
+      {/* Test tubes */}
+      <group position={[0.15, 0.15, 0]}>
+        <mesh><cylinderGeometry args={[0.02, 0.02, 0.12, 16]} /><meshPhysicalMaterial color={nTested ? "#22c55e" : "#ddd"} transparent opacity={0.8} /></mesh>
+        <Html position={[0, 0.1, 0]} center><div className={`px-2 py-1 rounded text-xs font-bold ${nTested ? "bg-green-500 text-white" : "bg-gray-200"}`}>N {nTested ? results.n : "?"}</div></Html>
+      </group>
+      <group position={[0.25, 0.15, 0]}>
+        <mesh><cylinderGeometry args={[0.02, 0.02, 0.12, 16]} /><meshPhysicalMaterial color={pTested ? "#f97316" : "#ddd"} transparent opacity={0.8} /></mesh>
+        <Html position={[0, 0.1, 0]} center><div className={`px-2 py-1 rounded text-xs font-bold ${pTested ? "bg-orange-500 text-white" : "bg-gray-200"}`}>P {pTested ? results.p : "?"}</div></Html>
+      </group>
+      <group position={[0.35, 0.15, 0]}>
+        <mesh><cylinderGeometry args={[0.02, 0.02, 0.12, 16]} /><meshPhysicalMaterial color={kTested ? "#a855f7" : "#ddd"} transparent opacity={0.8} /></mesh>
+        <Html position={[0, 0.1, 0]} center><div className={`px-2 py-1 rounded text-xs font-bold ${kTested ? "bg-purple-500 text-white" : "bg-gray-200"}`}>K {kTested ? results.k : "?"}</div></Html>
+      </group>
+
+      {/* Target zones */}
+      <TargetZone position={[-0.2, 0.15, 0]} label="🌍 Prelever" active={selectedItem === "sample"} onClick={() => handleAction("sample")} />
+      {sampleTaken && <TargetZone position={[0.15, 0.25, 0]} label="Test N" active={!nTested} onClick={() => handleAction("testN")} />}
+      {nTested && <TargetZone position={[0.25, 0.25, 0]} label="Test P" active={!pTested} onClick={() => handleAction("testP")} />}
+      {pTested && <TargetZone position={[0.35, 0.25, 0]} label="Test K" active={!kTested} onClick={() => handleAction("testK")} />}
+
+      {/* Clickable items */}
+      {!sampleTaken && <ClickableObject position={[-0.4, 0.08, 0.3]} selected={selectedItem === "sample"} enabled={true} onClick={() => setSelectedItem(selectedItem === "sample" ? null : "sample")}><group><mesh><boxGeometry args={[0.08, 0.06, 0.08]} /><meshStandardMaterial color="#8B4513" /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-amber-100 px-2 py-1 rounded text-xs font-bold">Echantillon</div></Html></group></ClickableObject>}
+
+      {/* Results */}
+      {kTested && <Html position={[0, 0.45, 0]} center><div className="bg-green-800 text-white p-3 rounded text-xs"><div className="font-bold mb-1">Analyse NPK Complete</div><div className="text-green-300">N: {results.n} mg/kg (Bon)</div><div className="text-orange-300">P: {results.p} mg/kg (Moyen)</div><div className="text-purple-300">K: {results.k} mg/kg (Bon)</div><div className="mt-1 text-yellow-300">Sol fertile pour arachide!</div></div></Html>}
+    </group>
+  )
+}
+
+function BloodPressureExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+  const { cuffPlaced, inflated, systolicRead, diastolicRead } = state
+  const [pressure, setPressure] = useState(0)
+  
+  const handleAction = (action) => {
+    if (action === "cuff" && selectedItem === "cuff") { setState(p => ({ ...p, cuffPlaced: true })); setSelectedItem(null); setStep(1); toast.success("🩺 Brassard installe!") }
+    else if (action === "inflate" && cuffPlaced && !inflated) { setState(p => ({ ...p, inflated: true })); setPressure(180); setStep(2); toast.success("Gonflage...") }
+    else if (action === "systolic" && inflated && !systolicRead) { setState(p => ({ ...p, systolicRead: true })); setPressure(120); setStep(3); toast.success("Systolique: 120 mmHg") }
+    else if (action === "diastolic" && systolicRead && !diastolicRead) { setState(p => ({ ...p, diastolicRead: true })); setPressure(80); setStep(experiment.steps.length - 1); toast.success("Diastolique: 80 mmHg - Normal!") }
+  }
+  
+  return (
+    <group>
+      {/* Arm */}
+      <mesh position={[0, 0.1, 0]} rotation={[0, 0, Math.PI/2]}><cylinderGeometry args={[0.06, 0.05, 0.4, 32]} /><meshStandardMaterial color="#e8beac" /></mesh>
+      
+      {/* Cuff */}
+      {cuffPlaced && <group position={[0, 0.1, 0]}>
+        <mesh><cylinderGeometry args={[0.08, 0.08, 0.12, 32, 1, true]} /><meshStandardMaterial color="#2563eb" /></mesh>
+        <Html position={[0, 0.1, 0]} center><div className="bg-blue-600 text-white px-2 py-1 rounded text-xs">Brassard</div></Html>
+      </group>}
+
+      {/* Manometer */}
+      <group position={[0.3, 0.2, 0]}>
+        <mesh><cylinderGeometry args={[0.06, 0.06, 0.02, 32]} /><meshStandardMaterial color="#fff" /></mesh>
+        <Html position={[0, 0, 0.02]} center><div className="bg-white border-2 border-gray-400 w-16 h-16 rounded-full flex items-center justify-center"><span className="text-xl font-bold">{pressure}</span></div></Html>
+        <Html position={[0, -0.08, 0]} center><div className="bg-gray-700 text-white px-2 py-1 rounded text-xs">mmHg</div></Html>
+      </group>
+
+      {/* Target zones */}
+      <TargetZone position={[0, 0.15, 0.1]} label="🩺 Brassard" active={selectedItem === "cuff"} onClick={() => handleAction("cuff")} />
+      {cuffPlaced && !inflated && <TargetZone position={[0.15, 0.2, 0]} label="💨 Gonfler" active={true} onClick={() => handleAction("inflate")} />}
+      {inflated && !systolicRead && <TargetZone position={[0.3, 0.3, 0]} label="❤️ Systole" active={true} onClick={() => handleAction("systolic")} />}
+      {systolicRead && !diastolicRead && <TargetZone position={[0.3, 0.3, 0]} label="💙 Diastole" active={true} onClick={() => handleAction("diastolic")} />}
+
+      {/* Clickable items */}
+      {!cuffPlaced && <ClickableObject position={[-0.35, 0.1, 0.3]} selected={selectedItem === "cuff"} enabled={true} onClick={() => setSelectedItem(selectedItem === "cuff" ? null : "cuff")}><group><mesh><torusGeometry args={[0.05, 0.02, 8, 32]} /><meshStandardMaterial color="#2563eb" /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-blue-100 px-2 py-1 rounded text-xs font-bold">Brassard</div></Html></group></ClickableObject>}
+
+      {/* Results */}
+      {diastolicRead && <Html position={[-0.3, 0.4, 0]} center><div className="bg-green-800 text-white p-3 rounded text-xs"><div className="font-bold mb-1">Tension Arterielle</div><div className="text-2xl text-green-300">120/80</div><div className="text-green-300">mmHg - Normal</div></div></Html>}
+    </group>
+  )
+}
+
+function ElectricMotorExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+  const { coilPlaced, magnetsPlaced, powerConnected, spinning } = state
+  const motorRef = useRef()
+  useFrame((s) => { if (spinning && motorRef.current) motorRef.current.rotation.z = s.clock.elapsedTime * 10 })
+  
+  const handleAction = (action) => {
+    if (action === "coil" && selectedItem === "coil") { setState(p => ({ ...p, coilPlaced: true })); setSelectedItem(null); setStep(1); toast.success("🔄 Bobine placee!") }
+    else if (action === "magnets" && selectedItem === "magnets" && coilPlaced) { setState(p => ({ ...p, magnetsPlaced: true })); setSelectedItem(null); setStep(2); toast.success("🧲 Aimants places!") }
+    else if (action === "power" && selectedItem === "power" && magnetsPlaced) { setState(p => ({ ...p, powerConnected: true, spinning: true })); setSelectedItem(null); setStep(experiment.steps.length - 1); toast.success("⚡ Moteur en marche!") }
+  }
+  
+  return (
+    <group>
+      {/* Motor base */}
+      <mesh position={[0, 0.03, 0]}><cylinderGeometry args={[0.15, 0.15, 0.06, 32]} /><meshStandardMaterial color="#444" metalness={0.8} /></mesh>
+      <Html position={[0, -0.02, 0.18]} center><div className="bg-gray-800 text-white px-2 py-1 rounded text-xs">Base Moteur</div></Html>
+      
+      {/* Magnets */}
+      {magnetsPlaced && <>
+        <mesh position={[-0.1, 0.12, 0]}><boxGeometry args={[0.03, 0.12, 0.06]} /><meshStandardMaterial color="#ef4444" /></mesh>
+        <mesh position={[0.1, 0.12, 0]}><boxGeometry args={[0.03, 0.12, 0.06]} /><meshStandardMaterial color="#3b82f6" /></mesh>
+        <Html position={[-0.1, 0.22, 0]} center><div className="bg-red-500 text-white px-1 rounded text-xs">N</div></Html>
+        <Html position={[0.1, 0.22, 0]} center><div className="bg-blue-500 text-white px-1 rounded text-xs">S</div></Html>
+      </>}
+      
+      {/* Coil/Rotor */}
+      {coilPlaced && <group ref={motorRef} position={[0, 0.12, 0]}>
+        <mesh rotation={[Math.PI/2, 0, 0]}><torusGeometry args={[0.05, 0.01, 8, 32]} /><meshStandardMaterial color="#f59e0b" metalness={0.9} /></mesh>
+        <mesh><cylinderGeometry args={[0.008, 0.008, 0.15, 8]} /><meshStandardMaterial color="#666" /></mesh>
+      </group>}
+      
+      {/* Power indicator */}
+      {powerConnected && <Html position={[0.25, 0.2, 0]} center><div className="bg-green-500 text-white p-2 rounded text-xs"><div className="font-bold">F = BIL</div><div className="text-yellow-300">Vitesse: 1200 RPM</div></div></Html>}
+
+      {/* Target zones */}
+      <TargetZone position={[0, 0.12, 0]} label="🔄 Bobine" active={selectedItem === "coil"} onClick={() => handleAction("coil")} />
+      {coilPlaced && <TargetZone position={[0, 0.12, 0.1]} label="🧲 Aimants" active={selectedItem === "magnets"} onClick={() => handleAction("magnets")} />}
+      {magnetsPlaced && <TargetZone position={[0.2, 0.1, 0]} label="⚡ Alimenter" active={selectedItem === "power"} onClick={() => handleAction("power")} />}
+
+      {/* Clickable items */}
+      {!coilPlaced && <ClickableObject position={[-0.35, 0.08, 0.3]} selected={selectedItem === "coil"} enabled={true} onClick={() => setSelectedItem(selectedItem === "coil" ? null : "coil")}><group><mesh rotation={[Math.PI/2, 0, 0]}><torusGeometry args={[0.04, 0.008, 8, 32]} /><meshStandardMaterial color="#f59e0b" /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-yellow-100 px-2 py-1 rounded text-xs font-bold">Bobine Cu</div></Html></group></ClickableObject>}
+      {!magnetsPlaced && coilPlaced && <ClickableObject position={[0, 0.08, 0.3]} selected={selectedItem === "magnets"} enabled={true} onClick={() => setSelectedItem(selectedItem === "magnets" ? null : "magnets")}><group><mesh><boxGeometry args={[0.06, 0.04, 0.02]} /><meshStandardMaterial color="#ef4444" /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-red-100 px-2 py-1 rounded text-xs font-bold">Aimants</div></Html></group></ClickableObject>}
+      {!powerConnected && magnetsPlaced && <ClickableObject position={[0.35, 0.08, 0.3]} selected={selectedItem === "power"} enabled={true} onClick={() => setSelectedItem(selectedItem === "power" ? null : "power")}><group><mesh><boxGeometry args={[0.06, 0.08, 0.03]} /><meshStandardMaterial color="#22c55e" /></mesh><Html position={[0, 0.07, 0]} center><div className="bg-green-100 px-2 py-1 rounded text-xs font-bold">12V DC</div></Html></group></ClickableObject>}
+    </group>
+  )
+}
+
+function HydroponicsExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+  const { tankReady, plantsPlaced, phAdjusted, ecChecked } = state
+  const [ph, setPh] = useState(7.0)
+  const [ec, setEc] = useState(0)
+  
+  const handleAction = (action) => {
+    if (action === "tank" && selectedItem === "tank") { setState(p => ({ ...p, tankReady: true })); setEc(1.8); setSelectedItem(null); setStep(1); toast.success("💧 Solution nutritive prete!") }
+    else if (action === "plants" && selectedItem === "plants" && tankReady) { setState(p => ({ ...p, plantsPlaced: true })); setSelectedItem(null); setStep(2); toast.success("🌱 Plants installes!") }
+    else if (action === "ph" && plantsPlaced && !phAdjusted) { setState(p => ({ ...p, phAdjusted: true })); setPh(6.0); setStep(3); toast.success("pH ajuste a 6.0!") }
+    else if (action === "ec" && phAdjusted && !ecChecked) { setState(p => ({ ...p, ecChecked: true })); setStep(experiment.steps.length - 1); toast.success("EC = 1.8 mS/cm - Optimal!") }
+  }
+  
+  return (
+    <group>
+      {/* Hydroponic tank */}
+      <mesh position={[0, 0.05, 0]}><boxGeometry args={[0.5, 0.1, 0.3]} /><meshPhysicalMaterial color="#1e40af" transparent opacity={0.3} /></mesh>
+      {tankReady && <mesh position={[0, 0.02, 0]}><boxGeometry args={[0.48, 0.06, 0.28]} /><meshStandardMaterial color="#22d3ee" transparent opacity={0.7} /></mesh>}
+      <Html position={[0, -0.02, 0.18]} center><div className="bg-blue-800 text-white px-2 py-1 rounded text-xs">Bac Hydroponique</div></Html>
+      
+      {/* Plants */}
+      {plantsPlaced && <>
+        <group position={[-0.15, 0.15, 0]}>
+          <mesh><cylinderGeometry args={[0.02, 0.02, 0.12, 8]} /><meshStandardMaterial color="#22c55e" /></mesh>
+          <mesh position={[0, 0.08, 0]}><sphereGeometry args={[0.04, 8, 8]} /><meshStandardMaterial color="#16a34a" /></mesh>
+        </group>
+        <group position={[0, 0.15, 0]}>
+          <mesh><cylinderGeometry args={[0.02, 0.02, 0.14, 8]} /><meshStandardMaterial color="#22c55e" /></mesh>
+          <mesh position={[0, 0.1, 0]}><sphereGeometry args={[0.05, 8, 8]} /><meshStandardMaterial color="#16a34a" /></mesh>
+        </group>
+        <group position={[0.15, 0.15, 0]}>
+          <mesh><cylinderGeometry args={[0.02, 0.02, 0.1, 8]} /><meshStandardMaterial color="#22c55e" /></mesh>
+          <mesh position={[0, 0.07, 0]}><sphereGeometry args={[0.035, 8, 8]} /><meshStandardMaterial color="#16a34a" /></mesh>
+        </group>
+        <Html position={[0, 0.28, 0]} center><div className="bg-green-600 text-white px-2 py-1 rounded text-xs">Laitue</div></Html>
+      </>}
+      
+      {/* Meters */}
+      {plantsPlaced && <Html position={[0.35, 0.2, 0]} center><div className="bg-gray-800 text-white p-2 rounded text-xs space-y-1">
+        <div className={phAdjusted ? "text-green-400" : "text-yellow-400"}>pH: {ph.toFixed(1)}</div>
+        <div className={ecChecked ? "text-green-400" : "text-blue-400"}>EC: {ec} mS/cm</div>
+      </div></Html>}
+
+      {/* Target zones */}
+      <TargetZone position={[0, 0.1, 0]} label="💧 Solution" active={selectedItem === "tank"} onClick={() => handleAction("tank")} />
+      {tankReady && <TargetZone position={[0, 0.2, 0]} label="🌱 Plants" active={selectedItem === "plants"} onClick={() => handleAction("plants")} />}
+      {plantsPlaced && !phAdjusted && <TargetZone position={[0.3, 0.15, 0]} label="📊 pH" active={true} onClick={() => handleAction("ph")} />}
+      {phAdjusted && !ecChecked && <TargetZone position={[0.3, 0.15, 0]} label="📊 EC" active={true} onClick={() => handleAction("ec")} />}
+
+      {/* Clickable items */}
+      {!tankReady && <ClickableObject position={[-0.4, 0.08, 0.3]} selected={selectedItem === "tank"} enabled={true} onClick={() => setSelectedItem(selectedItem === "tank" ? null : "tank")}><group><mesh><boxGeometry args={[0.08, 0.05, 0.05]} /><meshStandardMaterial color="#22d3ee" /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-cyan-100 px-2 py-1 rounded text-xs font-bold">Nutriments</div></Html></group></ClickableObject>}
+      {!plantsPlaced && tankReady && <ClickableObject position={[0.4, 0.08, 0.3]} selected={selectedItem === "plants"} enabled={true} onClick={() => setSelectedItem(selectedItem === "plants" ? null : "plants")}><group><mesh><cylinderGeometry args={[0.02, 0.02, 0.06, 8]} /><meshStandardMaterial color="#22c55e" /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-green-100 px-2 py-1 rounded text-xs font-bold">Plants</div></Html></group></ClickableObject>}
+    </group>
+  )
+}
+
+function ECGExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+  const { electrodesPlaced, connected, calibrated, recording, analyzed } = state
+  const [heartRate, setHeartRate] = useState(0)
+  const [waveOffset, setWaveOffset] = useState(0)
+  
+  useEffect(() => {
+    if (recording) {
+      const interval = setInterval(() => setWaveOffset(p => (p + 1) % 100), 50)
+      return () => clearInterval(interval)
+    }
+  }, [recording])
+  
+  const handleAction = (action) => {
+    if (action === "electrodes" && selectedItem === "electrodes") { setState(p => ({ ...p, electrodesPlaced: true })); setSelectedItem(null); setStep(1); toast.success("🩺 Electrodes placees!") }
+    else if (action === "connect" && electrodesPlaced && !connected) { setState(p => ({ ...p, connected: true })); setStep(2); toast.success("🔌 Derivations connectees!") }
+    else if (action === "calibrate" && connected && !calibrated) { setState(p => ({ ...p, calibrated: true })); setStep(3); toast.success("📊 Calibration OK!") }
+    else if (action === "record" && calibrated && !recording) { setState(p => ({ ...p, recording: true })); setHeartRate(72); setStep(4); toast.success("❤️ Enregistrement...") }
+    else if (action === "analyze" && recording && !analyzed) { setState(p => ({ ...p, analyzed: true })); setStep(experiment.steps.length - 1); toast.success("✅ ECG normal - 72 BPM") }
+  }
+  
+  return (
+    <group>
+      {/* Patient torso */}
+      <mesh position={[0, 0.15, 0]}><boxGeometry args={[0.4, 0.3, 0.15]} /><meshStandardMaterial color="#e8beac" /></mesh>
+      <Html position={[0, -0.02, 0.1]} center><div className="bg-gray-600 text-white px-2 py-1 rounded text-xs">Patient</div></Html>
+      
+      {/* Electrodes */}
+      {electrodesPlaced && <>
+        <mesh position={[-0.12, 0.22, 0.08]}><sphereGeometry args={[0.02, 16, 16]} /><meshStandardMaterial color="#ef4444" /></mesh>
+        <mesh position={[0.12, 0.22, 0.08]}><sphereGeometry args={[0.02, 16, 16]} /><meshStandardMaterial color="#fbbf24" /></mesh>
+        <mesh position={[-0.12, 0.08, 0.08]}><sphereGeometry args={[0.02, 16, 16]} /><meshStandardMaterial color="#22c55e" /></mesh>
+        <mesh position={[0.12, 0.08, 0.08]}><sphereGeometry args={[0.02, 16, 16]} /><meshStandardMaterial color="#333" /></mesh>
+      </>}
+      
+      {/* ECG Machine */}
+      <group position={[0.4, 0.2, 0]}>
+        <mesh><boxGeometry args={[0.2, 0.25, 0.08]} /><meshStandardMaterial color="#f5f5f5" /></mesh>
+        <mesh position={[0, 0.03, 0.041]}><boxGeometry args={[0.16, 0.12, 0.005]} /><meshStandardMaterial color={recording ? "#111" : "#333"} /></mesh>
+        {recording && <Html position={[0, 0.03, 0.05]} center>
+          <div className="w-32 h-12 bg-black overflow-hidden">
+            <svg width="128" height="48" className="text-green-500">
+              <path d={`M ${waveOffset} 24 l 10 0 l 2 -15 l 4 30 l 2 -15 l 15 0 l 3 -8 l 3 8 l 15 0`} stroke="currentColor" fill="none" strokeWidth="2"/>
+            </svg>
+          </div>
+        </Html>}
+        {heartRate > 0 && <Html position={[0.06, -0.08, 0.05]} center><div className="text-red-500 font-bold text-sm">{heartRate} BPM</div></Html>}
+      </group>
+
+      {/* Target zones */}
+      <TargetZone position={[0, 0.2, 0.1]} label="🩺 Electrodes" active={selectedItem === "electrodes"} onClick={() => handleAction("electrodes")} />
+      {electrodesPlaced && !connected && <TargetZone position={[0.3, 0.2, 0]} label="🔌 Connecter" active={true} onClick={() => handleAction("connect")} />}
+      {connected && !calibrated && <TargetZone position={[0.4, 0.3, 0]} label="📊 Calibrer" active={true} onClick={() => handleAction("calibrate")} />}
+      {calibrated && !recording && <TargetZone position={[0.4, 0.2, 0]} label="▶️ Enregistrer" active={true} onClick={() => handleAction("record")} />}
+      {recording && !analyzed && <TargetZone position={[0.4, 0.1, 0]} label="📋 Analyser" active={true} onClick={() => handleAction("analyze")} />}
+
+      {/* Clickable items */}
+      {!electrodesPlaced && <ClickableObject position={[-0.4, 0.1, 0.3]} selected={selectedItem === "electrodes"} enabled={true} onClick={() => setSelectedItem(selectedItem === "electrodes" ? null : "electrodes")}><group><mesh><sphereGeometry args={[0.025, 16, 16]} /><meshStandardMaterial color="#ef4444" /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-red-100 px-2 py-1 rounded text-xs font-bold">Electrodes</div></Html></group></ClickableObject>}
+
+      {/* Result */}
+      {analyzed && <Html position={[-0.3, 0.4, 0]} center><div className="bg-green-800 text-white p-3 rounded text-xs"><div className="font-bold mb-1">ECG Normal</div><div className="text-green-300">Rythme sinusal</div><div className="text-yellow-300">FC: 72 BPM</div><div className="text-blue-300">PR: 0.16s QRS: 0.08s</div></div></Html>}
+    </group>
+  )
+}
+
+function BloodAnalysisExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+  const { bloodDrawn, centrifuged, rbcCounted, wbcCounted, hbMeasured } = state
+  const [results, setResults] = useState({ rbc: 0, wbc: 0, hb: 0, plt: 0 })
+  
+  const handleAction = (action) => {
+    if (action === "draw" && selectedItem === "syringe") { setState(p => ({ ...p, bloodDrawn: true })); setSelectedItem(null); setStep(1); toast.success("💉 Sang preleve!") }
+    else if (action === "centrifuge" && bloodDrawn && !centrifuged) { setState(p => ({ ...p, centrifuged: true })); setStep(2); toast.success("🔄 Centrifugation...") }
+    else if (action === "rbc" && centrifuged && !rbcCounted) { setState(p => ({ ...p, rbcCounted: true })); setResults(r => ({ ...r, rbc: 4.8 })); setStep(3); toast.success("GR: 4.8 M/mm³") }
+    else if (action === "wbc" && rbcCounted && !wbcCounted) { setState(p => ({ ...p, wbcCounted: true })); setResults(r => ({ ...r, wbc: 7200, plt: 245000 })); setStep(4); toast.success("GB: 7200/mm³") }
+    else if (action === "hb" && wbcCounted && !hbMeasured) { setState(p => ({ ...p, hbMeasured: true })); setResults(r => ({ ...r, hb: 14.2 })); setStep(experiment.steps.length - 1); toast.success("Hb: 14.2 g/dL - NFS normale!") }
+  }
+  
+  return (
+    <group>
+      {/* Blood tube */}
+      <group position={[-0.15, 0.15, 0]}>
+        <mesh><cylinderGeometry args={[0.02, 0.02, 0.12, 16]} /><meshPhysicalMaterial color="#7c3aed" transparent opacity={0.5} /></mesh>
+        {bloodDrawn && <mesh position={[0, -0.02, 0]}><cylinderGeometry args={[0.018, 0.018, 0.08, 16]} /><meshStandardMaterial color="#dc2626" /></mesh>}
+        {centrifuged && <>
+          <mesh position={[0, -0.04, 0]}><cylinderGeometry args={[0.018, 0.018, 0.04, 16]} /><meshStandardMaterial color="#dc2626" /></mesh>
+          <mesh position={[0, 0.01, 0]}><cylinderGeometry args={[0.018, 0.018, 0.04, 16]} /><meshStandardMaterial color="#fef3c7" /></mesh>
+        </>}
+        <Html position={[0, -0.1, 0]} center><div className="bg-purple-600 text-white px-2 py-1 rounded text-xs">Tube EDTA</div></Html>
+      </group>
+      
+      {/* Centrifuge */}
+      <group position={[0.1, 0.1, 0]}>
+        <mesh><cylinderGeometry args={[0.1, 0.1, 0.06, 32]} /><meshStandardMaterial color="#444" /></mesh>
+        <Html position={[0, -0.06, 0]} center><div className="bg-gray-700 text-white px-2 py-1 rounded text-xs">Centrifugeuse</div></Html>
+      </group>
+      
+      {/* Analyzer display */}
+      {centrifuged && <Html position={[0.35, 0.25, 0]} center><div className="bg-gray-900 text-white p-2 rounded text-xs font-mono">
+        <div className="font-bold mb-1 text-green-400">NFS Resultats</div>
+        <div className={rbcCounted ? "text-green-300" : "text-gray-500"}>GR: {rbcCounted ? results.rbc + " M/mm³" : "---"}</div>
+        <div className={wbcCounted ? "text-green-300" : "text-gray-500"}>GB: {wbcCounted ? results.wbc + "/mm³" : "---"}</div>
+        <div className={hbMeasured ? "text-green-300" : "text-gray-500"}>Hb: {hbMeasured ? results.hb + " g/dL" : "---"}</div>
+        <div className={wbcCounted ? "text-green-300" : "text-gray-500"}>Plt: {wbcCounted ? results.plt + "/mm³" : "---"}</div>
+      </div></Html>}
+
+      {/* Target zones */}
+      <TargetZone position={[-0.15, 0.2, 0]} label="💉 Prelever" active={selectedItem === "syringe"} onClick={() => handleAction("draw")} />
+      {bloodDrawn && !centrifuged && <TargetZone position={[0.1, 0.15, 0]} label="🔄 Centrifuger" active={true} onClick={() => handleAction("centrifuge")} />}
+      {centrifuged && !rbcCounted && <TargetZone position={[0.3, 0.2, 0]} label="🔴 GR" active={true} onClick={() => handleAction("rbc")} />}
+      {rbcCounted && !wbcCounted && <TargetZone position={[0.3, 0.2, 0]} label="⚪ GB" active={true} onClick={() => handleAction("wbc")} />}
+      {wbcCounted && !hbMeasured && <TargetZone position={[0.3, 0.2, 0]} label="🩸 Hb" active={true} onClick={() => handleAction("hb")} />}
+
+      {/* Clickable items */}
+      {!bloodDrawn && <ClickableObject position={[-0.4, 0.1, 0.3]} selected={selectedItem === "syringe"} enabled={true} onClick={() => setSelectedItem(selectedItem === "syringe" ? null : "syringe")}><group><mesh rotation={[0, 0, Math.PI/4]}><cylinderGeometry args={[0.01, 0.01, 0.1, 16]} /><meshStandardMaterial color="#f5f5f5" /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-gray-100 px-2 py-1 rounded text-xs font-bold">Seringue</div></Html></group></ClickableObject>}
+
+      {/* Result */}
+      {hbMeasured && <Html position={[-0.3, 0.4, 0]} center><div className="bg-green-800 text-white p-3 rounded text-xs"><div className="font-bold mb-1">NFS Complete</div><div className="text-green-300">Tous les parametres normaux</div><div className="text-yellow-300">Pas d anemie</div></div></Html>}
+    </group>
+  )
+}
+
+function GlucoseTestExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+  const { fingerCleaned, pricked, bloodApplied, resultRead } = state
+  const [glucose, setGlucose] = useState(0)
+  
+  const handleAction = (action) => {
+    if (action === "clean" && selectedItem === "alcohol") { setState(p => ({ ...p, fingerCleaned: true })); setSelectedItem(null); setStep(1); toast.success("🧴 Doigt desinfecte!") }
+    else if (action === "prick" && selectedItem === "lancet" && fingerCleaned) { setState(p => ({ ...p, pricked: true })); setSelectedItem(null); setStep(2); toast.success("💉 Piqure effectuee!") }
+    else if (action === "apply" && pricked && !bloodApplied) { setState(p => ({ ...p, bloodApplied: true })); setStep(3); toast.success("🩸 Sang applique!") }
+    else if (action === "read" && bloodApplied && !resultRead) { setState(p => ({ ...p, resultRead: true })); setGlucose(0.95); setStep(experiment.steps.length - 1); toast.success("Glycemie: 0.95 g/L - Normal!") }
+  }
+  
+  return (
+    <group>
+      {/* Finger */}
+      <mesh position={[-0.15, 0.1, 0]} rotation={[0, 0, Math.PI/2]}><cylinderGeometry args={[0.025, 0.02, 0.12, 16]} /><meshStandardMaterial color={pricked ? "#ffcccc" : "#e8beac"} /></mesh>
+      {pricked && <mesh position={[-0.2, 0.1, 0]}><sphereGeometry args={[0.015, 16, 16]} /><meshStandardMaterial color="#dc2626" /></mesh>}
+      <Html position={[-0.15, 0.02, 0]} center><div className="bg-gray-600 text-white px-2 py-1 rounded text-xs">Doigt</div></Html>
+      
+      {/* Glucometer */}
+      <group position={[0.15, 0.1, 0]}>
+        <mesh><boxGeometry args={[0.12, 0.18, 0.03]} /><meshStandardMaterial color="#f5f5f5" /></mesh>
+        <mesh position={[0, 0.06, 0.016]}><boxGeometry args={[0.08, 0.05, 0.005]} /><meshStandardMaterial color={resultRead ? "#22c55e" : "#333"} /></mesh>
+        {resultRead && <Html position={[0, 0.06, 0.02]} center><div className="text-white font-mono font-bold text-sm">{glucose}</div></Html>}
+        <Html position={[0, -0.12, 0]} center><div className="bg-gray-700 text-white px-2 py-1 rounded text-xs">Glucometre</div></Html>
+      </group>
+      
+      {/* Strip slot */}
+      {bloodApplied && <mesh position={[0.15, -0.02, 0.016]}><boxGeometry args={[0.02, 0.04, 0.003]} /><meshStandardMaterial color="#fbbf24" /></mesh>}
+
+      {/* Target zones */}
+      <TargetZone position={[-0.15, 0.15, 0]} label="🧴 Nettoyer" active={selectedItem === "alcohol"} onClick={() => handleAction("clean")} />
+      {fingerCleaned && <TargetZone position={[-0.2, 0.15, 0]} label="💉 Piquer" active={selectedItem === "lancet"} onClick={() => handleAction("prick")} />}
+      {pricked && !bloodApplied && <TargetZone position={[0.15, 0, 0]} label="🩸 Appliquer" active={true} onClick={() => handleAction("apply")} />}
+      {bloodApplied && !resultRead && <TargetZone position={[0.15, 0.1, 0]} label="📊 Lire" active={true} onClick={() => handleAction("read")} />}
+
+      {/* Clickable items */}
+      {!fingerCleaned && <ClickableObject position={[-0.4, 0.08, 0.3]} selected={selectedItem === "alcohol"} enabled={true} onClick={() => setSelectedItem(selectedItem === "alcohol" ? null : "alcohol")}><group><mesh><cylinderGeometry args={[0.02, 0.02, 0.06, 16]} /><meshStandardMaterial color="#60a5fa" /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-blue-100 px-2 py-1 rounded text-xs font-bold">Alcool</div></Html></group></ClickableObject>}
+      {!pricked && fingerCleaned && <ClickableObject position={[0, 0.08, 0.3]} selected={selectedItem === "lancet"} enabled={true} onClick={() => setSelectedItem(selectedItem === "lancet" ? null : "lancet")}><group><mesh><boxGeometry args={[0.015, 0.05, 0.015]} /><meshStandardMaterial color="#9ca3af" /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-gray-100 px-2 py-1 rounded text-xs font-bold">Lancette</div></Html></group></ClickableObject>}
+
+      {/* Result */}
+      {resultRead && <Html position={[0, 0.35, 0]} center><div className="bg-green-800 text-white p-3 rounded text-xs"><div className="font-bold mb-1">Glycemie</div><div className="text-2xl text-green-300">{glucose} g/L</div><div className="text-green-300">Normal (0.7-1.1)</div></div></Html>}
+    </group>
+  )
+}
+
 function PlaceholderExperiment({ name }) {
   return (
     <group>
@@ -1223,14 +1631,14 @@ export default function ARLabPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-4 mb-6"><button onClick={() => navigate(-1)} className="btn-secondary"><ArrowLeft size={20} /></button><div><h1 className="text-2xl font-bold">Laboratoire 3D</h1><p className="text-gray-600 text-sm">Experiences interactives en environnement realiste</p></div></div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[{id:"chemistry",icon:"🧪",name:"Chimie",color:"from-purple-50 to-pink-50"},{id:"physics",icon:"⚡",name:"Physique",color:"from-blue-50 to-cyan-50"},{id:"biology",icon:"🧬",name:"Biologie",color:"from-green-50 to-emerald-50"}].map(s => <div key={s.id} onClick={() => setSubject(s.id)} className={`card p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-br ${s.color}`}><div className="text-4xl mb-3 text-center">{s.icon}</div><h2 className="text-xl font-bold text-center">{s.name}</h2></div>)}
+        {[{id:"chemistry",icon:"🧪",name:"Chimie",color:"from-purple-50 to-pink-50"},{id:"physics",icon:"⚡",name:"Physique",color:"from-blue-50 to-cyan-50"},{id:"biology",icon:"🧬",name:"Biologie",color:"from-green-50 to-emerald-50"},{id:"engineering",icon:"⚙️",name:"Ingenierie",color:"from-orange-50 to-amber-50"},{id:"agriculture",icon:"🌱",name:"Agriculture",color:"from-lime-50 to-green-50"},{id:"medicine",icon:"🏥",name:"Medecine",color:"from-red-50 to-rose-50"}].map(s => <div key={s.id} onClick={() => setSubject(s.id)} className={`card p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-br ${s.color}`}><div className="text-4xl mb-3 text-center">{s.icon}</div><h2 className="text-xl font-bold text-center">{s.name}</h2></div>)}
       </div>
     </div>
   )
 
   if (!level) return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4 mb-6"><button onClick={() => setSubject(null)} className="btn-secondary"><ArrowLeft size={20} /></button><h1 className="text-xl font-bold">{subject === "chemistry" ? "🧪 Chimie" : subject === "physics" ? "⚡ Physique" : "🧬 Biologie"}</h1></div>
+      <div className="flex items-center gap-4 mb-6"><button onClick={() => setSubject(null)} className="btn-secondary"><ArrowLeft size={20} /></button><h1 className="text-xl font-bold">{subject === "chemistry" ? "🧪 Chimie" : subject === "physics" ? "⚡ Physique" : subject === "biology" ? "🧬 Biologie" : subject === "engineering" ? "⚙️ Ingenierie" : subject === "agriculture" ? "🌱 Agriculture" : "🏥 Medecine"}</h1></div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div onClick={() => setLevel("lycee")} className="card p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-br from-green-50 to-emerald-50"><School size={40} className="mx-auto mb-3 text-green-600" /><h2 className="text-xl font-bold text-center mb-1">Lycee</h2><p className="text-center text-gray-500 text-sm">{arLabService.getExperimentsByLevel(subject, "lycee").length} experiences</p></div>
         <div onClick={() => setLevel("universite")} className="card p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-br from-purple-50 to-indigo-50"><GraduationCap size={40} className="mx-auto mb-3 text-purple-600" /><h2 className="text-xl font-bold text-center mb-1">Universite</h2><p className="text-center text-gray-500 text-sm">{arLabService.getExperimentsByLevel(subject, "universite").length} experiences</p></div>
@@ -1267,6 +1675,14 @@ function ExperimentView({ experiment, onBack }) {
     bunsenLit: false, magnesiumBurning: false,
     batteryConnected: false, resistorConnected: false, bulbLit: false, current: 0,
     batteryPlaced: false, r1Connected: false, r2Connected: false, bulb1Lit: false, bulb2Lit: false,
+    panelPlaced: false, meterConnected: false, measuring: false, angle: 45, voltage: '0',
+    sampleTaken: false, nTested: false, pTested: false, kTested: false,
+    cuffPlaced: false, inflated: false, systolicRead: false, diastolicRead: false,
+    coilPlaced: false, magnetsPlaced: false, powerConnected: false, spinning: false,
+    tankReady: false, plantsPlaced: false, phAdjusted: false, ecChecked: false,
+    fingerCleaned: false, pricked: false, bloodApplied: false, resultRead: false,
+    electrodesPlaced: false, connected: false, calibrated: false, recording: false, analyzed: false,
+    bloodDrawn: false, centrifuged: false, rbcCounted: false, wbcCounted: false, hbMeasured: false,
     stringAttached: false, massAttached: false, swinging: false, period: 0,
     slideReady: false, stainAdded: false, coverslipOn: false, focusedLow: false, focusedHigh: false,
     plantReady: false, lightOn: false, bubblesVisible: false, darkCompared: false,
@@ -1297,6 +1713,14 @@ function ExperimentView({ experiment, onBack }) {
       case "spectrophotometry": return <SpectrophotometryExperiment {...props} />
       case "galvanic-cell": return <GalvanicCellExperiment {...props} />
       case "chromatography": return <ChromatographyExperiment {...props} />
+      case "solar-panel": return <SolarPanelExperiment {...props} />
+      case "electric-motor": return <ElectricMotorExperiment {...props} />
+      case "soil-npk": return <SoilNPKExperiment {...props} />
+      case "hydroponics": return <HydroponicsExperiment {...props} />
+      case "blood-pressure": return <BloodPressureExperiment {...props} />
+      case "glucose-test": return <GlucoseTestExperiment {...props} />
+      case "ecg": return <ECGExperiment {...props} />
+      case "blood-analysis": return <BloodAnalysisExperiment {...props} />
       default: return <PlaceholderExperiment name={experiment.name} />
     }
   }
@@ -1355,6 +1779,17 @@ function ExperimentView({ experiment, onBack }) {
     </div>
   )
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 

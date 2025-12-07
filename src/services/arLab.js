@@ -545,6 +545,277 @@ const experiments = {
         'Determiner Km et Vmax graphiquement'
       ]
     }
+  ],
+  engineering: [
+    {
+      id: 'solar-panel',
+      name: 'Panneau Solaire',
+      description: 'Conversion energie solaire en electricite',
+      difficulty: 'Moyen',
+      level: 'universite',
+      duration: '20 min',
+      steps: ['Orienter panneau', 'Connecter multimetre', 'Mesurer tension', 'Varier angle', 'Optimiser rendement'],
+      classe: 'Genie Electrique',
+      chapter: 'Energies renouvelables',
+      materiel: [
+        'Panneau photovoltaique: convertit lumiere en electricite',
+        'Multimetre: mesure tension et courant',
+        'Lampe halogene: simule le soleil',
+        'Support orientable: permet de varier l angle'
+      ],
+      learned: [
+        'Effet photovoltaique: photons liberent des electrons',
+        'Tension proportionnelle a l eclairement',
+        'Angle optimal = perpendiculaire aux rayons',
+        'Rendement typique: 15-20%'
+      ],
+      formulas: ['P = U x I', 'Rendement = P_out / P_in x 100', 'E = P x t'],
+      realLife: [
+        'Centrales solaires au Senegal',
+        'Eclairage public solaire',
+        'Pompage eau solaire pour agriculture'
+      ],
+      bacQuestions: [
+        'Calculer la puissance d un panneau',
+        'Optimiser l orientation pour le Senegal'
+      ]
+    },
+    {
+      id: 'electric-motor',
+      name: 'Moteur Electrique',
+      description: 'Conversion energie electrique en mecanique',
+      difficulty: 'Moyen',
+      level: 'universite',
+      duration: '25 min',
+      steps: ['Assembler bobine', 'Placer aimants', 'Connecter alimentation', 'Observer rotation', 'Mesurer vitesse'],
+      classe: 'Genie Electrique',
+      chapter: 'Machines electriques',
+      materiel: [
+        'Bobine de cuivre: cree le champ magnetique',
+        'Aimants permanents: stator',
+        'Alimentation DC: fournit le courant',
+        'Tachymetre: mesure la vitesse de rotation'
+      ],
+      learned: [
+        'Force de Laplace: F = BIL',
+        'Le courant dans un champ magnetique cree une force',
+        'Couple moteur proportionnel au courant',
+        'Vitesse depend de la tension'
+      ],
+      formulas: ['F = B x I x L', 'P = C x omega', 'omega = 2*pi*n/60'],
+      realLife: [
+        'Ventilateurs et climatiseurs',
+        'Voitures electriques',
+        'Machines industrielles'
+      ],
+      bacQuestions: [
+        'Expliquer le principe du moteur DC',
+        'Calculer le couple moteur'
+      ]
+    }
+  ],
+  agriculture: [
+    {
+      id: 'soil-npk',
+      name: 'Analyse de Sol NPK',
+      description: 'Mesurer azote, phosphore, potassium du sol',
+      difficulty: 'Moyen',
+      level: 'lycee',
+      duration: '25 min',
+      steps: ['Prelever echantillon', 'Preparer solution', 'Test azote N', 'Test phosphore P', 'Test potassium K', 'Interpreter resultats'],
+      classe: 'Agriculture',
+      chapter: 'Fertilite des sols',
+      materiel: [
+        'Echantillon de sol: terre a analyser',
+        'Kit NPK: reactifs colorimetriques',
+        'Eau distillee: pour dilution',
+        'Tubes a essai: pour les tests'
+      ],
+      learned: [
+        'N (Azote): croissance des feuilles',
+        'P (Phosphore): developpement racines et fleurs',
+        'K (Potassium): resistance aux maladies',
+        'Equilibre NPK essentiel pour les cultures'
+      ],
+      formulas: ['NPK ratio ex: 10-10-10', 'Dose = Surface x Besoin/m2'],
+      realLife: [
+        'Agriculture au Senegal (arachide, mil)',
+        'Maraichage Niayes',
+        'Jardinage domestique'
+      ],
+      bacQuestions: [
+        'Interpreter une analyse de sol',
+        'Recommander un engrais adapte'
+      ]
+    },
+    {
+      id: 'hydroponics',
+      name: 'Culture Hydroponique',
+      description: 'Cultiver sans sol avec solution nutritive',
+      difficulty: 'Avance',
+      level: 'universite',
+      duration: '30 min',
+      steps: ['Preparer solution', 'Installer plants', 'Regler pH', 'Controler EC', 'Observer croissance'],
+      classe: 'Agriculture moderne',
+      chapter: 'Cultures hors-sol',
+      materiel: [
+        'Bac hydroponique: contient la solution',
+        'Solution nutritive: eau + mineraux',
+        'pH-metre: mesure l acidite',
+        'EC-metre: mesure la conductivite',
+        'Plants de laitue: culture test'
+      ],
+      learned: [
+        'Plantes absorbent nutriments dissous directement',
+        'pH optimal: 5.5 - 6.5',
+        'EC indique concentration en mineraux',
+        '90% moins d eau que culture traditionnelle'
+      ],
+      formulas: ['EC = somme ions (mS/cm)', 'pH = -log[H+]'],
+      realLife: [
+        'Agriculture urbaine Dakar',
+        'Production tomates hors-saison',
+        'Fermes verticales'
+      ],
+      bacQuestions: [
+        'Avantages de l hydroponie',
+        'Ajuster pH et EC'
+      ]
+    }
+  ],
+  medicine: [
+    {
+      id: 'blood-pressure',
+      name: 'Tension Arterielle',
+      description: 'Mesurer pression systolique et diastolique',
+      difficulty: 'Facile',
+      level: 'lycee',
+      duration: '15 min',
+      steps: ['Installer brassard', 'Gonfler', 'Ecouter pouls', 'Noter systolique', 'Noter diastolique', 'Interpreter'],
+      classe: 'Sciences de la sante',
+      chapter: 'Systeme cardiovasculaire',
+      materiel: [
+        'Tensiometre: mesure la pression',
+        'Brassard: comprime l artere',
+        'Stethoscope: ecoute les bruits de Korotkoff',
+        'Manometre: affiche la pression'
+      ],
+      learned: [
+        'Systolique: pression quand coeur contracte (120 mmHg normal)',
+        'Diastolique: pression quand coeur relache (80 mmHg normal)',
+        'Hypertension: > 140/90 mmHg',
+        'Bruits de Korotkoff indiquent le flux sanguin'
+      ],
+      formulas: ['PA = DC x RP', 'DC = VES x FC'],
+      realLife: [
+        'Depistage hypertension',
+        'Suivi grossesse',
+        'Consultation medicale'
+      ],
+      bacQuestions: [
+        'Interpreter une mesure tensionnelle',
+        'Facteurs de l hypertension'
+      ]
+    },
+    {
+      id: 'glucose-test',
+      name: 'Test de Glycemie',
+      description: 'Mesurer le taux de glucose sanguin',
+      difficulty: 'Facile',
+      level: 'lycee',
+      duration: '10 min',
+      steps: ['Desinfecter doigt', 'Piquer', 'Deposer goutte', 'Inserer bandelette', 'Lire resultat', 'Interpreter'],
+      classe: 'Sciences de la sante',
+      chapter: 'Metabolisme glucidique',
+      materiel: [
+        'Glucometre: appareil de mesure',
+        'Bandelettes reactives: detectent glucose',
+        'Lancette: pour piquer le doigt',
+        'Alcool: desinfection'
+      ],
+      learned: [
+        'Glycemie normale a jeun: 0.7 - 1.1 g/L',
+        'Diabete si > 1.26 g/L a jeun',
+        'Glucose = source d energie principale',
+        'Insuline regule la glycemie'
+      ],
+      formulas: ['1 g/L = 5.5 mmol/L', 'HbA1c = moyenne 3 mois'],
+      realLife: [
+        'Depistage diabete',
+        'Suivi patients diabetiques',
+        'Urgences hypoglycemie'
+      ],
+      bacQuestions: [
+        'Interpreter une glycemie',
+        'Role de l insuline'
+      ]
+    },
+    {
+      id: 'ecg',
+      name: 'Electrocardiogramme',
+      description: 'Enregistrer l activite electrique du coeur',
+      difficulty: 'Avance',
+      level: 'universite',
+      duration: '25 min',
+      steps: ['Placer electrodes', 'Connecter derivations', 'Calibrer', 'Enregistrer', 'Analyser tracé'],
+      classe: 'Medecine',
+      chapter: 'Cardiologie',
+      materiel: [
+        'Electrocardiographe: enregistre le signal',
+        'Electrodes: captent l activite electrique',
+        'Gel conducteur: ameliore le contact',
+        'Papier millimetre: 25mm/s'
+      ],
+      learned: [
+        'Onde P: depolarisation auriculaire',
+        'Complexe QRS: depolarisation ventriculaire',
+        'Onde T: repolarisation ventriculaire',
+        'Intervalle RR: frequence cardiaque'
+      ],
+      formulas: ['FC = 60/RR (s)', '1 petit carreau = 0.04s', '1 grand carreau = 0.2s'],
+      realLife: [
+        'Diagnostic infarctus',
+        'Detection arythmies',
+        'Bilan pre-operatoire'
+      ],
+      bacQuestions: [
+        'Identifier les ondes P, QRS, T',
+        'Calculer la frequence cardiaque'
+      ]
+    },
+    {
+      id: 'blood-analysis',
+      name: 'Analyse Sanguine NFS',
+      description: 'Numeration Formule Sanguine complete',
+      difficulty: 'Avance',
+      level: 'universite',
+      duration: '30 min',
+      steps: ['Prelever sang', 'Centrifuger', 'Analyser globules rouges', 'Compter globules blancs', 'Mesurer hemoglobine', 'Interpreter'],
+      classe: 'Medecine',
+      chapter: 'Hematologie',
+      materiel: [
+        'Tube EDTA: anticoagulant',
+        'Centrifugeuse: separe les composants',
+        'Automate NFS: compte les cellules',
+        'Lames + colorant: frottis sanguin'
+      ],
+      learned: [
+        'GR normaux: 4.5-5.5 millions/mm3',
+        'GB normaux: 4000-10000/mm3',
+        'Hemoglobine: 12-16 g/dL',
+        'Plaquettes: 150000-400000/mm3'
+      ],
+      formulas: ['Hematocrite = Volume GR / Volume total', 'VGM = Ht / GR'],
+      realLife: [
+        'Diagnostic anemie',
+        'Detection infections',
+        'Suivi chimiotherapie'
+      ],
+      bacQuestions: [
+        'Interpreter une NFS',
+        'Identifier une anemie'
+      ]
+    }
   ]
 }
 
@@ -571,6 +842,8 @@ export const getIndicatorColor = (pH) => {
   if (pH < 9) return '#ff88aa'
   return '#ff44aa'
 }
+
+
 
 
 
