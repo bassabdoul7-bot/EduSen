@@ -1,4 +1,4 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+﻿import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import {
   LayoutDashboard,
@@ -13,7 +13,8 @@ import {
   X,
   Crown,
   Heart,
-  FlaskConical
+  FlaskConical,
+  FileText
 } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
@@ -37,6 +38,7 @@ export default function Layout() {
     { path: '/', icon: LayoutDashboard, label: 'Tableau de bord' },
     { path: '/chatbot', icon: MessageSquare, label: 'Tuteur IA' },
     { path: '/ar-lab', icon: FlaskConical, label: 'Labo Virtuel' },
+    { path: '/concours', icon: FileText, label: 'Concours' },
     { path: '/admissions', icon: GraduationCap, label: 'Admissions' },
     { path: '/scholarships', icon: Award, label: 'Bourses' },
     { path: '/forum', icon: MessageCircle, label: 'Forum' },
