@@ -24,7 +24,7 @@ const experiments = {
         'L indicateur colore change au pH de virage',
         'Calcul de concentration: C = n/V'
       ],
-      formulas: ['pH = -log[H+]', 'C1.V1 = C2.V2', 'n = C x V'],
+      formulas: ['pH = -log[H+] (pH: potentiel hydrogene, [H+]: concentration ions H+ en mol/L)', 'C1.V1 = C2.V2 (relation a l equivalence, C: concentration, V: volume)', 'n = C x V (n: quantite matiere en mol, C en mol/L, V en L)'],
       realLife: [
         'Controle qualite en industrie alimentaire',
         'Analyse de l eau potable',
@@ -33,6 +33,40 @@ const experiments = {
       bacQuestions: [
         'Calculer la concentration d une solution acide',
         'Determiner le volume a l equivalence'
+      ]
+    },
+    {
+      id: 'precipitation',
+      name: 'Reaction de Precipitation',
+      description: 'Formation d un precipite solide',
+      difficulty: 'Facile',
+      level: 'lycee',
+      duration: '15 min',
+      steps: ['Verser AgNO3', 'Ajouter NaCl', 'Observer precipite', 'Filtrer', 'Identifier AgCl'],
+      classe: 'Premiere S',
+      chapter: 'Reactions en solution',
+      materiel: [
+        'Solution AgNO3: nitrate d argent',
+        'Solution NaCl: chlorure de sodium',
+        'Becher: pour le melange',
+        'Filtre: separer le precipite',
+        'Agitateur: melanger les solutions'
+      ],
+      learned: [
+        'Precipite = solide forme en solution',
+        'AgCl est un solide blanc insoluble',
+        'Equation: Ag+ + Cl- -> AgCl(s)',
+        'Test des ions chlorure'
+      ],
+      formulas: ['AgNO3 + NaCl -> AgCl(s) + NaNO3', 'Ag+(aq) + Cl-(aq) -> AgCl(s)'],
+      realLife: [
+        'Traitement des eaux usees',
+        'Analyse chimique (tests d ions)',
+        'Photographie argentique'
+      ],
+      bacQuestions: [
+        'Ecrire l equation de precipitation',
+        'Identifier un ion par precipitation'
       ]
     },
     {
@@ -125,7 +159,7 @@ const experiments = {
         'Chaque molecule a un spectre d absorption unique',
         'Lambda max = longueur d onde d absorption maximale'
       ],
-      formulas: ['A = epsilon * l * c', 'A = log(I0/I)', 'T = I/I0 = 10^(-A)'],
+      formulas: ['A = epsilon * l * c (A: absorbance sans unite, epsilon: coefficient extinction en L/mol.cm, l: largeur cuve en cm, c: concentration en mol/L)', 'A = log(I0/I) (I0: intensite incidente, I: intensite transmise)', 'T = I/I0 = 10^(-A) (T: transmittance)'],
       realLife: [
         'Analyse de sang en laboratoire medical',
         'Controle qualite en industrie pharmaceutique',
@@ -229,7 +263,7 @@ const experiments = {
         'En serie: le courant est le meme partout',
         'La resistance limite l intensite du courant'
       ],
-      formulas: ['U = R x I', 'I = U / R', 'P = U x I'],
+      formulas: ['U = R x I (U: tension en Volts, R: resistance en Ohms, I: intensite en Amperes)', 'I = U / R (Loi d Ohm)', 'P = U x I (P: puissance en Watts)'],
       realLife: [
         'Installation electrique de la maison',
         'Circuits des telephones et ordinateurs',
@@ -238,6 +272,41 @@ const experiments = {
       bacQuestions: [
         'Calculer l intensite dans un circuit serie',
         'Determiner la resistance equivalente'
+      ]
+    },
+    {
+      id: 'optics-lens',
+      name: 'Lentilles et Formation d Images',
+      description: 'Formation d images par une lentille',
+      difficulty: 'Moyen',
+      level: 'lycee',
+      duration: '20 min',
+      steps: ['Placer lentille convergente', 'Observer image reelle', 'Changer en divergente', 'Observer image virtuelle', 'Comparer les deux'],
+      classe: 'Premiere S',
+      chapter: 'Optique geometrique',
+      materiel: [
+        'Lentille convergente: bords minces, centre epais, f > 0',
+        'Lentille divergente: bords epais, centre mince, f < 0',
+        'Bougie: objet lumineux',
+        'Ecran blanc: recoit l image',
+        'Banc optique: support gradue',
+        'Regle: mesure des distances'
+      ],
+      learned: [
+        'Convergente: image REELLE, inversee, sur ecran',
+        'Divergente: image VIRTUELLE, droite, non projetable',
+        'Relation conjugaison: 1/OA prime - 1/OA = 1/f prime (valable pour les deux)',
+        'Convergente: f prime > 0 / Divergente: f prime < 0'
+      ],
+      formulas: ['1/OA\' - 1/OA = 1/f\'', 'gamma = OA\'/OA = A\'B\'/AB', 'f\' = distance focale'],
+      realLife: [
+        'Appareil photo et smartphone',
+        'Lunettes et lentilles de contact',
+        'Microscopes et telescopes'
+      ],
+      bacQuestions: [
+        'Tracer le schema de formation d image',
+        'Calculer la position de l image'
       ]
     },
     {
@@ -262,7 +331,7 @@ const experiments = {
         'Vitesse augmente lineairement: v = gt',
         'Distance parcourue: h = 1/2 gt2'
       ],
-      formulas: ['h = 1/2 * g * t^2', 'v = g * t', 'g = 2h / t^2'],
+      formulas: ['h = 1/2 * g * t^2 (h: hauteur en m, g: gravite 9.81 m/s2, t: temps en s)', 'v = g * t (v: vitesse en m/s)', 'g = 2h / t^2 pour calculer g experimentalement'],
       realLife: [
         'Parachutisme',
         'Calcul trajectoire satellites',
@@ -329,7 +398,7 @@ const experiments = {
         'Formule: T = 2*pi*sqrt(L/g)',
         'Valable pour petites oscillations (< 10 degres)'
       ],
-      formulas: ['T = 2*pi*sqrt(L/g)', 'g = 4*pi^2*L/T^2', 'f = 1/T'],
+      formulas: ['T = 2*pi*sqrt(L/g) (T: periode en s, L: longueur fil en m, g: gravite 9.81 m/s2)', 'g = 4*pi^2*L/T^2 pour determiner g experimentalement', 'f = 1/T (f: frequence en Hz)'],
       realLife: [
         'Horloges a balancier (precision)',
         'Sismographes (detection tremblements)',
@@ -429,7 +498,7 @@ const experiments = {
         'L energie cinetique depend de la frequence, pas de l intensite',
         'Preuve de la nature quantique de la lumiere (Einstein 1905)'
       ],
-      formulas: ['E = h*f', 'Ec = h*f - W', 'f_seuil = W/h'],
+      formulas: ['E = h*f (E: energie photon en J, h: constante Planck 6.63x10^-34 J.s, f: frequence en Hz)', 'Ec = h*f - W (Ec: energie cinetique electron, W: travail extraction du metal)', 'f_seuil = W/h (frequence minimale pour ejecter electrons)'],
       realLife: [
         'Panneaux solaires photovoltaiques',
         'Capteurs de lumiere (cameras)',
@@ -473,6 +542,39 @@ const experiments = {
       bacQuestions: [
         'Identifier les organites d une cellule',
         'Comparer cellule animale et vegetale'
+      ]
+    },
+    {
+      id: 'blood-circulation',
+      name: 'Circulation Sanguine',
+      description: 'Observer le trajet du sang dans le corps',
+      difficulty: 'Moyen',
+      level: 'lycee',
+      duration: '20 min',
+      steps: ['Observer coeur', 'Suivre sang oxygene', 'Suivre sang desoxygene', 'Identifier organes', 'Comprendre double circulation'],
+      classe: 'Seconde',
+      chapter: 'Corps humain et sante',
+      materiel: [
+        'Maquette coeur: 4 cavites visibles',
+        'Schema circulation: arteres et veines',
+        'Colorants: rouge (O2) et bleu (CO2)',
+        'Modele 3D interactif'
+      ],
+      learned: [
+        'Double circulation: pulmonaire + systemique',
+        'Coeur = pompe a 4 cavites',
+        'Arteres: sang du coeur vers organes',
+        'Veines: sang des organes vers coeur'
+      ],
+      formulas: ['DC = FC x VES (DC: Debit Cardiaque en L/min, FC: Frequence Cardiaque en bpm, VES: Volume Ejection Systolique en mL)', 'Au repos: DC = 70 bpm x 70 mL = 5 L/min'],
+      realLife: [
+        'Maladies cardiovasculaires',
+        'Don du sang',
+        'Sport et entrainement'
+      ],
+      bacQuestions: [
+        'Decrire la double circulation',
+        'Role des valvules cardiaques'
       ]
     },
     {
@@ -634,7 +736,7 @@ const experiments = {
         'Equation de Michaelis-Menten: V = Vmax*[S]/(Km+[S])',
         'Linearisation de Lineweaver-Burk pour trouver Km et Vmax'
       ],
-      formulas: ['V = Vmax*[S]/(Km+[S])', '1/V = Km/(Vmax*[S]) + 1/Vmax', 'kcat = Vmax/[E]'],
+      formulas: ['V = Vmax*[S]/(Km+[S]) (V: vitesse reaction, Vmax: vitesse max, [S]: concentration substrat, Km: constante Michaelis)', '1/V = Km/(Vmax*[S]) + 1/Vmax (Lineweaver-Burk pour determiner Km et Vmax)', 'kcat = Vmax/[E] (kcat: constante catalytique, [E]: concentration enzyme)'],
       realLife: [
         'Developpement de medicaments (inhibiteurs)',
         'Diagnostic medical (dosages enzymatiques)',
@@ -942,6 +1044,22 @@ export const getIndicatorColor = (pH) => {
   if (pH < 9) return '#ff88aa'
   return '#ff44aa'
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

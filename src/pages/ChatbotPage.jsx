@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
+import { FeatureGate } from '../components/FeatureGate'
 import { useAuth } from '../context/AuthContext'
 import { usePremium } from '../context/PremiumContext'
 import { chatService } from '../services/chat'
@@ -13,26 +14,25 @@ import { jsPDF } from 'jspdf'
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
 
 const SUBJECTS = [
-  { id: 'math', name: 'Mathématiques', icon: '🔢' },
+  { id: 'math', name: 'Mathematiques', icon: '🔢' },
   { id: 'physics', name: 'Physique', icon: '⚛️' },
   { id: 'chemistry', name: 'Chimie', icon: '🧪' },
   { id: 'biology', name: 'Biologie', icon: '🧬' },
-  { id: 'french', name: 'Français', icon: '📖' },
+  { id: 'french', name: 'Francais', icon: '📖' },
   { id: 'english', name: 'Anglais', icon: '🇬🇧' },
   { id: 'history', name: 'Histoire', icon: '📜' },
-  { id: 'geography', name: 'Géographie', icon: '🌍' },
+  { id: 'geography', name: 'Geographie', icon: '🌍' },
   { id: 'philosophy', name: 'Philosophie', icon: '💭' },
-  { id: 'economics', name: 'Économie', icon: '💰' },
+  { id: 'economics', name: 'Economie', icon: '💰' },
   { id: 'programming', name: 'Programmation', icon: '💻' },
-  { id: 'medicine', name: 'Médecine', icon: '⚕️' },
-  { id: 'law', name: 'Droit', icon: '⚖️' },
+  { id: 'medicine', name: 'Medecine', icon: '⚕️' },
   { id: 'humanities', name: 'Sciences Humaines', icon: '🧠' },
-  { id: 'general', name: 'Questions Générales', icon: '💬' }
+  { id: 'general', name: 'Questions Generales', icon: '💬' }
 ]
 
 export default function ChatbotPage() {
   const { user, profile } = useAuth()
-  const { isPremium, messageCount, canSendMessage, incrementMessageCount } = usePremium()
+  const { isPremium, checkCanSendMessage, incrementMessageCount } = usePremium()
   const [selectedSubject, setSelectedSubject] = useState(SUBJECTS[0])
   const [showAllSubjects, setShowAllSubjects] = useState(false)
   const [messages, setMessages] = useState([])
@@ -44,6 +44,7 @@ export default function ChatbotPage() {
   const [conversations, setConversations] = useState([])
   const [currentConversationId, setCurrentConversationId] = useState(null)
   const [showSidebar, setShowSidebar] = useState(false)
+  const [messageCount, setMessageCount] = useState(0)
   const messagesEndRef = useRef(null)
 
   const scrollToBottom = () => {
@@ -76,7 +77,7 @@ export default function ChatbotPage() {
     } else {
       setMessages([{
         role: 'assistant',
-        content: `Bonjour! Je suis votre tuteur en ${selectedSubject.name}. Comment puis-je vous aider aujourd'hui?`
+        content: 'Bonjour! Je suis votre tuteur en ' + selectedSubject.name + '. Comment puis-je vous aider aujourd\'hui?'
       }])
     }
   }
@@ -87,10 +88,10 @@ export default function ChatbotPage() {
       setCurrentConversationId(data.id)
       setMessages([{
         role: 'assistant',
-        content: `Bonjour! Je suis votre tuteur en ${selectedSubject.name}. Comment puis-je vous aider aujourd'hui?`
+        content: 'Bonjour! Je suis votre tuteur en ' + selectedSubject.name + '. Comment puis-je vous aider aujourd\'hui?'
       }])
       await loadAllConversations()
-      toast.success('Nouvelle conversation créée!')
+      toast.success('Nouvelle conversation creee!')
     }
   }
 
@@ -98,7 +99,7 @@ export default function ChatbotPage() {
     if (confirm('Voulez-vous vraiment supprimer cette conversation?')) {
       await chatService.deleteConversation(conversationId)
       await loadAllConversations()
-      toast.success('Conversation supprimée!')
+      toast.success('Conversation supprimee!')
     }
   }
 
@@ -133,13 +134,13 @@ export default function ChatbotPage() {
       const result = await Tesseract.recognize(imageData, 'fra+eng', {
         logger: (m) => {
           if (m.status === 'recognizing text') {
-            console.log(`OCR Progress: ${Math.round(m.progress * 100)}%`)
+            console.log('OCR Progress: ' + Math.round(m.progress * 100) + '%')
           }
         }
       })
       
       if (!result.data.text.trim()) {
-        toast.error('Aucun texte détecté dans l\'image')
+        toast.error('Aucun texte detecte dans l\'image')
         return null
       }
       
@@ -179,10 +180,10 @@ export default function ChatbotPage() {
             .trim()
           
           if (pageText) {
-            fullText += `\nPage ${pageNum}:\n${pageText}\n`
+            fullText += '\nPage ' + pageNum + ':\n' + pageText + '\n'
           }
         } catch (pageError) {
-          console.error(`Error on page ${pageNum}:`, pageError)
+          console.error('Error on page ' + pageNum + ':', pageError)
         }
       }
       
@@ -203,13 +204,13 @@ export default function ChatbotPage() {
 
   const handleImageCapture = async (imageData) => {
     if (!isPremium) {
-      toast.error('Fonctionnalité Premium uniquement!')
+      toast.error('Fonctionnalite Premium uniquement!')
       return
     }
 
     const extractedText = await extractTextFromImage(imageData)
     if (extractedText) {
-      setInputMessage(`[Image analysée]\n\n${extractedText}`)
+      setInputMessage('[Image analysee]\n\n' + extractedText)
       setShowImageUpload(false)
       toast.success('Texte extrait!')
     }
@@ -217,24 +218,25 @@ export default function ChatbotPage() {
 
   const handlePDFUpload = async (file) => {
     if (!isPremium) {
-      toast.error('Fonctionnalité Premium uniquement!')
+      toast.error('Fonctionnalite Premium uniquement!')
       return
     }
 
     const extractedText = await extractTextFromPDF(file)
     if (extractedText) {
       const truncated = extractedText.substring(0, 3000)
-      setInputMessage(`[PDF: ${file.name}]\n\n${truncated}${extractedText.length > 3000 ? '...(tronqué)' : ''}`)
+      setInputMessage('[PDF: ' + file.name + ']\n\n' + truncated + (extractedText.length > 3000 ? '...(tronque)' : ''))
       setShowImageUpload(false)
-      toast.success('PDF analysé!')
+      toast.success('PDF analyse!')
     }
   }
 
   const sendMessage = async () => {
     if (!inputMessage.trim() || loading) return
 
-    if (!isPremium && messageCount >= 10) {
-      toast.error('Limite de messages atteinte!')
+    const canSend = await checkCanSendMessage()
+    if (!canSend.allowed) {
+      toast.error('Limite de messages atteinte! Passez a Premium.')
       return
     }
 
@@ -255,9 +257,8 @@ export default function ChatbotPage() {
 
       if (response.reply) {
         setMessages([...updatedMessages, { role: 'assistant', content: response.reply }])
-        if (!isPremium) {
-          incrementMessageCount()
-        }
+        await incrementMessageCount()
+        setMessageCount(prev => prev + 1)
         await loadAllConversations()
       }
     } catch (error) {
@@ -270,12 +271,12 @@ export default function ChatbotPage() {
 
   const exportToWord = async () => {
     if (messages.length === 0) {
-      toast.error('Aucune conversation à exporter')
+      toast.error('Aucune conversation a exporter')
       return
     }
 
     setExporting(true)
-    toast.loading('Création du document Word...', { id: 'export' })
+    toast.loading('Creation du document Word...', { id: 'export' })
 
     try {
       const doc = new Document({
@@ -283,7 +284,7 @@ export default function ChatbotPage() {
           properties: {},
           children: [
             new Paragraph({
-              text: 'EduSen - Plateforme Éducative',
+              text: 'EduSen - Plateforme Educative',
               heading: HeadingLevel.HEADING_1,
               alignment: AlignmentType.CENTER,
               spacing: { after: 200 }
@@ -291,7 +292,7 @@ export default function ChatbotPage() {
             new Paragraph({
               children: [
                 new TextRun({
-                  text: `Matière: ${selectedSubject.name}`,
+                  text: 'Matiere: ' + selectedSubject.name,
                   bold: true
                 })
               ],
@@ -300,7 +301,7 @@ export default function ChatbotPage() {
             new Paragraph({
               children: [
                 new TextRun({
-                  text: `Étudiant: ${profile?.full_name || 'Étudiant'}`,
+                  text: 'Etudiant: ' + (profile?.full_name || 'Etudiant'),
                   bold: true
                 })
               ],
@@ -309,21 +310,17 @@ export default function ChatbotPage() {
             new Paragraph({
               children: [
                 new TextRun({
-                  text: `Date: ${new Date().toLocaleDateString('fr-FR')}`,
+                  text: 'Date: ' + new Date().toLocaleDateString('fr-FR'),
                   bold: true
                 })
               ],
-              spacing: { after: 400 }
-            }),
-            new Paragraph({
-              text: '─'.repeat(50),
               spacing: { after: 400 }
             }),
             ...messages.flatMap((msg, idx) => [
               new Paragraph({
                 children: [
                   new TextRun({
-                    text: msg.role === 'user' ? 'QUESTION:' : 'RÉPONSE:',
+                    text: msg.role === 'user' ? 'QUESTION:' : 'REPONSE:',
                     bold: true,
                     color: msg.role === 'user' ? '006838' : '0066CC',
                     size: 24
@@ -337,11 +334,7 @@ export default function ChatbotPage() {
               })
             ]),
             new Paragraph({
-              text: '─'.repeat(50),
-              spacing: { before: 400, after: 200 }
-            }),
-            new Paragraph({
-              text: '© EduSen - Excellence Académique pour le Sénégal',
+              text: '(c) EduSen - Excellence Academique pour le Senegal',
               alignment: AlignmentType.CENTER,
               italics: true
             })
@@ -353,11 +346,11 @@ export default function ChatbotPage() {
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `EduSen-${selectedSubject.id}-${Date.now()}.docx`
+      a.download = 'EduSen-' + selectedSubject.id + '-' + Date.now() + '.docx'
       a.click()
       window.URL.revokeObjectURL(url)
       
-      toast.success('Document Word téléchargé!', { id: 'export' })
+      toast.success('Document Word telecharge!', { id: 'export' })
     } catch (error) {
       console.error('Export error:', error)
       toast.error('Erreur lors de l\'export Word', { id: 'export' })
@@ -368,12 +361,12 @@ export default function ChatbotPage() {
 
   const exportToPDF = async () => {
     if (messages.length === 0) {
-      toast.error('Aucune conversation à exporter')
+      toast.error('Aucune conversation a exporter')
       return
     }
 
     setExporting(true)
-    toast.loading('Création du PDF...', { id: 'export' })
+    toast.loading('Creation du PDF...', { id: 'export' })
 
     try {
       const doc = new jsPDF()
@@ -381,16 +374,16 @@ export default function ChatbotPage() {
 
       doc.setFontSize(20)
       doc.setTextColor(0, 104, 56)
-      doc.text('EduSen - Plateforme Éducative', 105, yPosition, { align: 'center' })
+      doc.text('EduSen - Plateforme Educative', 105, yPosition, { align: 'center' })
       yPosition += 15
 
       doc.setFontSize(12)
       doc.setTextColor(0, 0, 0)
-      doc.text(`Matière: ${selectedSubject.name}`, 20, yPosition)
+      doc.text('Matiere: ' + selectedSubject.name, 20, yPosition)
       yPosition += 7
-      doc.text(`Étudiant: ${profile?.full_name || 'Étudiant'}`, 20, yPosition)
+      doc.text('Etudiant: ' + (profile?.full_name || 'Etudiant'), 20, yPosition)
       yPosition += 7
-      doc.text(`Date: ${new Date().toLocaleDateString('fr-FR')}`, 20, yPosition)
+      doc.text('Date: ' + new Date().toLocaleDateString('fr-FR'), 20, yPosition)
       yPosition += 15
 
       doc.setDrawColor(200, 200, 200)
@@ -411,7 +404,7 @@ export default function ChatbotPage() {
         } else {
           doc.setTextColor(0, 102, 204)
           doc.setFont(undefined, 'bold')
-          doc.text('RÉPONSE:', 20, yPosition)
+          doc.text('REPONSE:', 20, yPosition)
         }
         yPosition += 7
 
@@ -438,15 +431,15 @@ export default function ChatbotPage() {
         doc.setFontSize(8)
         doc.setTextColor(128, 128, 128)
         doc.text(
-          `© EduSen - Excellence Académique pour le Sénégal | Page ${i}/${pageCount}`,
+          '(c) EduSen - Excellence Academique | Page ' + i + '/' + pageCount,
           105,
           290,
           { align: 'center' }
         )
       }
 
-      doc.save(`EduSen-${selectedSubject.id}-${Date.now()}.pdf`)
-      toast.success('PDF téléchargé!', { id: 'export' })
+      doc.save('EduSen-' + selectedSubject.id + '-' + Date.now() + '.pdf')
+      toast.success('PDF telecharge!', { id: 'export' })
     } catch (error) {
       console.error('Export error:', error)
       toast.error('Erreur lors de l\'export PDF', { id: 'export' })
@@ -456,15 +449,16 @@ export default function ChatbotPage() {
   }
 
   return (
+    <FeatureGate feature="ai_tutor">
     <div className='flex flex-col md:flex-row h-[calc(100vh-8rem)] gap-0 md:gap-4'>
-      {/* Mobile Header with Menu Toggle */}
+      {/* Mobile Header */}
       <div className='md:hidden mb-4'>
         <div className='flex items-center justify-between p-3 bg-senegal-green text-white rounded-lg'>
           <button
             onClick={() => setShowSidebar(!showSidebar)}
             className='px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors text-sm font-semibold'
           >
-            ☰ Historique
+            Historique
           </button>
           <div className='flex items-center gap-2'>
             <div className='text-xl'>{selectedSubject.icon}</div>
@@ -479,35 +473,21 @@ export default function ChatbotPage() {
         </div>
       </div>
 
-      {/* Sidebar - Full screen on mobile, side panel on desktop */}
+      {/* Sidebar */}
       {showSidebar && (
         <>
-          {/* Mobile Overlay */}
           <div 
             className='fixed inset-0 bg-black/50 z-40 md:hidden'
             onClick={() => setShowSidebar(false)}
           />
           
-          {/* Sidebar Content */}
-          <div className={`
-            fixed md:relative
-            inset-y-0 left-0
-            w-80 md:w-80
-            bg-white
-            z-50 md:z-0
-            flex flex-col
-            shadow-2xl md:shadow-none
-            transition-transform duration-300
-            card p-4
-            h-full
-          `}>
+          <div className='fixed md:relative inset-y-0 left-0 w-80 md:w-80 bg-white z-50 md:z-0 flex flex-col shadow-2xl md:shadow-none transition-transform duration-300 card p-4 h-full'>
             <div className='flex items-center justify-between mb-4'>
               <h3 className='font-bold text-gray-800'>💬 Historique</h3>
               <div className='flex gap-2'>
                 <button
                   onClick={startNewConversation}
                   className='btn-primary flex items-center gap-2 text-sm px-3 py-2'
-                  title='Nouvelle conversation'
                 >
                   <MessageSquarePlus size={16} />
                   <span className='hidden sm:inline'>Nouveau</span>
@@ -516,7 +496,7 @@ export default function ChatbotPage() {
                   onClick={() => setShowSidebar(false)}
                   className='md:hidden px-3 py-2 text-gray-500 hover:bg-gray-100 rounded-lg'
                 >
-                  ✕
+                  X
                 </button>
               </div>
             </div>
@@ -529,9 +509,9 @@ export default function ChatbotPage() {
                     loadConversation(conv)
                     setShowSidebar(false)
                   }}
-                  className={`p-3 rounded-lg cursor-pointer transition-all hover:bg-gray-100 ${
-                    currentConversationId === conv.id ? 'bg-senegal-green/10 border-2 border-senegal-green' : 'border-2 border-transparent'
-                  }`}
+                  className={'p-3 rounded-lg cursor-pointer transition-all hover:bg-gray-100 ' + 
+                    (currentConversationId === conv.id ? 'bg-senegal-green/10 border-2 border-senegal-green' : 'border-2 border-transparent')
+                  }
                 >
                   <div className='flex items-start justify-between gap-2'>
                     <div className='flex-1 min-w-0'>
@@ -574,12 +554,12 @@ export default function ChatbotPage() {
           {showAllSubjects ? (
             <div>
               <div className='flex items-center justify-between mb-3'>
-                <h3 className='text-lg font-bold text-gray-800'>📚 Choisissez votre matière:</h3>
+                <h3 className='text-lg font-bold text-gray-800'>📚 Choisissez votre matiere:</h3>
                 <button
                   onClick={() => setShowAllSubjects(false)}
                   className='px-4 py-2 text-sm font-semibold text-senegal-green hover:bg-senegal-green/10 rounded-lg transition-colors'
                 >
-                  Masquer ✕
+                  Masquer
                 </button>
               </div>
               <div className='grid grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-2'>
@@ -590,11 +570,11 @@ export default function ChatbotPage() {
                       setSelectedSubject(subject)
                       setShowAllSubjects(false)
                     }}
-                    className={`p-2 rounded-lg border-2 transition-all hover:scale-105 ${
-                      selectedSubject.id === subject.id
+                    className={'p-2 rounded-lg border-2 transition-all hover:scale-105 ' + 
+                      (selectedSubject.id === subject.id
                         ? 'bg-senegal-green text-white border-senegal-green shadow-lg'
-                        : 'bg-white border-gray-200 hover:border-senegal-green'
-                    }`}
+                        : 'bg-white border-gray-200 hover:border-senegal-green')
+                    }
                   >
                     <div className='text-xl mb-1'>{subject.icon}</div>
                     <div className='text-[10px] font-semibold leading-tight'>{subject.name}</div>
@@ -609,7 +589,7 @@ export default function ChatbotPage() {
                   onClick={() => setShowSidebar(!showSidebar)}
                   className='px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors'
                 >
-                  {showSidebar ? '◀' : '▶'}
+                  {showSidebar ? '<' : '>'}
                 </button>
                 <div className='text-2xl'>{selectedSubject.icon}</div>
                 <div className='font-semibold'>{selectedSubject.name}</div>
@@ -618,7 +598,7 @@ export default function ChatbotPage() {
                 onClick={() => setShowAllSubjects(true)}
                 className='px-4 py-2 text-sm font-semibold bg-white text-senegal-green rounded-lg hover:bg-gray-100 transition-colors'
               >
-                Changer de matière
+                Changer de matiere
               </button>
             </div>
           )}
@@ -628,12 +608,12 @@ export default function ChatbotPage() {
         {showAllSubjects && (
           <div className='md:hidden fixed inset-0 bg-white z-50 p-4 overflow-y-auto'>
             <div className='flex items-center justify-between mb-4'>
-              <h3 className='text-lg font-bold text-gray-800'>📚 Choisissez votre matière:</h3>
+              <h3 className='text-lg font-bold text-gray-800'>📚 Choisissez votre matiere:</h3>
               <button
                 onClick={() => setShowAllSubjects(false)}
                 className='px-4 py-2 text-sm font-semibold text-senegal-green hover:bg-senegal-green/10 rounded-lg'
               >
-                ✕ Fermer
+                Fermer
               </button>
             </div>
             <div className='grid grid-cols-3 gap-2'>
@@ -644,11 +624,11 @@ export default function ChatbotPage() {
                     setSelectedSubject(subject)
                     setShowAllSubjects(false)
                   }}
-                  className={`p-3 rounded-lg border-2 transition-all ${
-                    selectedSubject.id === subject.id
+                  className={'p-3 rounded-lg border-2 transition-all ' + 
+                    (selectedSubject.id === subject.id
                       ? 'bg-senegal-green text-white border-senegal-green shadow-lg'
-                      : 'bg-white border-gray-200'
-                  }`}
+                      : 'bg-white border-gray-200')
+                  }
                 >
                   <div className='text-2xl mb-1'>{subject.icon}</div>
                   <div className='text-[10px] font-semibold leading-tight'>{subject.name}</div>
@@ -667,7 +647,6 @@ export default function ChatbotPage() {
                   onClick={exportToWord}
                   disabled={exporting}
                   className='btn-secondary flex items-center gap-2 text-xs md:text-sm px-2 md:px-3 py-2'
-                  title='Exporter en Word'
                 >
                   <FileText size={14} />
                   <span className='hidden sm:inline'>Word</span>
@@ -676,7 +655,6 @@ export default function ChatbotPage() {
                   onClick={exportToPDF}
                   disabled={exporting}
                   className='btn-secondary flex items-center gap-2 text-xs md:text-sm px-2 md:px-3 py-2'
-                  title='Exporter en PDF'
                 >
                   <Download size={14} />
                   <span className='hidden sm:inline'>PDF</span>
@@ -693,7 +671,7 @@ export default function ChatbotPage() {
               </span>
             ) : (
               <span className='text-gray-600 text-xs md:text-sm'>
-                {messageCount}/10
+                /10
               </span>
             )}
           </div>
@@ -705,14 +683,14 @@ export default function ChatbotPage() {
             {messages.map((msg, idx) => (
               <div
                 key={idx}
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={'flex ' + (msg.role === 'user' ? 'justify-end' : 'justify-start')}
               >
                 <div
-                  className={`max-w-[85%] md:max-w-[80%] p-3 md:p-4 rounded-lg text-sm md:text-base ${
-                    msg.role === 'user'
+                  className={'max-w-[85%] md:max-w-[80%] p-3 md:p-4 rounded-lg text-sm md:text-base ' + 
+                    (msg.role === 'user'
                       ? 'bg-senegal-green text-white'
-                      : 'bg-gray-100 text-gray-900'
-                  }`}
+                      : 'bg-gray-100 text-gray-900')
+                  }
                 >
                   <div className='whitespace-pre-wrap break-words'>{msg.content}</div>
                 </div>
@@ -755,8 +733,7 @@ export default function ChatbotPage() {
                 className='btn-secondary flex items-center gap-2 text-xs md:text-sm px-3 py-2'
               >
                 <Camera size={14} />
-                <span className='hidden sm:inline'>{showImageUpload ? 'Masquer' : 'Upload Image/PDF'}</span>
-                <span className='sm:hidden'>📷</span>
+                <span>{showImageUpload ? 'Masquer' : 'Upload Image/PDF'}</span>
               </button>
             </div>
           )}
@@ -787,5 +764,6 @@ export default function ChatbotPage() {
         </div>
       </div>
     </div>
+    </FeatureGate>
   )
 }

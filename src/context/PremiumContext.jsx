@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+﻿import { createContext, useContext, useEffect, useState } from 'react'
 import { useAuth } from './AuthContext'
 import { subscriptionService } from '../services/subscription'
 
@@ -13,52 +13,61 @@ export const usePremium = () => {
 }
 
 export const PremiumProvider = ({ children }) => {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const [isPremium, setIsPremium] = useState(false)
   const [subscription, setSubscription] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)  // Start with false!
 
   useEffect(() => {
-    if (user) {
-      console.log('💎 Loading subscription for user:', user.id)
-      loadSubscription()
-    } else {
+    if (!user) {
       setIsPremium(false)
       setSubscription(null)
-      setLoading(false)
+      return
     }
-  }, [user])
 
-  const loadSubscription = async () => {
-    if (!user) return
-    
-    const { data, error } = await subscriptionService.getSubscription(user.id)
-    
-    console.log('💎 Subscription data:', { data, error })
-    
-    if (!error && data) {
-      setSubscription(data)
-      const premium = await subscriptionService.isPremium(user.id)
-      console.log('💎 Is Premium:', premium)
-      setIsPremium(premium)
-    } else {
-      console.log('⚠️ No subscription found or error:', error)
+    // Check profile plan first (new tier system)
+    if (profile?.plan === 'student') {
+      setIsPremium(true)
+    }
+
+    // Load subscription in background - don't block UI
+    const loadSub = async () => {
+      try {
+        const { data } = await subscriptionService.getSubscription(user.id)
+        if (data) {
+          setSubscription(data)
+          if (data.plan === 'premium' && data.status === 'active') {
+            setIsPremium(true)
+          }
+        }
+      } catch (err) {
+        console.error('Subscription error:', err)
+      }
     }
     
-    setLoading(false)
-  }
+    loadSub()
+  }, [user, profile])
 
   const checkCanSendMessage = async () => {
     if (!user) return { allowed: false, remaining: 0 }
-    const result = await subscriptionService.canSendAIMessage(user.id)
-    console.log('💬 Can send message:', result)
-    return result
+    if (isPremium || profile?.plan === 'student') {
+      return { allowed: true, remaining: 999 }
+    }
+    
+    try {
+      return await subscriptionService.canSendAIMessage(user.id)
+    } catch {
+      return { allowed: true, remaining: 10 }
+    }
   }
 
   const incrementMessageCount = async () => {
-    if (!user) return
-    console.log('📈 Incrementing message count')
-    await subscriptionService.incrementAIMessages(user.id)
+    if (!user || isPremium || profile?.plan === 'student') return
+    try {
+      await subscriptionService.incrementAIMessages(user.id)
+    } catch (err) {
+      console.error('Increment error:', err)
+    }
   }
 
   const value = {
@@ -67,10 +76,8 @@ export const PremiumProvider = ({ children }) => {
     loading,
     checkCanSendMessage,
     incrementMessageCount,
-    refreshSubscription: loadSubscription
+    refreshSubscription: () => {}
   }
-
-  console.log('💎 Premium context value:', { isPremium, subscription, loading })
 
   return <PremiumContext.Provider value={value}>{children}</PremiumContext.Provider>
 }

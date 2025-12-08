@@ -16,6 +16,8 @@ import ProfilePage from './pages/ProfilePage'
 import PremiumPage from './pages/PremiumPage'
 import SponsorPage from './pages/SponsorPage'
 import ARLabPage from './pages/ARLabPage'
+import ConcoursPage from './pages/ConcoursPage'
+import PricingPage from './pages/PricingPage'
 
 // Layout
 import Layout from './components/shared/Layout'
@@ -29,6 +31,7 @@ function App() {
           <Routes>
             <Route path='/login' element={<Login />} />
             <Route path='/register' element={<Register />} />
+            <Route path='/pricing' element={<PricingPage />} />
             
             <Route path='/' element={<ProtectedRoute><Layout /></ProtectedRoute>}>
               <Route index element={<Dashboard />} />
@@ -41,6 +44,7 @@ function App() {
               <Route path='premium' element={<PremiumPage />} />
               <Route path='sponsor' element={<SponsorPage />} />
               <Route path='ar-lab' element={<ARLabPage />} />
+              <Route path='concours' element={<ConcoursPage />} />
             </Route>
           </Routes>
         </Router>
@@ -68,3 +72,4 @@ function ProtectedRoute({ children }) {
 }
 
 export default App
+

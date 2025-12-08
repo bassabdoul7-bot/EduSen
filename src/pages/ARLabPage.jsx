@@ -1,11 +1,13 @@
 ﻿import { useState, useEffect, useRef } from "react"
+import { usePlan } from "../hooks/usePlan"
 import { Canvas, useFrame } from "@react-three/fiber"
-import { OrbitControls, Html, Environment } from "@react-three/drei"
+import { OrbitControls, Html, Environment, Line } from "@react-three/drei"
 import { arLabService, calculatePH, getIndicatorColor, calculateCurrent, calculatePeriod } from "../services/arLab"
 import toast from "react-hot-toast"
 import { ArrowLeft, PlayCircle, Camera, X, List, ChevronDown, ChevronUp, Circle, CheckCircle, RotateCcw, MousePointer, Hand, GraduationCap, School } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import * as THREE from "three"
+import { LabMascot } from "../components/LabMascot"
 
 // ============ LAB ENVIRONMENT ============
 
@@ -448,16 +450,26 @@ function CompletionBanner({ text, experiment }) {
 
 // ============ EXPERIMENTS ============
 
-function AcidBaseExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary }) {
+function AcidBaseExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary, triggerMascotAction }) {
   const { hclVolume, indicatorAdded, pH, color, neutralized } = state
   const handlePour = (type) => {
-    if (type === "hcl" && selectedItem === "hcl") { setState(p => ({ ...p, hclVolume: 50, pH: 1 })); setSelectedItem(null); setStep(1); toast.success("🧪 HCl!") }
-    else if (type === "indicator" && selectedItem === "indicator") { setState(p => ({ ...p, indicatorAdded: true })); setSelectedItem(null); setStep(2); toast.success("💧 Indicateur!") }
+    if (type === "hcl" && selectedItem === "hcl") {
+      triggerMascotAction([-0.4, 0.1, 0.3], [0, 0.15, -0.15], "#ff6b6b", "Je prends l'acide!", () => {
+        setState(p => ({ ...p, hclVolume: 50, pH: 1 })); setSelectedItem(null); setStep(1); toast.success("HCl verse!")
+      })
+    }
+    else if (type === "indicator" && selectedItem === "indicator") {
+      triggerMascotAction([0, 0.08, 0.3], [0, 0.15, -0.15], "#9b59b6", "J'ajoute l'indicateur!", () => {
+        setState(p => ({ ...p, indicatorAdded: true })); setSelectedItem(null); setStep(2); toast.success("Indicateur ajoute!")
+      })
+    }
     else if (type === "naoh" && selectedItem === "naoh" && !neutralized) {
-      setState(p => { const nV = p.naohVolume + 8, nPH = calculatePH(p.hclVolume, nV), nC = getIndicatorColor(nPH), done = nPH >= 6.5
-        if (done) setTimeout(() => { setStep(experiment.steps.length - 1); toast.success("🎉 Neutralise!") }, 300)
-        return { ...p, naohVolume: nV, pH: nPH, color: nC, neutralized: done }
-      }); setSelectedItem(null)
+      triggerMascotAction([0.4, 0.1, 0.3], [0, 0.15, -0.15], "#4dabf7", "Je neutralise!", () => {
+        setState(p => { const nV = p.naohVolume + 8, nPH = calculatePH(p.hclVolume, nV), nC = getIndicatorColor(nPH), done = nPH >= 6.5
+          if (done) setTimeout(() => { setStep(experiment.steps.length - 1); toast.success("Neutralise!") }, 300)
+          return { ...p, naohVolume: nV, pH: nPH, color: nC, neutralized: done }
+        }); setSelectedItem(null)
+      })
     }
   }
   return (
@@ -487,20 +499,71 @@ function AcidBaseExperiment({ state, setState, setStep, experiment, selectedItem
   )
 }
 
+function PrecipitationExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+  const { agno3Added, naclAdded, precipitateFormed, filtered } = state
+  const [precipitateAmount, setPrecipitateAmount] = useState(0)
+  
+  useEffect(() => {
+    if (naclAdded && precipitateAmount < 10) {
+      const interval = setInterval(() => setPrecipitateAmount(p => Math.min(p + 1, 10)), 200)
+      return () => clearInterval(interval)
+    }
+  }, [naclAdded, precipitateAmount])
+  
+  const handleAction = (action) => {
+    if (action === "agno3" && selectedItem === "agno3") { setState(p => ({ ...p, agno3Added: true })); setSelectedItem(null); setStep(1); toast.success("🧪 AgNO3 verse!") }
+    else if (action === "nacl" && selectedItem === "nacl" && agno3Added) { setState(p => ({ ...p, naclAdded: true, precipitateFormed: true })); setSelectedItem(null); setStep(2); toast.success("⚪ Precipite blanc forme!") }
+    else if (action === "filter" && precipitateAmount >= 10) { setState(p => ({ ...p, filtered: true })); setStep(3); toast.success("🔬 AgCl filtre!") }
+    else if (action === "identify" && filtered) { setStep(experiment.steps.length - 1); toast.success("✅ AgCl identifie - Test Cl- positif!") }
+  }
+  
+  return (
+    <group>
+      {/* Beaker */}
+      <group position={[0, 0.1, 0]}>
+        <mesh><cylinderGeometry args={[0.08, 0.07, 0.15, 32, 1, true]} /><meshPhysicalMaterial color="#fff" transparent opacity={0.2} side={2} /></mesh>
+        {agno3Added && <mesh position={[0, -0.02, 0]}><cylinderGeometry args={[0.07, 0.065, 0.1, 32]} /><meshStandardMaterial color={naclAdded ? "#f5f5f5" : "#e0e0e0"} transparent opacity={0.8} /></mesh>}
+        {naclAdded && precipitateAmount > 0 && <mesh position={[0, -0.05, 0]}><cylinderGeometry args={[0.065, 0.06, precipitateAmount * 0.005, 32]} /><meshStandardMaterial color="#fff" /></mesh>}
+        <Html position={[0, -0.1, 0.1]} center><div className="bg-gray-600 text-white px-2 py-1 rounded text-xs">Becher</div></Html>
+      </group>
+      
+      {/* Filter funnel */}
+      {precipitateAmount >= 10 && <group position={[0.3, 0.15, 0]}>
+        <mesh><coneGeometry args={[0.06, 0.1, 32, 1, true]} /><meshPhysicalMaterial color="#fff" transparent opacity={0.3} side={2} /></mesh>
+        {filtered && <mesh position={[0, -0.02, 0]}><coneGeometry args={[0.04, 0.04, 32]} /><meshStandardMaterial color="#fff" /></mesh>}
+        <Html position={[0, 0.08, 0]} center><div className="bg-gray-200 px-2 py-1 rounded text-xs font-bold">Filtre</div></Html>
+      </group>}
+
+      {/* Target zones */}
+      <TargetZone position={[0, 0.2, 0]} label="🧪 AgNO3" active={selectedItem === "agno3"} onClick={() => handleAction("agno3")} />
+      {agno3Added && <TargetZone position={[0, 0.22, 0.05]} label="🧪 NaCl" active={selectedItem === "nacl"} onClick={() => handleAction("nacl")} />}
+      {precipitateAmount >= 10 && !filtered && <TargetZone position={[0.3, 0.2, 0]} label="🔬 Filtrer" active={true} onClick={() => handleAction("filter")} />}
+      {filtered && <TargetZone position={[0.3, 0.25, 0]} label="✅ Identifier" active={true} onClick={() => handleAction("identify")} />}
+
+      {/* Clickable bottles */}
+      {!agno3Added && <ClickableObject position={[-0.35, 0.1, 0.25]} selected={selectedItem === "agno3"} enabled={true} onClick={() => setSelectedItem(selectedItem === "agno3" ? null : "agno3")}><group><mesh><cylinderGeometry args={[0.025, 0.025, 0.08, 16]} /><meshStandardMaterial color="#c0c0c0" /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-gray-200 px-2 py-1 rounded text-xs font-bold">AgNO3</div></Html></group></ClickableObject>}
+      {!naclAdded && agno3Added && <ClickableObject position={[0.35, 0.1, 0.25]} selected={selectedItem === "nacl"} enabled={true} onClick={() => setSelectedItem(selectedItem === "nacl" ? null : "nacl")}><group><mesh><cylinderGeometry args={[0.025, 0.025, 0.08, 16]} /><meshStandardMaterial color="#fff" /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-white border px-2 py-1 rounded text-xs font-bold">NaCl</div></Html></group></ClickableObject>}
+
+      {/* Formula */}
+      {naclAdded && <Html position={[-0.3, 0.3, 0]} center><div className="bg-purple-900 text-white p-2 rounded text-xs"><div className="font-bold">Precipitation</div><div className="text-yellow-300">Ag⁺ + Cl⁻ → AgCl(s)</div><div className="text-white mt-1">Precipite blanc</div></div></Html>}
+    </group>
+  )
+}
+
 function ElectrolysisExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
   const { tankFilled, elecElectrodesOn, elecPowerOn, bubblingH2, bubblingO2 } = state
   const [h2Volume, setH2Volume] = useState(0)
   const [o2Volume, setO2Volume] = useState(0)
   
   useEffect(() => {
-    if (powerOn && h2Volume < 20) {
+    if (elecPowerOn && h2Volume < 20) {
       const interval = setInterval(() => {
         setH2Volume(p => Math.min(p + 2, 20))
         setO2Volume(p => Math.min(p + 1, 10))
       }, 500)
       return () => clearInterval(interval)
     }
-  }, [powerOn, h2Volume])
+  }, [elecPowerOn, h2Volume])
   
   const handleAction = (action) => {
     if (action === "fill" && selectedItem === "water") { setState(p => ({ ...p, tankFilled: true })); setSelectedItem(null); setStep(1); toast.success("💧 Cuve remplie!") }
@@ -527,7 +590,7 @@ function ElectrolysisExperiment({ state, setState, setStep, experiment, selected
       {elecElectrodesOn && <>
         <mesh position={[-0.1, 0.28, 0]}><cylinderGeometry args={[0.03, 0.03, 0.12, 16]} /><meshPhysicalMaterial color="#fff" transparent opacity={0.3} /></mesh>
         <mesh position={[0.1, 0.28, 0]}><cylinderGeometry args={[0.03, 0.03, 0.12, 16]} /><meshPhysicalMaterial color="#fff" transparent opacity={0.3} /></mesh>
-        {powerOn && <>
+        {elecPowerOn && <>
           <mesh position={[-0.1, 0.22 + h2Volume * 0.005, 0]}><cylinderGeometry args={[0.025, 0.025, h2Volume * 0.005, 16]} /><meshStandardMaterial color="#e5e5e5" transparent opacity={0.7} /></mesh>
           <mesh position={[0.1, 0.22 + o2Volume * 0.005, 0]}><cylinderGeometry args={[0.025, 0.025, o2Volume * 0.005, 16]} /><meshStandardMaterial color="#bfdbfe" transparent opacity={0.7} /></mesh>
         </>}
@@ -535,12 +598,10 @@ function ElectrolysisExperiment({ state, setState, setStep, experiment, selected
         <Html position={[0.1, 0.38, 0]} center><div className="bg-blue-200 px-2 py-1 rounded text-xs font-bold">O₂ {o2Volume}mL</div></Html>
       </>}
       
-      {/* Power supply */}
-      {electrodesPlaced && <group position={[0.3, 0.1, 0]}>
-        <mesh><boxGeometry args={[0.1, 0.08, 0.06]} /><meshStandardMaterial color={powerOn ? "#22c55e" : "#666"} /></mesh>
-        <Html position={[0, 0.06, 0]} center><div className={`px-2 py-1 rounded text-xs font-bold ${powerOn ? "bg-green-500 text-white" : "bg-gray-300"}`}>12V DC</div></Html>
+      {elecElectrodesOn && <group position={[0.3, 0.1, 0]}>
+        <mesh><boxGeometry args={[0.1, 0.08, 0.06]} /><meshStandardMaterial color={elecPowerOn ? "#22c55e" : "#666"} /></mesh>
+        <Html position={[0, 0.06, 0]} center><div className={`px-2 py-1 rounded text-xs font-bold ${elecPowerOn ? "bg-green-500 text-white" : "bg-gray-300"}`}>12V DC</div></Html>
       </group>}
-
       {/* Target zones */}
       <TargetZone position={[0, 0.15, 0.12]} label="💧 Remplir" active={selectedItem === "water"} onClick={() => handleAction("fill")} />
       {tankFilled && <TargetZone position={[0, 0.2, 0]} label="⚡ Electrodes" active={selectedItem === "electrodes"} onClick={() => handleAction("electrodes")} />}
@@ -552,7 +613,75 @@ function ElectrolysisExperiment({ state, setState, setStep, experiment, selected
       {!elecElectrodesOn && tankFilled && <ClickableObject position={[0, 0.08, 0.3]} selected={selectedItem === "electrodes"} enabled={true} onClick={() => setSelectedItem(selectedItem === "electrodes" ? null : "electrodes")}><group><mesh><cylinderGeometry args={[0.01, 0.01, 0.08, 16]} /><meshStandardMaterial color="#333" /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-gray-200 px-2 py-1 rounded text-xs font-bold">Electrodes C</div></Html></group></ClickableObject>}
 
       {/* Formula display */}
-      {powerOn && <Html position={[-0.35, 0.3, 0]} center><div className="bg-blue-900 text-white p-2 rounded text-xs"><div className="font-bold">Electrolyse</div><div className="text-yellow-300">2H₂O → 2H₂ + O₂</div><div className="text-green-300 mt-1">V(H₂) = 2 × V(O₂)</div></div></Html>}
+      {elecPowerOn && <Html position={[-0.35, 0.3, 0]} center><div className="bg-blue-900 text-white p-2 rounded text-xs"><div className="font-bold">Electrolyse</div><div className="text-yellow-300">2H₂O → 2H₂ + O₂</div><div className="text-green-300 mt-1">V(H₂) = 2 × V(O₂)</div></div></Html>}
+    </group>
+  )
+}
+
+function OpticsLensExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+  const { lensPlaced, candleLit, screenPlaced, imageFocused, divergentTested } = state
+  const [screenPos, setScreenPos] = useState(0.4)
+  const [imageSharp, setImageSharp] = useState(false)
+  const [lensType, setLensType] = useState('convergente')
+  
+  const handleAction = (action) => {
+    if (action === "lens" && selectedItem === "lens") { setState(p => ({ ...p, lensPlaced: true })); setSelectedItem(null); setStep(1); toast.success("🔍 Lentille placee!") }
+    else if (action === "candle" && lensPlaced && !candleLit) { setState(p => ({ ...p, candleLit: true })); setStep(2); toast.success("🕯️ Bougie allumee!") }
+    else if (action === "screen" && selectedItem === "screen" && candleLit) { setState(p => ({ ...p, screenPlaced: true })); setSelectedItem(null); setStep(3); toast.success("📺 Ecran place!") }
+    else if (action === "focus" && screenPlaced && !imageFocused) { setScreenPos(0.25); setImageSharp(true); setState(p => ({ ...p, imageFocused: true })); setStep(2); toast.success("Image REELLE nette!") }
+    else if (action === "divergent" && imageFocused && !divergentTested) { setLensType("divergente"); setImageSharp(false); setState(p => ({ ...p, divergentTested: true })); setStep(4); toast.success("Lentille divergente - Image VIRTUELLE!") }
+  }
+  
+  return (
+    <group>
+      {/* Optical bench */}
+      <mesh position={[0, 0.02, 0]}><boxGeometry args={[1, 0.02, 0.1]} /><meshStandardMaterial color="#444" /></mesh>
+      <Html position={[0, -0.02, 0.08]} center><div className="bg-gray-700 text-white px-2 py-1 rounded text-xs">Banc optique</div></Html>
+      
+      {/* Candle (object) */}
+      <group position={[-0.35, 0.1, 0]}>
+        <mesh><cylinderGeometry args={[0.015, 0.015, 0.1, 16]} /><meshStandardMaterial color="#f5f5dc" /></mesh>
+        {candleLit && <>
+          <mesh position={[0, 0.07, 0]}><coneGeometry args={[0.015, 0.04, 16]} /><meshBasicMaterial color="#ff9500" /></mesh>
+          <pointLight position={[0, 0.08, 0]} color="#ff9500" intensity={1} distance={0.5} />
+        </>}
+        <Html position={[0, -0.08, 0]} center><div className="bg-yellow-100 px-2 py-1 rounded text-xs font-bold">Objet (A)</div></Html>
+      </group>
+      
+      {/* Lens */}
+      {lensPlaced && <group position={[0, 0.1, 0]}>
+        <mesh rotation={[0, Math.PI/2, 0]}><cylinderGeometry args={[0.08, 0.08, 0.01, 32]} /><meshPhysicalMaterial color="#87ceeb" transparent opacity={0.4} /></mesh>
+        <Html position={[0, 0.12, 0]} center><div className="bg-blue-200 px-2 py-1 rounded text-xs font-bold">Lentille f'=10cm</div></Html>
+        <Html position={[0, -0.08, 0]} center><div className="bg-gray-500 text-white px-1 rounded text-xs">O</div></Html>
+      </group>}
+      
+      {/* Screen */}
+      {screenPlaced && <group position={[screenPos, 0.1, 0]}>
+        <mesh><boxGeometry args={[0.01, 0.15, 0.12]} /><meshStandardMaterial color="#fff" /></mesh>
+        {candleLit && <mesh position={[-0.006, 0, 0]}><planeGeometry args={[0.01, imageSharp ? 0.06 : 0.1]} /><meshBasicMaterial color={imageSharp ? "#ff6600" : "#ffaa77"} transparent opacity={imageSharp ? 1 : 0.3} /></mesh>}
+        <Html position={[0, -0.1, 0]} center><div className="bg-gray-200 px-2 py-1 rounded text-xs font-bold">Ecran (A')</div></Html>
+      </group>}
+      
+      {/* Light rays when focused */}
+      {imageFocused && <>
+        <Line points={[[-0.35, 0.15, 0], [0, 0.15, 0], [screenPos, 0.07, 0]]} color="#ff0000" lineWidth={2} />
+        <Line points={[[-0.35, 0.15, 0], [0, 0.1, 0], [screenPos, 0.07, 0]]} color="#ff0000" lineWidth={2} />
+      </>}
+
+      {/* Target zones */}
+      <TargetZone position={[0, 0.15, 0]} label="🔍 Lentille" active={selectedItem === "lens"} onClick={() => handleAction("lens")} />
+      {lensPlaced && !candleLit && <TargetZone position={[-0.35, 0.15, 0]} label="🕯️ Allumer" active={true} onClick={() => handleAction("candle")} />}
+      {candleLit && <TargetZone position={[0.3, 0.15, 0]} label="📺 Ecran" active={selectedItem === "screen"} onClick={() => handleAction("screen")} />}
+      {screenPlaced && !imageFocused && <TargetZone position={[0.3, 0.2, 0]} label="🎯 Focaliser" active={true} onClick={() => handleAction("focus")} />}
+      {screenPlaced && !imageFocused && <TargetZone position={[0.3, 0.2, 0]} label="🎯 Focaliser" active={true} onClick={() => handleAction("focus")} />}
+      {imageFocused && !divergentTested && <TargetZone position={[0, 0.25, 0]} label="🔄 Divergente" active={true} onClick={() => handleAction("divergent")} />}
+      {imageFocused && !divergentTested && <TargetZone position={[0, 0.25, 0]} label="🔄 Divergente" active={true} onClick={() => handleAction("divergent")} />}
+      {/* Clickable items */}
+      {!lensPlaced && <ClickableObject position={[-0.4, 0.08, 0.25]} selected={selectedItem === "lens"} enabled={true} onClick={() => setSelectedItem(selectedItem === "lens" ? null : "lens")}><group><mesh rotation={[0, Math.PI/2, 0]}><cylinderGeometry args={[0.04, 0.04, 0.005, 32]} /><meshPhysicalMaterial color="#87ceeb" transparent opacity={0.5} /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-blue-100 px-2 py-1 rounded text-xs font-bold">Lentille</div></Html></group></ClickableObject>}
+      {!screenPlaced && candleLit && <ClickableObject position={[0.4, 0.08, 0.25]} selected={selectedItem === "screen"} enabled={true} onClick={() => setSelectedItem(selectedItem === "screen" ? null : "screen")}><group><mesh><boxGeometry args={[0.005, 0.06, 0.05]} /><meshStandardMaterial color="#fff" /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-gray-100 px-2 py-1 rounded text-xs font-bold">Ecran</div></Html></group></ClickableObject>}
+
+      {/* Formula */}
+      {imageFocused && <Html position={[-0.35, 0.35, 0]} center><div className="bg-blue-900 text-white p-2 rounded text-xs"><div className="font-bold">Relation conjugaison</div><div className="text-yellow-300">1/OA' - 1/OA = 1/f'</div><div className="text-green-300 mt-1">OA=-35cm, f'=10cm</div><div className="text-green-300">OA'=+14cm</div></div></Html>}
     </group>
   )
 }
@@ -618,6 +747,75 @@ function FreeFallExperiment({ state, setState, setStep, experiment, selectedItem
 
       {/* Formula */}
       {measured && <Html position={[-0.25, 0.25, 0]} center><div className="bg-blue-900 text-white p-2 rounded text-xs"><div className="font-bold">Chute Libre</div><div className="text-yellow-300">h = ½gt²</div><div className="text-green-300">g = 2h/t²</div><div className="text-white mt-1">g ≈ 9.81 m/s²</div></div></Html>}
+    </group>
+  )
+}
+
+function BloodCirculationExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+  const { heartViewed, pulmonaryTracked, systemicTracked, organsIdentified } = state
+  const [bloodFlow, setBloodFlow] = useState(false)
+  
+  useEffect(() => {
+    if (heartViewed) setBloodFlow(true)
+  }, [heartViewed])
+  
+  const handleAction = (action) => {
+    if (action === "heart") { setState(p => ({ ...p, heartViewed: true })); setStep(1); toast.success("❤️ Coeur observe!") }
+    else if (action === "pulmonary" && heartViewed) { setState(p => ({ ...p, pulmonaryTracked: true })); setStep(2); toast.success("🫁 Circulation pulmonaire!") }
+    else if (action === "systemic" && pulmonaryTracked) { setState(p => ({ ...p, systemicTracked: true })); setStep(3); toast.success("🔴 Circulation systemique!") }
+    else if (action === "organs" && systemicTracked) { setState(p => ({ ...p, organsIdentified: true })); setStep(experiment.steps.length - 1); toast.success("✅ Double circulation comprise!") }
+  }
+  
+  return (
+    <group>
+      {/* Heart */}
+      <group position={[0, 0.2, 0]}>
+        <mesh><sphereGeometry args={[0.1, 32, 32]} /><meshStandardMaterial color="#dc2626" /></mesh>
+        <mesh position={[-0.06, 0.02, 0.05]}><sphereGeometry args={[0.04, 16, 16]} /><meshStandardMaterial color="#991b1b" /></mesh>
+        <mesh position={[0.06, 0.02, 0.05]}><sphereGeometry args={[0.04, 16, 16]} /><meshStandardMaterial color="#7f1d1d" /></mesh>
+        <Html position={[0, -0.15, 0]} center><div className="bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">❤️ Coeur</div></Html>
+      </group>
+      
+      {/* Lungs */}
+      <group position={[0, 0.2, -0.2]}>
+        <mesh position={[-0.15, 0, 0]}><sphereGeometry args={[0.08, 16, 16]} /><meshStandardMaterial color="#fca5a5" /></mesh>
+        <mesh position={[0.15, 0, 0]}><sphereGeometry args={[0.08, 16, 16]} /><meshStandardMaterial color="#fca5a5" /></mesh>
+        <Html position={[0, 0.12, 0]} center><div className="bg-pink-200 px-2 py-1 rounded text-xs font-bold">🫁 Poumons</div></Html>
+      </group>
+      
+      {/* Body organs */}
+      <group position={[0, -0.1, 0]}>
+        <mesh><boxGeometry args={[0.3, 0.15, 0.1]} /><meshStandardMaterial color="#fbbf24" /></mesh>
+        <Html position={[0, -0.1, 0]} center><div className="bg-yellow-400 px-2 py-1 rounded text-xs font-bold">Organes</div></Html>
+      </group>
+      
+      {/* Blood vessels */}
+      {bloodFlow && <>
+        {/* Pulmonary circulation - blue to lungs, red back */}
+        {pulmonaryTracked && <>
+          <Line points={[[0.05, 0.25, 0], [0.1, 0.25, -0.1], [0.15, 0.2, -0.2]]} color="#3b82f6" lineWidth={3} />
+          <Line points={[[-0.15, 0.2, -0.2], [-0.1, 0.25, -0.1], [-0.05, 0.25, 0]]} color="#ef4444" lineWidth={3} />
+        </>}
+        {/* Systemic circulation - red to body, blue back */}
+        {systemicTracked && <>
+          <Line points={[[0, 0.1, 0], [0, 0, 0], [0.1, -0.05, 0]]} color="#ef4444" lineWidth={3} />
+          <Line points={[[-0.1, -0.05, 0], [0, 0, 0], [0, 0.1, 0]]} color="#3b82f6" lineWidth={3} />
+        </>}
+      </>}
+
+      {/* Target zones */}
+      <TargetZone position={[0, 0.2, 0.12]} label="❤️ Coeur" active={!heartViewed} onClick={() => handleAction("heart")} />
+      {heartViewed && !pulmonaryTracked && <TargetZone position={[0, 0.2, -0.1]} label="🫁 Pulmonaire" active={true} onClick={() => handleAction("pulmonary")} />}
+      {pulmonaryTracked && !systemicTracked && <TargetZone position={[0, 0.05, 0]} label="🔴 Systemique" active={true} onClick={() => handleAction("systemic")} />}
+      {systemicTracked && !organsIdentified && <TargetZone position={[0, -0.1, 0.1]} label="✅ Comprendre" active={true} onClick={() => handleAction("organs")} />}
+
+      {/* Info display */}
+      {heartViewed && <Html position={[0.35, 0.3, 0]} center><div className="bg-red-900 text-white p-2 rounded text-xs">
+        <div className="font-bold mb-1">Double Circulation</div>
+        {pulmonaryTracked && <div className="text-blue-300">🫁 Pulmonaire: Coeur↔Poumons</div>}
+        {systemicTracked && <div className="text-red-300">🔴 Systemique: Coeur↔Organes</div>}
+        {organsIdentified && <div className="text-yellow-300 mt-1">DC = 5 L/min</div>}
+      </div></Html>}
     </group>
   )
 }
@@ -1835,9 +2033,33 @@ function ExperimentSummaryModal({ experiment, onClose, onRetry }) {
 
 export default function ARLabPage() {
   const navigate = useNavigate()
+  const { canAccessLab, isFree, plan } = usePlan()
   const [subject, setSubject] = useState(null)
   const [level, setLevel] = useState(null)
   const [experiment, setExperiment] = useState(null)
+  const [completedExperiments, setCompletedExperiments] = useState(() => {
+    const saved = localStorage.getItem('edusen_completed_experiments')
+    return saved ? JSON.parse(saved) : []
+  })
+  
+  const FREE_EXPERIMENT_LIMIT = 3
+  const canAccessExperiment = (expId) => {
+    if (!isFree) return true // Paid users get unlimited
+    // Free users: allow if already completed OR under limit
+    return completedExperiments.includes(expId) || completedExperiments.length < FREE_EXPERIMENT_LIMIT
+  }
+  
+  const markExperimentStarted = (expId) => {
+    if (!completedExperiments.includes(expId)) {
+      const updated = [...completedExperiments, expId]
+      setCompletedExperiments(updated)
+      localStorage.setItem('edusen_completed_experiments', JSON.stringify(updated))
+    }
+  }
+
+
+
+
 
   if (!subject) return (
     <div className="space-y-6">
@@ -1863,8 +2085,53 @@ export default function ARLabPage() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-4 mb-4"><button onClick={() => setLevel(null)} className="btn-secondary"><ArrowLeft size={20} /></button><h1 className="text-lg font-bold">{level === "lycee" ? "📚 Lycee" : "🎓 Universite"}</h1></div>
+        {isFree && (
+          <div className="bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-xl p-4 mb-4 flex items-center justify-between">
+            <div>
+              <p className="font-semibold text-orange-800">Plan Gratuit</p>
+              <p className="text-sm text-orange-600">{FREE_EXPERIMENT_LIMIT - completedExperiments.length} experiences restantes</p>
+            </div>
+            <button onClick={() => navigate('/pricing')} className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-semibold hover:bg-orange-600 transition">
+              Passer Premium
+            </button>
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {experiments.map(exp => <div key={exp.id} onClick={() => setExperiment(exp)} className="card p-4 cursor-pointer hover:shadow-lg hover:scale-102 transition-all"><div className="flex justify-between items-start mb-2"><h3 className="font-bold text-sm">{exp.name}</h3><span className={`px-1.5 py-0.5 rounded text-xs ${exp.difficulty === "Facile" ? "bg-green-100 text-green-700" : exp.difficulty === "Moyen" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{exp.difficulty}</span></div><p className="text-gray-600 text-xs mb-2">{exp.description}</p><button className="btn-primary w-full text-sm py-1.5"><PlayCircle size={14} className="inline mr-1" />Commencer</button></div>)}
+          {experiments.map((exp, index) => {
+            const isLocked = isFree && !canAccessExperiment(exp.id)
+            return (
+              <div 
+                key={exp.id} 
+                onClick={() => {
+                  if (isLocked) {
+                    toast.error(`Abonnez-vous pour acceder a plus de ${FREE_EXPERIMENT_LIMIT} experiences!`)
+                    return
+                  }
+                  markExperimentStarted(exp.id)
+                  setExperiment(exp)
+                }} 
+                className={`card p-4 cursor-pointer transition-all ${isLocked ? 'opacity-60 grayscale' : 'hover:shadow-lg hover:scale-102'}`}
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-bold text-sm flex items-center gap-2">
+                    {isLocked && <span className="text-orange-500">🔒</span>}
+                    {exp.name}
+                  </h3>
+                  <span className={`px-1.5 py-0.5 rounded text-xs ${exp.difficulty === "Facile" ? "bg-green-100 text-green-700" : exp.difficulty === "Moyen" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{exp.difficulty}</span>
+                </div>
+                <p className="text-gray-600 text-xs mb-2">{exp.description}</p>
+                {isLocked ? (
+                  <button className="w-full text-sm py-1.5 bg-gray-200 text-gray-500 rounded-lg">
+                    <span className="inline mr-1">🔒</span> Premium requis
+                  </button>
+                ) : (
+                  <button className="btn-primary w-full text-sm py-1.5">
+                    <PlayCircle size={14} className="inline mr-1" />Commencer
+                  </button>
+                )}
+              </div>
+            )
+          })}
         </div>
       </div>
     )
@@ -1898,11 +2165,45 @@ function ExperimentView({ experiment, onBack }) {
     tankFilled: false, elecElectrodesOn: false, elecPowerOn: false, bubblingH2: false, bubblingO2: false,
     ballPlaced: false, released: false, measured: false,
     seedsPlaced: false, watered: false, germLightOn: false, radicleVisible: false, comparison: false,
+    lensPlaced: false, candleLit: false, screenPlaced: false, imageFocused: false, divergentTested: false,
+    agno3Added: false, naclAdded: false, precipitateFormed: false, filtered: false,
+    heartViewed: false, pulmonaryTracked: false, systemicTracked: false, organsIdentified: false,
     stringAttached: false, massAttached: false, swinging: false, period: 0,
     slideReady: false, stainAdded: false, coverslipOn: false, focusedLow: false, focusedHigh: false,
     plantReady: false, lightOn: false, bubblesVisible: false, darkCompared: false,
   }
   const [state, setState] = useState(initialState)
+  
+  // Mascot control states
+  const [mascotTarget, setMascotTarget] = useState(null)
+  const [mascotWorking, setMascotWorking] = useState(false)
+  const [mascotMessage, setMascotMessage] = useState("Salut! Je suis Roby 🤖")
+  const [pendingAction, setPendingAction] = useState(null)
+  
+  // Helper function to trigger mascot action
+  const [mascotObjectPos, setMascotObjectPos] = useState(null)
+  const [mascotObjectColor, setMascotObjectColor] = useState(null)
+  
+  const triggerMascotAction = (objectPos, targetPos, objectColor, message, action) => {
+    setMascotObjectPos(objectPos)
+    setMascotTarget(targetPos)
+    setMascotObjectColor(objectColor)
+    setMascotMessage(message)
+    setMascotWorking(true)
+    setPendingAction(() => action)
+  }
+  
+  // When mascot completes action
+  const handleMascotComplete = () => {
+    if (pendingAction) {
+      pendingAction()
+      setPendingAction(null)
+    }
+    setMascotWorking(false)
+    setMascotTarget(null)
+    setMascotMessage("C'est fait! ✅")
+    setTimeout(() => setMascotMessage(""), 2000)
+  }
 
   const reset = () => { setState(initialState); setStep(0); setSelectedItem(null); toast.success("🔄 Reset!") }
 
@@ -1911,15 +2212,18 @@ function ExperimentView({ experiment, onBack }) {
   useEffect(() => () => streamRef.current?.getTracks().forEach(t => t.stop()), [])
 
   const renderExperiment = () => {
-    const props = { state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary }
+    const props = { state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary, triggerMascotAction }
     switch(experiment.id) {
       case "acid-base": return <AcidBaseExperiment {...props} />
+      case "precipitation": return <PrecipitationExperiment {...props} />
       case "electrolysis": return <ElectrolysisExperiment {...props} />
       case "combustion": return <CombustionExperiment {...props} />
       case "simple-circuit": return <CircuitExperiment {...props} />
+      case "optics-lens": return <OpticsLensExperiment {...props} />
       case "free-fall": return <FreeFallExperiment {...props} />
       case "parallel-circuit": return <ParallelCircuitExperiment {...props} />
       case "cell-observation": return <CellObservationExperiment {...props} />
+      case "blood-circulation": return <BloodCirculationExperiment {...props} />
       case "germination": return <GerminationExperiment {...props} />
       case "photosynthesis": return <PhotosynthesisExperiment {...props} />
       case "gel-electrophoresis": return <GelElectrophoresisExperiment {...props} />
@@ -1979,6 +2283,14 @@ function ExperimentView({ experiment, onBack }) {
               // Full lab environment
               <FullLabEnvironment>
                 {renderExperiment()}
+                <LabMascot 
+                  targetPosition={mascotTarget}
+                  objectPosition={mascotObjectPos}
+                  objectColor={mascotObjectColor}
+                  isWorking={mascotWorking}
+                  message={mascotMessage}
+                  onActionComplete={handleMascotComplete}
+                />
               </FullLabEnvironment>
             )}
             
@@ -1997,6 +2309,42 @@ function ExperimentView({ experiment, onBack }) {
     </div>
   )
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

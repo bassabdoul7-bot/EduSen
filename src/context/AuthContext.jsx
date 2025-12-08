@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useState } from 'react'
-import { authService } from '../services/supabase'
+﻿import { createContext, useContext, useEffect, useState } from 'react'
+import { authService, supabase } from '../services/supabase'
 
 const AuthContext = createContext({})
 
@@ -16,36 +16,97 @@ export const AuthProvider = ({ children }) => {
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    console.log('🔍 AuthProvider: Starting auth check...')
+  // Load profile - non-blocking, with timeout
+  const loadProfile = async (userId) => {
+    if (!userId) {
+      setProfile(null)
+      return
+    }
     
-    authService.getCurrentUser()
-      .then((user) => {
-        console.log('👤 Current user:', user)
-        setUser(user)
-        // Skip profile loading for now - just set loading to false
+    try {
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Profile load timeout')), 3000)
+      )
+      
+      const fetchPromise = supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle()
+      
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise])
+      
+      if (error) {
+        console.log('Profile load error, using default:', error)
+        setProfile({ id: userId, plan: 'free' })
+      } else if (data) {
+        setProfile({ ...data, plan: data.plan || 'free' })
+      } else {
+        setProfile({ id: userId, plan: 'free' })
+      }
+    } catch (err) {
+      console.log('Profile error/timeout, using default:', err)
+      setProfile({ id: userId, plan: 'free' })
+    }
+  }
+
+  useEffect(() => {
+    let mounted = true
+    console.log('AuthProvider: Starting auth check...')
+    
+    const initAuth = async () => {
+      try {
+        const user = await authService.getCurrentUser()
+        console.log('Current user:', user?.id)
+        
+        if (mounted) {
+          setUser(user)
+          if (user) {
+            await loadProfile(user.id)
+          }
+          setLoading(false)
+        }
+      } catch (err) {
+        console.error('Auth init error:', err)
+        if (mounted) setLoading(false)
+      }
+    }
+
+    initAuth()
+
+    // Failsafe timeout
+    const timeout = setTimeout(() => {
+      if (mounted && loading) {
+        console.log('Auth timeout - forcing load complete')
         setLoading(false)
-      })
-      .catch(err => {
-        console.error('❌ Auth error:', err)
-        setLoading(false)
-      })
+      }
+    }, 5000)
 
     const { data: { subscription } } = authService.onAuthStateChange(
       async (event, session) => {
-        console.log('🔄 Auth state changed:', event)
+        console.log('Auth state changed:', event)
         const currentUser = session?.user ?? null
-        setUser(currentUser)
-        setLoading(false)
+        
+        if (mounted) {
+          setUser(currentUser)
+          if (currentUser) {
+            loadProfile(currentUser.id)  // Don't await
+          } else {
+            setProfile(null)
+          }
+          setLoading(false)
+        }
       }
     )
 
     return () => {
+      mounted = false
+      clearTimeout(timeout)
       subscription?.unsubscribe()
     }
   }, [])
 
-  const signUp = async (email, password, fullName) => {
+  const signUp = async (email, password, fullName, extra = {}) => {
     const { data, error } = await authService.signUp(email, password, fullName)
     return { data, error }
   }
@@ -71,10 +132,8 @@ export const AuthProvider = ({ children }) => {
     signUp,
     signIn,
     signOut,
-    refreshProfile: () => {},
+    refreshProfile: () => user && loadProfile(user.id),
   }
-
-  console.log('🎯 Auth state:', { user: !!user, profile: !!profile, loading })
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
