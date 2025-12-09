@@ -539,7 +539,7 @@ function AcidBaseExperiment({ state, setState, setStep, experiment, selectedItem
   )
 }
 
-function PrecipitationExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+function PrecipitationExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, triggerMascotAction }) {
   const { agno3Added, naclAdded, precipitateFormed, filtered } = state
   const [precipitateAmount, setPrecipitateAmount] = useState(0)
   
@@ -551,27 +551,47 @@ function PrecipitationExperiment({ state, setState, setStep, experiment, selecte
   }, [naclAdded, precipitateAmount])
   
   const handleAction = (action) => {
-    if (action === "agno3" && selectedItem === "agno3") { setState(p => ({ ...p, agno3Added: true })); setSelectedItem(null); setStep(1); toast.success("🧪 AgNO3 verse!") }
-    else if (action === "nacl" && selectedItem === "nacl" && agno3Added) { setState(p => ({ ...p, naclAdded: true, precipitateFormed: true })); setSelectedItem(null); setStep(2); toast.success("⚪ Precipite blanc forme!") }
-    else if (action === "filter" && precipitateAmount >= 10) { setState(p => ({ ...p, filtered: true })); setStep(3); toast.success("🔬 AgCl filtre!") }
+    if (action === "agno3" && selectedItem === "agno3") {
+      triggerMascotAction([-0.35, 0.1, 0.25], [0, 0.15, 0], "#e0e0e0", "Je verse AgNO3!", () => {
+        setState(p => ({ ...p, agno3Added: true })); setSelectedItem(null); setStep(1); toast.success("🧪 AgNO3 verse!")
+      })
+    }
+    else if (action === "nacl" && selectedItem === "nacl" && agno3Added) {
+      triggerMascotAction([0.35, 0.1, 0.25], [0, 0.15, 0], "#ffffff", "J'ajoute NaCl!", () => {
+        setState(p => ({ ...p, naclAdded: true, precipitateFormed: true })); setSelectedItem(null); setStep(2); toast.success("⚪ Precipite blanc forme!")
+      })
+    }
+    else if (action === "filter" && precipitateAmount >= 10) {
+      triggerMascotAction([0, 0.1, 0], [0.3, 0.15, 0], "#ffffff", "Je filtre!", () => {
+        setState(p => ({ ...p, filtered: true })); setStep(3); toast.success("🔬 AgCl filtre!")
+      })
+    }
     else if (action === "identify" && filtered) { setStep(experiment.steps.length - 1); toast.success("✅ AgCl identifie - Test Cl- positif!") }
   }
   
   return (
     <group>
-      {/* Beaker */}
-      <group position={[0, 0.1, 0]}>
-        <mesh><cylinderGeometry args={[0.08, 0.07, 0.15, 32, 1, true]} /><meshPhysicalMaterial color="#fff" transparent opacity={0.2} side={2} /></mesh>
-        {agno3Added && <mesh position={[0, -0.02, 0]}><cylinderGeometry args={[0.07, 0.065, 0.1, 32]} /><meshStandardMaterial color={naclAdded ? "#f5f5f5" : "#e0e0e0"} transparent opacity={0.8} /></mesh>}
-        {naclAdded && precipitateAmount > 0 && <mesh position={[0, -0.05, 0]}><cylinderGeometry args={[0.065, 0.06, precipitateAmount * 0.005, 32]} /><meshStandardMaterial color="#fff" /></mesh>}
-        <Html position={[0, -0.1, 0.1]} center><div className="bg-gray-600 text-white px-2 py-1 rounded text-xs">Becher</div></Html>
+      {/* Erlenmeyer Flask */}
+      <group position={[0, 0.08, 0]}>
+        <mesh><cylinderGeometry args={[0.03, 0.1, 0.15, 32, 1, true]} /><meshStandardMaterial color="#88ccff" transparent opacity={0.5} side={THREE.DoubleSide} /></mesh>
+        <mesh position={[0, -0.075, 0]} rotation={[-Math.PI/2, 0, 0]}><circleGeometry args={[0.1, 32]} /><meshStandardMaterial color="#88ccff" transparent opacity={0.45} /></mesh>
+        <mesh position={[0, 0.1, 0]}><cylinderGeometry args={[0.028, 0.03, 0.05, 24, 1, true]} /><meshStandardMaterial color="#88ccff" transparent opacity={0.5} side={THREE.DoubleSide} /></mesh>
+        <mesh position={[0, 0.125, 0]}><torusGeometry args={[0.028, 0.005, 12, 24]} /><meshStandardMaterial color="#ffffff" /></mesh>
+        <mesh position={[0, -0.07, 0]}><torusGeometry args={[0.1, 0.004, 12, 32]} /><meshStandardMaterial color="#aaddff" /></mesh>
+        {agno3Added && <mesh position={[0, -0.03, 0]}><cylinderGeometry args={[0.045, 0.085, 0.08, 32]} /><meshStandardMaterial color={naclAdded ? "#f8f8f8" : "#e8e8e8"} transparent opacity={0.85} /></mesh>}
+        {naclAdded && precipitateAmount > 0 && <mesh position={[0, -0.06, 0]}><cylinderGeometry args={[0.05 + precipitateAmount * 0.002, 0.08, precipitateAmount * 0.004, 32]} /><meshStandardMaterial color="#ffffff" /></mesh>}
+        <Html position={[0, -0.12, 0.12]} center><div className="bg-blue-600 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-lg">Erlenmeyer</div></Html>
       </group>
-      
-      {/* Filter funnel */}
-      {precipitateAmount >= 10 && <group position={[0.3, 0.15, 0]}>
-        <mesh><coneGeometry args={[0.06, 0.1, 32, 1, true]} /><meshPhysicalMaterial color="#fff" transparent opacity={0.3} side={2} /></mesh>
-        {filtered && <mesh position={[0, -0.02, 0]}><coneGeometry args={[0.04, 0.04, 32]} /><meshStandardMaterial color="#fff" /></mesh>}
-        <Html position={[0, 0.08, 0]} center><div className="bg-gray-200 px-2 py-1 rounded text-xs font-bold">Filtre</div></Html>
+
+      {/* Glass Filter Funnel with Stand */}
+      {precipitateAmount >= 10 && <group position={[0.3, 0.12, 0]}>
+        <mesh><coneGeometry args={[0.07, 0.12, 32, 1, true]} /><meshStandardMaterial color="#88ccff" transparent opacity={0.4} side={THREE.DoubleSide} /></mesh>
+        <mesh position={[0, 0.06, 0]}><cylinderGeometry args={[0.015, 0.015, 0.04, 16]} /><meshStandardMaterial color="#88ccff" transparent opacity={0.5} /></mesh>
+        <mesh position={[0, 0.065, 0]}><torusGeometry args={[0.07, 0.004, 12, 24]} /><meshStandardMaterial color="#aaddff" /></mesh>
+        <mesh position={[0, -0.08, 0]}><cylinderGeometry args={[0.008, 0.008, 0.06, 12]} /><meshStandardMaterial color="#666666" metalness={0.8} roughness={0.2} /></mesh>
+        <mesh position={[0, -0.11, 0]}><boxGeometry args={[0.12, 0.005, 0.08]} /><meshStandardMaterial color="#444444" metalness={0.6} roughness={0.3} /></mesh>
+        {filtered && <mesh position={[0, 0, 0]}><coneGeometry args={[0.05, 0.06, 32]} /><meshStandardMaterial color="#ffffff" /></mesh>}
+        <Html position={[0, 0.1, 0]} center><div className="bg-gray-700 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-lg">Entonnoir</div></Html>
       </group>}
 
       {/* Target zones */}
@@ -580,16 +600,33 @@ function PrecipitationExperiment({ state, setState, setStep, experiment, selecte
       {precipitateAmount >= 10 && !filtered && <TargetZone position={[0.3, 0.2, 0]} label="🔬 Filtrer" active={true} onClick={() => handleAction("filter")} />}
       {filtered && <TargetZone position={[0.3, 0.25, 0]} label="✅ Identifier" active={true} onClick={() => handleAction("identify")} />}
 
-      {/* Clickable bottles */}
-      {!agno3Added && <ClickableObject position={[-0.35, 0.1, 0.25]} selected={selectedItem === "agno3"} enabled={true} onClick={() => setSelectedItem(selectedItem === "agno3" ? null : "agno3")}><group><mesh><cylinderGeometry args={[0.025, 0.025, 0.08, 16]} /><meshStandardMaterial color="#c0c0c0" /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-gray-200 px-2 py-1 rounded text-xs font-bold">AgNO3</div></Html></group></ClickableObject>}
-      {!naclAdded && agno3Added && <ClickableObject position={[0.35, 0.1, 0.25]} selected={selectedItem === "nacl"} enabled={true} onClick={() => setSelectedItem(selectedItem === "nacl" ? null : "nacl")}><group><mesh><cylinderGeometry args={[0.025, 0.025, 0.08, 16]} /><meshStandardMaterial color="#fff" /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-white border px-2 py-1 rounded text-xs font-bold">NaCl</div></Html></group></ClickableObject>}
+      {/* Reagent Bottles */}
+      {!agno3Added && <ClickableObject position={[-0.35, 0.08, 0.25]} selected={selectedItem === "agno3"} enabled={true} onClick={() => setSelectedItem(selectedItem === "agno3" ? null : "agno3")}>
+        <group>
+          <mesh><cylinderGeometry args={[0.028, 0.032, 0.09, 16]} /><meshStandardMaterial color="#aaddff" transparent opacity={0.6} /></mesh>
+          <mesh position={[0, -0.04, 0]}><cylinderGeometry args={[0.03, 0.03, 0.01, 16]} /><meshStandardMaterial color="#88bbee" transparent opacity={0.5} /></mesh>
+          <mesh position={[0, 0.055, 0]}><cylinderGeometry args={[0.015, 0.02, 0.02, 12]} /><meshStandardMaterial color="#aaddff" transparent opacity={0.6} /></mesh>
+          <mesh position={[0, 0.07, 0]}><cylinderGeometry args={[0.018, 0.018, 0.015, 12]} /><meshStandardMaterial color="#333333" /></mesh>
+          <mesh position={[0, -0.01, 0]}><cylinderGeometry args={[0.024, 0.026, 0.05, 16]} /><meshStandardMaterial color="#e0e0e0" transparent opacity={0.9} /></mesh>
+          <Html position={[0, 0.1, 0]} center><div className="bg-gray-700 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-lg border border-gray-500">AgNO3</div></Html>
+        </group>
+      </ClickableObject>}
+      {!naclAdded && agno3Added && <ClickableObject position={[0.35, 0.08, 0.25]} selected={selectedItem === "nacl"} enabled={true} onClick={() => setSelectedItem(selectedItem === "nacl" ? null : "nacl")}>
+        <group>
+          <mesh><cylinderGeometry args={[0.028, 0.032, 0.09, 16]} /><meshStandardMaterial color="#aaddff" transparent opacity={0.6} /></mesh>
+          <mesh position={[0, -0.04, 0]}><cylinderGeometry args={[0.03, 0.03, 0.01, 16]} /><meshStandardMaterial color="#88bbee" transparent opacity={0.5} /></mesh>
+          <mesh position={[0, 0.055, 0]}><cylinderGeometry args={[0.015, 0.02, 0.02, 12]} /><meshStandardMaterial color="#aaddff" transparent opacity={0.6} /></mesh>
+          <mesh position={[0, 0.07, 0]}><cylinderGeometry args={[0.018, 0.018, 0.015, 12]} /><meshStandardMaterial color="#ffffff" /></mesh>
+          <mesh position={[0, -0.01, 0]}><cylinderGeometry args={[0.024, 0.026, 0.05, 16]} /><meshStandardMaterial color="#ffffff" transparent opacity={0.95} /></mesh>
+          <Html position={[0, 0.1, 0]} center><div className="bg-white text-gray-800 px-2 py-1 rounded-lg text-xs font-bold shadow-lg border border-gray-300">NaCl</div></Html>
+        </group>
+      </ClickableObject>}
 
       {/* Formula */}
-      {naclAdded && <Html position={[-0.3, 0.3, 0]} center><div className="bg-purple-900 text-white p-2 rounded text-xs"><div className="font-bold">Precipitation</div><div className="text-yellow-300">Ag⁺ + Cl⁻ → AgCl(s)</div><div className="text-white mt-1">Precipite blanc</div></div></Html>}
+      {naclAdded && <Html position={[-0.3, 0.3, 0]} center><div className="bg-purple-900 text-white p-2 rounded text-xs"><div className="font-bold">Precipitation</div><div className="text-yellow-300">Ag+ + Cl- → AgCl(s)</div><div className="text-white mt-1">Precipite blanc</div></div></Html>}
     </group>
   )
 }
-
 function ElectrolysisExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
   const { tankFilled, elecElectrodesOn, elecPowerOn, bubblingH2, bubblingO2 } = state
   const [h2Volume, setH2Volume] = useState(0)
