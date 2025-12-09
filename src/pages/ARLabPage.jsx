@@ -671,7 +671,7 @@ function PrecipitationExperiment({ state, setState, setStep, experiment, selecte
     </group>
   )
 }
-function ElectrolysisExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, triggerMascotAction }) {
+function ElectrolysisExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, triggerMascotAction, grabbedItem }) {
   const { tankFilled, elecElectrodesOn, elecPowerOn, bubblingH2, bubblingO2 } = state
   const [h2Volume, setH2Volume] = useState(0)
   const [o2Volume, setO2Volume] = useState(0)
@@ -687,8 +687,8 @@ function ElectrolysisExperiment({ state, setState, setStep, experiment, selected
   }, [elecPowerOn, h2Volume])
   
   const handleAction = (action) => {
-    if (action === "fill" && selectedItem === "water") { triggerMascotAction([-0.35, 0.1, 0.25], [0, 0.15, 0], "#3b82f6", "Je remplis!", () => { setState(p => ({ ...p, tankFilled: true })); setSelectedItem(null); setStep(1); toast.success("💧 Cuve remplie!") }) }
-    else if (action === "electrodes" && selectedItem === "electrodes" && tankFilled) { triggerMascotAction([0.35, 0.08, 0.25], [0, 0.18, 0], "#333", "Electrodes!", () => { setState(p => ({ ...p, elecElectrodesOn: true })); setSelectedItem(null); setStep(2); toast.success("⚡ Electrodes placees!") }) }
+    if (action === "fill" && selectedItem === "water") { triggerMascotAction([-0.35, 0.1, 0.25], [0, 0.15, 0], "#3b82f6", "Je remplis!", () => { setState(p => ({ ...p, tankFilled: true })); setSelectedItem(null); setStep(1); toast.success("💧 Cuve remplie!") }, "water") }
+    else if (action === "electrodes" && selectedItem === "electrodes" && tankFilled) { triggerMascotAction([0.35, 0.08, 0.25], [0, 0.18, 0], "#333", "Electrodes!", () => { setState(p => ({ ...p, elecElectrodesOn: true })); setSelectedItem(null); setStep(2); toast.success("⚡ Electrodes placees!") }, "electrodes") }
     else if (action === "power" && elecElectrodesOn && !elecPowerOn) { triggerMascotAction([0.32, 0.1, 0], [0.32, 0.12, 0], "#22c55e", "J allume!", () => { setState(p => ({ ...p, elecPowerOn: true, bubblingH2: true, bubblingO2: true })); setStep(3); toast.success("🔌 Electrolyse en cours!") }) }
     else if (action === "identify" && h2Volume >= 20) { setStep(experiment.steps.length - 1); toast.success("H2 = 2x O2 - Verifie!") }
   }
@@ -730,8 +730,8 @@ function ElectrolysisExperiment({ state, setState, setStep, experiment, selected
       {h2Volume >= 20 && <TargetZone position={[0, 0.4, 0]} label="✅ Identifier" active={true} onClick={() => handleAction("identify")} />}
 
       {/* Clickable items */}
-      {!tankFilled && <ClickableObject position={[-0.35, 0.1, 0.25]} selected={selectedItem === "water"} enabled={true} onClick={() => setSelectedItem(selectedItem === "water" ? null : "water")}><group><mesh><cylinderGeometry args={[0.025, 0.07, 0.12, 32, 1, true]} /><meshPhysicalMaterial color="#88ccff" transparent opacity={0.5} side={THREE.DoubleSide} /></mesh><mesh position={[0, -0.06, 0]} rotation={[-Math.PI/2, 0, 0]}><circleGeometry args={[0.07, 32]} /><meshStandardMaterial color="#88ccff" transparent opacity={0.4} /></mesh><mesh position={[0, 0.08, 0]}><cylinderGeometry args={[0.022, 0.025, 0.04, 16]} /><meshPhysicalMaterial color="#88ccff" transparent opacity={0.5} side={THREE.DoubleSide} /></mesh><mesh position={[0, 0.1, 0]}><torusGeometry args={[0.022, 0.004, 8, 16]} /><meshStandardMaterial color="#ffffff" /></mesh><mesh position={[0, -0.02, 0]}><cylinderGeometry args={[0.035, 0.06, 0.06, 32]} /><meshStandardMaterial color="#3b82f6" transparent opacity={0.7} /></mesh><Html position={[0, 0.14, 0]} center><div className="bg-blue-600 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-lg">H₂O + Na₂SO₄</div></Html></group></ClickableObject>}
-      {!elecElectrodesOn && tankFilled && <ClickableObject position={[0.35, 0.08, 0.25]} selected={selectedItem === "electrodes"} enabled={true} onClick={() => setSelectedItem(selectedItem === "electrodes" ? null : "electrodes")}><group><mesh position={[-0.015, 0, 0]}><cylinderGeometry args={[0.012, 0.012, 0.12, 12]} /><meshStandardMaterial color="#1a1a1a" /></mesh><mesh position={[0.015, 0, 0]}><cylinderGeometry args={[0.012, 0.012, 0.12, 12]} /><meshStandardMaterial color="#1a1a1a" /></mesh><mesh position={[-0.015, 0.065, 0]}><sphereGeometry args={[0.015, 12, 12]} /><meshStandardMaterial color="#dc2626" /></mesh><mesh position={[0.015, 0.065, 0]}><sphereGeometry args={[0.015, 12, 12]} /><meshStandardMaterial color="#2563eb" /></mesh><Html position={[0, 0.1, 0]} center><div className="bg-gray-700 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-lg">Electrodes C</div></Html></group></ClickableObject>}
+      {!tankFilled && grabbedItem !== "water" && <ClickableObject position={[-0.35, 0.1, 0.25]} selected={selectedItem === "water"} enabled={true} onClick={() => setSelectedItem(selectedItem === "water" ? null : "water")}><group><mesh><cylinderGeometry args={[0.025, 0.07, 0.12, 32, 1, true]} /><meshPhysicalMaterial color="#88ccff" transparent opacity={0.5} side={THREE.DoubleSide} /></mesh><mesh position={[0, -0.06, 0]} rotation={[-Math.PI/2, 0, 0]}><circleGeometry args={[0.07, 32]} /><meshStandardMaterial color="#88ccff" transparent opacity={0.4} /></mesh><mesh position={[0, 0.08, 0]}><cylinderGeometry args={[0.022, 0.025, 0.04, 16]} /><meshPhysicalMaterial color="#88ccff" transparent opacity={0.5} side={THREE.DoubleSide} /></mesh><mesh position={[0, 0.1, 0]}><torusGeometry args={[0.022, 0.004, 8, 16]} /><meshStandardMaterial color="#ffffff" /></mesh><mesh position={[0, -0.02, 0]}><cylinderGeometry args={[0.035, 0.06, 0.06, 32]} /><meshStandardMaterial color="#3b82f6" transparent opacity={0.7} /></mesh><Html position={[0, 0.14, 0]} center><div className="bg-blue-600 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-lg">H₂O + Na₂SO₄</div></Html></group></ClickableObject>}
+      {!elecElectrodesOn && tankFilled && grabbedItem !== "electrodes" && <ClickableObject position={[0.35, 0.08, 0.25]} selected={selectedItem === "electrodes"} enabled={true} onClick={() => setSelectedItem(selectedItem === "electrodes" ? null : "electrodes")}><group><mesh position={[-0.015, 0, 0]}><cylinderGeometry args={[0.012, 0.012, 0.12, 12]} /><meshStandardMaterial color="#1a1a1a" /></mesh><mesh position={[0.015, 0, 0]}><cylinderGeometry args={[0.012, 0.012, 0.12, 12]} /><meshStandardMaterial color="#1a1a1a" /></mesh><mesh position={[-0.015, 0.065, 0]}><sphereGeometry args={[0.015, 12, 12]} /><meshStandardMaterial color="#dc2626" /></mesh><mesh position={[0.015, 0.065, 0]}><sphereGeometry args={[0.015, 12, 12]} /><meshStandardMaterial color="#2563eb" /></mesh><Html position={[0, 0.1, 0]} center><div className="bg-gray-700 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-lg">Electrodes C</div></Html></group></ClickableObject>}
 
       {/* Formula display */}
       {elecPowerOn && <Html position={[-0.35, 0.3, 0]} center><div className="bg-blue-900 text-white p-2 rounded text-xs"><div className="font-bold">Electrolyse</div><div className="text-yellow-300">2H₂O → 2H₂ + O₂</div><div className="text-green-300 mt-1">V(H₂) = 2 × V(O₂)</div></div></Html>}
@@ -1018,11 +1018,11 @@ function GerminationExperiment({ state, setState, setStep, experiment, selectedI
   )
 }
 
-function CombustionExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary }) {
+function CombustionExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary, triggerMascotAction, grabbedItem }) {
   const { bunsenLit, magnesiumBurning } = state
   const handleAction = (a) => {
-    if (a === "lighter" && selectedItem === "lighter") { setState(p => ({ ...p, bunsenLit: true })); setSelectedItem(null); setStep(1); toast.success("🔥 Allume!") }
-    else if (a === "magnesium" && selectedItem === "magnesium" && bunsenLit) { setState(p => ({ ...p, magnesiumBurning: true })); setSelectedItem(null); setStep(3); toast.success("✨ Combustion!"); setTimeout(() => setStep(experiment.steps.length - 1), 2000) }
+    if (a === "lighter" && selectedItem === "lighter") { triggerMascotAction([-0.35, 0.08, 0.28], [0, 0.32, -0.1], "#e74c3c", "J allume!", () => { setState(p => ({ ...p, bunsenLit: true })); setSelectedItem(null); setStep(1); toast.success("🔥 Allume!") }, "lighter") }
+    else if (a === "magnesium" && selectedItem === "magnesium" && bunsenLit) { triggerMascotAction([0.35, 0.08, 0.28], [0, 0.45, -0.1], "#ccc", "Je brule!", () => { setState(p => ({ ...p, magnesiumBurning: true })); setSelectedItem(null); setStep(3); toast.success("✨ Combustion!"); setTimeout(() => setStep(experiment.steps.length - 1), 2000) }, "magnesium") }
   }
   return (
     <group>
@@ -1044,12 +1044,12 @@ function CombustionExperiment({ state, setState, setStep, experiment, selectedIt
       <TargetZone position={[0, 0.32, -0.1]} label="🔥 Allumer" active={selectedItem === "lighter"} onClick={() => handleAction("lighter")} />
       <TargetZone position={[0, 0.45, -0.1]} label="✨ Bruler" active={selectedItem === "magnesium" && bunsenLit} onClick={() => handleAction("magnesium")} />
 
-      <ClickableObject position={[-0.4, 0.08, 0.3]} selected={selectedItem === "lighter"} enabled={!bunsenLit} onClick={() => setSelectedItem(selectedItem === "lighter" ? null : "lighter")}>
+      {grabbedItem !== "lighter" && <ClickableObject position={[-0.4, 0.08, 0.3]} selected={selectedItem === "lighter"} enabled={!bunsenLit} onClick={() => setSelectedItem(selectedItem === "lighter" ? null : "lighter")}>
         <group><mesh><boxGeometry args={[0.03, 0.08, 0.018]} /><meshStandardMaterial color="#e74c3c" /></mesh><Html position={[0, 0.07, 0]} center><div className="bg-red-500 text-white px-1.5 py-0.5 rounded text-xs font-bold">🔥</div></Html></group>
-      </ClickableObject>
-      <ClickableObject position={[0.4, 0.08, 0.3]} selected={selectedItem === "magnesium"} enabled={bunsenLit && !magnesiumBurning} onClick={() => setSelectedItem(selectedItem === "magnesium" ? null : "magnesium")}>
+      </ClickableObject>}
+      {grabbedItem !== "magnesium" && <ClickableObject position={[0.4, 0.08, 0.3]} selected={selectedItem === "magnesium"} enabled={bunsenLit && !magnesiumBurning} onClick={() => setSelectedItem(selectedItem === "magnesium" ? null : "magnesium")}>
         <group><mesh rotation={[0, 0, 0.3]}><boxGeometry args={[0.15, 0.012, 0.006]} /><meshStandardMaterial color="#ccc" metalness={0.95} /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-gray-200 px-2 py-1 rounded text-xs font-bold">Ruban Mg</div></Html></group>
-      </ClickableObject>
+      </ClickableObject>}
 
       
     </group>
@@ -2304,8 +2304,10 @@ function ExperimentView({ experiment, onBack }) {
   // Helper function to trigger mascot action
   const [mascotObjectPos, setMascotObjectPos] = useState(null)
   const [mascotObjectColor, setMascotObjectColor] = useState(null)
+  const [grabbedItem, setGrabbedItem] = useState(null)
   
-  const triggerMascotAction = (objectPos, targetPos, objectColor, message, action) => {
+  const triggerMascotAction = (objectPos, targetPos, objectColor, message, action, itemId = null) => {
+    setGrabbedItem(itemId)
     setMascotObjectPos(objectPos)
     setMascotTarget(targetPos)
     setMascotObjectColor(objectColor)
@@ -2322,6 +2324,7 @@ function ExperimentView({ experiment, onBack }) {
     }
     setMascotWorking(false)
     setMascotTarget(null)
+    setGrabbedItem(null)
     setMascotMessage("C'est fait! ✅")
     setTimeout(() => setMascotMessage(""), 2000)
   }
@@ -2333,7 +2336,7 @@ function ExperimentView({ experiment, onBack }) {
   useEffect(() => () => streamRef.current?.getTracks().forEach(t => t.stop()), [])
 
   const renderExperiment = () => {
-    const props = { state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary, triggerMascotAction }
+    const props = { state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary, triggerMascotAction, grabbedItem }
     switch(experiment.id) {
       case "acid-base": return <AcidBaseExperiment {...props} />
       case "precipitation": return <PrecipitationExperiment {...props} />
