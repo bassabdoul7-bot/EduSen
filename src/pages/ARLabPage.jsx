@@ -671,7 +671,7 @@ function PrecipitationExperiment({ state, setState, setStep, experiment, selecte
     </group>
   )
 }
-function ElectrolysisExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+function ElectrolysisExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, triggerMascotAction }) {
   const { tankFilled, elecElectrodesOn, elecPowerOn, bubblingH2, bubblingO2 } = state
   const [h2Volume, setH2Volume] = useState(0)
   const [o2Volume, setO2Volume] = useState(0)
@@ -687,9 +687,9 @@ function ElectrolysisExperiment({ state, setState, setStep, experiment, selected
   }, [elecPowerOn, h2Volume])
   
   const handleAction = (action) => {
-    if (action === "fill" && selectedItem === "water") { setState(p => ({ ...p, tankFilled: true })); setSelectedItem(null); setStep(1); toast.success("💧 Cuve remplie!") }
-    else if (action === "electrodes" && selectedItem === "electrodes" && tankFilled) { setState(p => ({ ...p, elecElectrodesOn: true })); setSelectedItem(null); setStep(2); toast.success("⚡ Electrodes placees!") }
-    else if (action === "power" && elecElectrodesOn && !elecPowerOn) { setState(p => ({ ...p, elecPowerOn: true, bubblingH2: true, bubblingO2: true })); setStep(3); toast.success("🔌 Electrolyse en cours!") }
+    if (action === "fill" && selectedItem === "water") { triggerMascotAction([-0.35, 0.1, 0.25], [0, 0.15, 0], "#3b82f6", "Je remplis!", () => { setState(p => ({ ...p, tankFilled: true })); setSelectedItem(null); setStep(1); toast.success("💧 Cuve remplie!") }) }
+    else if (action === "electrodes" && selectedItem === "electrodes" && tankFilled) { triggerMascotAction([0.35, 0.08, 0.25], [0, 0.18, 0], "#333", "Electrodes!", () => { setState(p => ({ ...p, elecElectrodesOn: true })); setSelectedItem(null); setStep(2); toast.success("⚡ Electrodes placees!") }) }
+    else if (action === "power" && elecElectrodesOn && !elecPowerOn) { triggerMascotAction([0.32, 0.1, 0], [0.32, 0.12, 0], "#22c55e", "J allume!", () => { setState(p => ({ ...p, elecPowerOn: true, bubblingH2: true, bubblingO2: true })); setStep(3); toast.success("🔌 Electrolyse en cours!") }) }
     else if (action === "identify" && h2Volume >= 20) { setStep(experiment.steps.length - 1); toast.success("H2 = 2x O2 - Verifie!") }
   }
   
