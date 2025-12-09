@@ -17,7 +17,7 @@ function LabRoom() {
       {/* Floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
         <planeGeometry args={[12, 12]} />
-        <meshStandardMaterial color="#d4d4d4" roughness={0.3} />
+        <meshStandardMaterial color="#8B7355" roughness={0.6} />
       </mesh>
       
       {/* Floor tiles pattern */}
@@ -25,11 +25,11 @@ function LabRoom() {
         <group key={`tile-${i}`}>
           <mesh rotation={[-Math.PI/2,0,0]} position={[i, -0.49, 0]}>
             <planeGeometry args={[0.03, 12]} />
-            <meshBasicMaterial color="#bbb" />
+            <meshBasicMaterial color="#6B5344" />
           </mesh>
           <mesh rotation={[-Math.PI/2,0,0]} position={[0, -0.49, i]}>
             <planeGeometry args={[12, 0.03]} />
-            <meshBasicMaterial color="#bbb" />
+            <meshBasicMaterial color="#6B5344" />
           </mesh>
         </group>
       ))}
@@ -571,6 +571,40 @@ function PrecipitationExperiment({ state, setState, setStep, experiment, selecte
   
   return (
     <group>
+      {/* Lab Stand with Clamp */}
+      <group position={[-0.25, 0, -0.3]}>
+        <mesh position={[0, 0.01, 0]}><boxGeometry args={[0.15, 0.02, 0.12]} /><meshStandardMaterial color="#333" metalness={0.8} /></mesh>
+        <mesh position={[0, 0.15, 0]}><cylinderGeometry args={[0.008, 0.008, 0.3, 12]} /><meshStandardMaterial color="#666" metalness={0.9} /></mesh>
+        <mesh position={[0.06, 0.22, 0]}><boxGeometry args={[0.12, 0.015, 0.015]} /><meshStandardMaterial color="#666" metalness={0.9} /></mesh>
+      </group>
+      
+      {/* Stirring Rod */}
+      <mesh position={[0.2, 0.04, -0.2]} rotation={[0, 0.3, Math.PI/2]}><cylinderGeometry args={[0.005, 0.005, 0.18, 8]} /><meshStandardMaterial color="#ddd" transparent opacity={0.6} /></mesh>
+      
+      {/* Petri Dish */}
+      <group position={[0.28, 0.02, -0.25]}>
+        <mesh><cylinderGeometry args={[0.05, 0.05, 0.015, 24]} /><meshPhysicalMaterial color="#fff" transparent opacity={0.3} /></mesh>
+      </group>
+      
+      {/* Wash Bottle */}
+      <group position={[-0.32, 0.06, 0.05]}>
+        <mesh><cylinderGeometry args={[0.025, 0.03, 0.1, 16]} /><meshStandardMaterial color="#fff" transparent opacity={0.5} /></mesh>
+        <mesh position={[0.02, 0.06, 0]} rotation={[0, 0, -0.4]}><cylinderGeometry args={[0.006, 0.004, 0.06, 8]} /><meshStandardMaterial color="#fff" transparent opacity={0.5} /></mesh>
+      </group>
+      
+      {/* Safety Goggles */}
+      <group position={[0.35, 0.02, 0.15]} rotation={[0, -0.5, 0]}>
+        <mesh><torusGeometry args={[0.025, 0.008, 8, 16]} /><meshStandardMaterial color="#222" /></mesh>
+        <mesh position={[0.05, 0, 0]}><torusGeometry args={[0.025, 0.008, 8, 16]} /><meshStandardMaterial color="#222" /></mesh>
+        <mesh position={[0.025, 0, 0]}><boxGeometry args={[0.02, 0.015, 0.008]} /><meshStandardMaterial color="#222" /></mesh>
+      </group>
+      
+      {/* Notebook */}
+      <group position={[-0.38, 0.015, 0.25]} rotation={[0, 0.2, 0]}>
+        <mesh><boxGeometry args={[0.12, 0.01, 0.16]} /><meshStandardMaterial color="#f5f5f0" /></mesh>
+        <mesh position={[0, 0.006, 0]}><boxGeometry args={[0.1, 0.002, 0.14]} /><meshStandardMaterial color="#e8e8e0" /></mesh>
+      </group>
+      
       {/* Erlenmeyer Flask */}
       <group position={[0, 0.08, 0]}>
         <mesh><cylinderGeometry args={[0.03, 0.1, 0.15, 32, 1, true]} /><meshStandardMaterial color="#88ccff" transparent opacity={0.5} side={THREE.DoubleSide} /></mesh>
