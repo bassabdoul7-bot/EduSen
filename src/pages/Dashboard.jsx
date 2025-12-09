@@ -1,4 +1,4 @@
-import { useAuth } from '../context/AuthContext'
+﻿import { useAuth } from '../context/AuthContext'
 import {
   MessageSquare,
   GraduationCap,
@@ -6,7 +6,8 @@ import {
   MessageCircle,
   TrendingUp,
   BookOpen,
-  FlaskConical
+  FlaskConical,
+  FileText
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -27,6 +28,13 @@ export default function Dashboard() {
       icon: FlaskConical,
       link: '/ar-lab',
       color: 'from-pink-500 to-rose-600'
+    },
+    {
+      title: 'Concours',
+      description: 'Epreuves et predictions IA 2026',
+      icon: FileText,
+      link: '/concours',
+      color: 'from-orange-500 to-orange-600'
     },
     {
       title: 'Bourses',
@@ -62,7 +70,7 @@ export default function Dashboard() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
         {quickLinks.map((item) => (
           <Link
             key={item.title}
@@ -111,9 +119,9 @@ export default function Dashboard() {
                 💡 Utilisez le tuteur IA pour obtenir des explications detaillees sur vos devoirs
               </p>
             </div>
-            <div className="p-4 bg-pink-50 rounded-lg border-l-4 border-pink-500">
+            <div className="p-4 bg-orange-50 rounded-lg border-l-4 border-orange-500">
               <p className="text-sm text-gray-700">
-                🔬 Testez le Labo Virtuel - faites des experiences sans equipement!
+                📝 Preparez vos concours avec les anciennes epreuves et predictions IA!
               </p>
             </div>
             <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
