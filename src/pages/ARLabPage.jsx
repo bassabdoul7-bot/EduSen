@@ -240,7 +240,7 @@ function SideLabBench({ position, rotation = [0, 0, 0] }) {
     <group position={position} rotation={rotation}>
       <mesh><boxGeometry args={[2.2, 0.06, 0.7]} /><meshStandardMaterial color="#2a2a2a" roughness={0.3} /></mesh>
       {[[-1, -0.28], [1, -0.28]].map(([x, z], i) => (
-        <mesh key={i} position={[x, -0.28, z]}><boxGeometry args={[0.06, 0.55, 0.06]} /><meshStandardMaterial color="#444" metalness={0.6} /></mesh>
+        <mesh key={i} position={[x, -0.28, z]}><boxGeometry args={[0.06, 0.55, 0.06]} /><meshStandardMaterial color="#1a1a1a" metalness={0.9} roughness={0.1} /></mesh>
       ))}
       {[-0.7, -0.25, 0.2, 0.65].map((x, i) => (
         <group key={i} position={[x, -0.18, 0.32]}>
@@ -271,11 +271,11 @@ function MainLabBench({ children }) {
       {/* Main tabletop - black lab surface */}
       <mesh position={[0, 0, 0]} castShadow receiveShadow>
         <boxGeometry args={[1.6, 0.06, 1.1]} />
-        <meshStandardMaterial color="#1a1a1a" roughness={0.3} />
+        <meshStandardMaterial color="#e0e0e0" roughness={0.15} metalness={0.3} />
       </mesh>
       {/* Legs */}
       {[[-0.7, -0.4], [0.7, -0.4], [-0.7, 0.45], [0.7, 0.45]].map(([x, z], i) => (
-        <mesh key={i} position={[x, -0.28, z]}><boxGeometry args={[0.06, 0.55, 0.06]} /><meshStandardMaterial color="#444" metalness={0.6} /></mesh>
+        <mesh key={i} position={[x, -0.28, z]}><boxGeometry args={[0.06, 0.55, 0.06]} /><meshStandardMaterial color="#1a1a1a" metalness={0.9} roughness={0.1} /></mesh>
       ))}
       {/* Bottom shelf */}
       <mesh position={[0, -0.4, 0]}><boxGeometry args={[1.4, 0.025, 0.9]} /><meshStandardMaterial color="#555" /></mesh>
@@ -474,24 +474,64 @@ function AcidBaseExperiment({ state, setState, setStep, experiment, selectedItem
   }
   return (
     <group>
-      {/* Beaker */}
+     {/* ERLENMEYER FLASK */}
       <group position={[0, 0.08, -0.15]}>
-        <mesh><cylinderGeometry args={[0.1, 0.08, 0.18, 32, 1, true]} /><meshPhysicalMaterial color="#fff" transparent opacity={0.2} side={THREE.DoubleSide} /></mesh>
-        {hclVolume > 0 && <mesh position={[0, -0.02, 0]}><cylinderGeometry args={[0.08, 0.07, 0.12, 32]} /><meshStandardMaterial color={color} transparent opacity={0.85} /></mesh>}
-        <Html position={[0, 0.14, 0]} center><div className="bg-purple-600 text-white px-2 py-0.5 rounded text-xs font-bold">pH: {pH.toFixed(1)}</div></Html>
+        <mesh><cylinderGeometry args={[0.035, 0.13, 0.18, 32, 1, true]} /><meshStandardMaterial color="#88ccff" transparent opacity={0.5} side={THREE.DoubleSide} /></mesh>
+        <mesh position={[0, -0.09, 0]} rotation={[-Math.PI/2, 0, 0]}><circleGeometry args={[0.13, 32]} /><meshStandardMaterial color="#88ccff" transparent opacity={0.45} /></mesh>
+        <mesh position={[0, 0.12, 0]}><cylinderGeometry args={[0.032, 0.035, 0.06, 24, 1, true]} /><meshStandardMaterial color="#88ccff" transparent opacity={0.5} side={THREE.DoubleSide} /></mesh>
+        <mesh position={[0, 0.15, 0]}><torusGeometry args={[0.032, 0.007, 12, 24]} /><meshStandardMaterial color="#ffffff" /></mesh>
+        <mesh position={[0, -0.085, 0]}><torusGeometry args={[0.13, 0.006, 12, 32]} /><meshStandardMaterial color="#aaddff" /></mesh>
+        {hclVolume > 0 && <mesh position={[0, -0.04, 0]}><cylinderGeometry args={[0.055, 0.11, 0.1, 32]} /><meshStandardMaterial color={color} transparent opacity={0.9} /></mesh>}
+        {hclVolume > 0 && <mesh position={[0, 0.01, 0]} rotation={[-Math.PI/2, 0, 0]}><circleGeometry args={[0.055, 32]} /><meshStandardMaterial color={color} /></mesh>}
+        <Html position={[0, 0.25, 0]} center><div className="bg-purple-600 text-white px-3 py-2 rounded-xl text-sm font-bold shadow-xl border-2 border-purple-300">pH: {pH.toFixed(1)}</div></Html>
       </group>
-
       <TargetZone position={[0, 0.22, -0.15]} label="⬇️ Verser" active={["hcl","indicator","naoh"].includes(selectedItem) && ((selectedItem==="hcl"&&!hclVolume)||(selectedItem==="indicator"&&hclVolume&&!indicatorAdded)||(selectedItem==="naoh"&&indicatorAdded&&!neutralized))} onClick={() => handlePour(selectedItem)} />
 
+      {/* Fire extinguisher */}
+      <group position={[-0.7, -0.3, 0.2]}>
+        <mesh position={[0, 0.15, 0]}><cylinderGeometry args={[0.04, 0.04, 0.28, 16]} /><meshStandardMaterial color="#cc0000" roughness={0.4} /></mesh>
+        <mesh position={[0, 0.3, 0]}><cylinderGeometry args={[0.025, 0.04, 0.025, 16]} /><meshStandardMaterial color="#cc0000" /></mesh>
+        <mesh position={[0, 0.32, 0]}><boxGeometry args={[0.05, 0.015, 0.02]} /><meshStandardMaterial color="#111" /></mesh>
+      </group>
+      {/* Wash bottle */}
+      <group position={[0.55, 0.1, -0.2]}>
+        <mesh position={[0, 0.04, 0]}><cylinderGeometry args={[0.03, 0.025, 0.1, 16]} /><meshPhysicalMaterial color="#ffffff" transparent opacity={0.35} /></mesh>
+        <mesh position={[0, 0.03, 0]}><cylinderGeometry args={[0.024, 0.02, 0.07, 16]} /><meshStandardMaterial color="#4fc3f7" transparent opacity={0.6} /></mesh>
+        <mesh position={[0, 0.095, 0]}><cylinderGeometry args={[0.015, 0.02, 0.02, 12]} /><meshStandardMaterial color="#f44336" /></mesh>
+        <mesh position={[0.015, 0.13, 0]} rotation={[0.6, 0, 0.3]}><cylinderGeometry args={[0.004, 0.003, 0.08, 8]} /><meshStandardMaterial color="#f44336" /></mesh>
+      </group>
+      {/* Test tube rack */}
+      <group position={[-0.25, 0.06, -0.25]}>
+        <mesh><boxGeometry args={[0.12, 0.01, 0.04]} /><meshStandardMaterial color="#4a3728" roughness={0.9} /></mesh>
+        <mesh position={[0, 0.04, 0]}><boxGeometry args={[0.12, 0.008, 0.025]} /><meshStandardMaterial color="#4a3728" /></mesh>
+        <mesh position={[-0.05, 0.02, 0]}><boxGeometry args={[0.008, 0.04, 0.025]} /><meshStandardMaterial color="#4a3728" /></mesh>
+        <mesh position={[0.05, 0.02, 0]}><boxGeometry args={[0.008, 0.04, 0.025]} /><meshStandardMaterial color="#4a3728" /></mesh>
+        <group position={[-0.03, 0.06, 0]}><mesh><cylinderGeometry args={[0.008, 0.008, 0.07, 12]} /><meshPhysicalMaterial color="#ffffff" transparent opacity={0.25} /></mesh><mesh position={[0, -0.02, 0]}><cylinderGeometry args={[0.006, 0.006, 0.025, 12]} /><meshStandardMaterial color="#81c784" transparent opacity={0.8} /></mesh></group>
+        <group position={[0, 0.06, 0]}><mesh><cylinderGeometry args={[0.008, 0.008, 0.07, 12]} /><meshPhysicalMaterial color="#ffffff" transparent opacity={0.25} /></mesh><mesh position={[0, -0.02, 0]}><cylinderGeometry args={[0.006, 0.006, 0.025, 12]} /><meshStandardMaterial color="#64b5f6" transparent opacity={0.8} /></mesh></group>
+        <group position={[0.03, 0.06, 0]}><mesh><cylinderGeometry args={[0.008, 0.008, 0.07, 12]} /><meshPhysicalMaterial color="#ffffff" transparent opacity={0.25} /></mesh><mesh position={[0, -0.02, 0]}><cylinderGeometry args={[0.006, 0.006, 0.025, 12]} /><meshStandardMaterial color="#ffb74d" transparent opacity={0.8} /></mesh></group>
+      </group>
+      {/* Bunsen Burner */}
+      <group position={[0.25, 0.05, -0.25]}>
+        <mesh position={[0, 0.01, 0]}><cylinderGeometry args={[0.045, 0.05, 0.02, 24]} /><meshStandardMaterial color="#1a1a1a" metalness={0.85} roughness={0.15} /></mesh>
+        <mesh position={[0, 0.07, 0]}><cylinderGeometry args={[0.016, 0.018, 0.1, 16]} /><meshStandardMaterial color="#2a2a2a" metalness={0.75} roughness={0.25} /></mesh>
+        <mesh position={[0, 0.125, 0]}><cylinderGeometry args={[0.022, 0.016, 0.015, 16]} /><meshStandardMaterial color="#1a1a1a" metalness={0.85} /></mesh>
+      </group>
+      {/* Wooden shelf for bottles */}
+      <group position={[0, 0.02, 0.3]}>
+        <mesh position={[0, 0, 0]}><boxGeometry args={[0.95, 0.015, 0.12]} /><meshStandardMaterial color="#8B4513" roughness={0.85} /></mesh>
+        <mesh position={[0, -0.005, 0.055]}><boxGeometry args={[0.95, 0.025, 0.01]} /><meshStandardMaterial color="#6d3710" roughness={0.9} /></mesh>
+        <mesh position={[-0.4, -0.025, -0.03]}><boxGeometry args={[0.015, 0.05, 0.08]} /><meshStandardMaterial color="#444" metalness={0.8} /></mesh>
+        <mesh position={[0.4, -0.025, -0.03]}><boxGeometry args={[0.015, 0.05, 0.08]} /><meshStandardMaterial color="#444" metalness={0.8} /></mesh>
+      </group>
       {/* Bottles on shelf */}
       <ClickableObject position={[-0.4, 0.1, 0.3]} selected={selectedItem === "hcl"} enabled={!hclVolume} onClick={() => setSelectedItem(selectedItem === "hcl" ? null : "hcl")}>
-        <group><mesh><cylinderGeometry args={[0.04, 0.04, 0.12, 16]} /><meshStandardMaterial color="#ff6b6b" /></mesh><mesh position={[0, 0.07, 0]}><cylinderGeometry args={[0.025, 0.025, 0.02, 16]} /><meshStandardMaterial color="#333" /></mesh><Html position={[0, 0.12, 0]} center><div className="bg-white px-2 py-1 rounded text-xs font-bold shadow">HCl (Acide)</div></Html></group>
+        <group><mesh position={[0, 0.03, 0]}><cylinderGeometry args={[0.042, 0.035, 0.08, 16]} /><meshPhysicalMaterial color="#ff6b6b" transparent opacity={0.3} roughness={0.1} /></mesh><mesh position={[0, 0.02, 0]}><cylinderGeometry args={[0.036, 0.03, 0.06, 16]} /><meshStandardMaterial color="#ff4444" transparent opacity={0.9} /></mesh><mesh position={[0, 0.075, 0]}><cylinderGeometry args={[0.028, 0.042, 0.02, 16]} /><meshPhysicalMaterial color="#ff6b6b" transparent opacity={0.75} /></mesh><mesh position={[0, 0.095, 0]}><cylinderGeometry args={[0.022, 0.028, 0.025, 16]} /><meshPhysicalMaterial color="#ff6b6b" transparent opacity={0.7} /></mesh><mesh position={[0, 0.115, 0]}><cylinderGeometry args={[0.024, 0.024, 0.02, 16]} /><meshStandardMaterial color="#1a1a1a" roughness={0.8} /></mesh><Html position={[0, 0.16, 0]} center><div className="bg-white px-2 py-1 rounded text-xs font-bold shadow border-2 border-red-500">HCl (Acide)</div></Html></group>
       </ClickableObject>
       <ClickableObject position={[0, 0.08, 0.3]} selected={selectedItem === "indicator"} enabled={hclVolume > 0 && !indicatorAdded} onClick={() => setSelectedItem(selectedItem === "indicator" ? null : "indicator")}>
-        <group><mesh><cylinderGeometry args={[0.028, 0.028, 0.08, 16]} /><meshStandardMaterial color="#9b59b6" /></mesh><mesh position={[0, 0.05, 0]}><cylinderGeometry args={[0.018, 0.018, 0.015, 16]} /><meshStandardMaterial color="#333" /></mesh><Html position={[0, 0.1, 0]} center><div className="bg-purple-100 px-2 py-1 rounded text-xs font-bold shadow">Indicateur</div></Html></group>
+        <group><mesh position={[0, 0.025, 0]}><cylinderGeometry args={[0.032, 0.026, 0.065, 16]} /><meshPhysicalMaterial color="#9b59b6" transparent opacity={0.3} roughness={0.1} /></mesh><mesh position={[0, 0.015, 0]}><cylinderGeometry args={[0.027, 0.022, 0.045, 16]} /><meshStandardMaterial color="#8e44ad" transparent opacity={0.95} /></mesh><mesh position={[0, 0.062, 0]}><cylinderGeometry args={[0.02, 0.032, 0.015, 16]} /><meshPhysicalMaterial color="#9b59b6" transparent opacity={0.8} /></mesh><mesh position={[0, 0.08, 0]}><cylinderGeometry args={[0.015, 0.02, 0.025, 16]} /><meshPhysicalMaterial color="#9b59b6" transparent opacity={0.75} /></mesh><mesh position={[0, 0.1, 0]}><cylinderGeometry args={[0.017, 0.017, 0.018, 16]} /><meshStandardMaterial color="#2d2d2d" roughness={0.9} /></mesh><Html position={[0, 0.14, 0]} center><div className="bg-purple-100 px-2 py-1 rounded text-xs font-bold shadow border-2 border-purple-500">Indicateur</div></Html></group>
       </ClickableObject>
       <ClickableObject position={[0.4, 0.1, 0.3]} selected={selectedItem === "naoh"} enabled={indicatorAdded && !neutralized} onClick={() => setSelectedItem(selectedItem === "naoh" ? null : "naoh")}>
-        <group><mesh><cylinderGeometry args={[0.04, 0.04, 0.12, 16]} /><meshStandardMaterial color="#4dabf7" /></mesh><mesh position={[0, 0.07, 0]}><cylinderGeometry args={[0.025, 0.025, 0.02, 16]} /><meshStandardMaterial color="#333" /></mesh><Html position={[0, 0.12, 0]} center><div className="bg-blue-100 px-2 py-1 rounded text-xs font-bold shadow">NaOH (Base)</div></Html></group>
+        <group><mesh position={[0, 0.03, 0]}><cylinderGeometry args={[0.042, 0.035, 0.08, 16]} /><meshPhysicalMaterial color="#4dabf7" transparent opacity={0.3} roughness={0.1} /></mesh><mesh position={[0, 0.02, 0]}><cylinderGeometry args={[0.036, 0.03, 0.06, 16]} /><meshStandardMaterial color="#2196f3" transparent opacity={0.9} /></mesh><mesh position={[0, 0.075, 0]}><cylinderGeometry args={[0.028, 0.042, 0.02, 16]} /><meshPhysicalMaterial color="#4dabf7" transparent opacity={0.75} /></mesh><mesh position={[0, 0.095, 0]}><cylinderGeometry args={[0.022, 0.028, 0.025, 16]} /><meshPhysicalMaterial color="#4dabf7" transparent opacity={0.7} /></mesh><mesh position={[0, 0.115, 0]}><cylinderGeometry args={[0.024, 0.024, 0.02, 16]} /><meshStandardMaterial color="#1a1a1a" roughness={0.8} /></mesh><Html position={[0, 0.16, 0]} center><div className="bg-blue-100 px-2 py-1 rounded text-xs font-bold shadow border-2 border-blue-500">NaOH (Base)</div></Html></group>
       </ClickableObject>
 
       
@@ -2177,7 +2217,7 @@ function ExperimentView({ experiment, onBack }) {
   // Mascot control states
   const [mascotTarget, setMascotTarget] = useState(null)
   const [mascotWorking, setMascotWorking] = useState(false)
-  const [mascotMessage, setMascotMessage] = useState("Salut! Je suis Roby 🤖")
+  const [mascotMessage, setMascotMessage] = useState("Salut! Moi c'est Ziz 🧪")
   const [pendingAction, setPendingAction] = useState(null)
   
   // Helper function to trigger mascot action

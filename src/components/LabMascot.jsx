@@ -366,7 +366,7 @@ export function LabMascot({
       
       {/* ============ SPEECH BUBBLE ============ */}
       {message && (
-        <Html position={[0.15, 0.18, 0]} center>
+        <Html position={[0.3, 0.4, 0]} center>
           <div className="bg-white px-3 py-2 rounded-2xl shadow-xl text-xs font-semibold max-w-36 border-2 border-blue-400 relative">
             <div className="absolute -left-2 top-1/2 -translate-y-1/2">
               <div className="w-0 h-0 border-t-[6px] border-b-[6px] border-r-[8px] border-transparent border-r-white"></div>
