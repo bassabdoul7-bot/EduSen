@@ -1,7 +1,8 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 import { usePlan } from '../hooks/usePlan';
+import SecurePDFViewer from '../components/SecurePDFViewer';
 
 const LEVEL_COLORS = {
   cm2: 'bg-green-100 text-green-800',
@@ -26,11 +27,22 @@ export default function ConcoursPage() {
   const [activeTab, setActiveTab] = useState('papers');
   const [generating, setGenerating] = useState(false);
   const [prediction, setPrediction] = useState(null);
+  
+  // Secure PDF Viewer state
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [selectedPaper, setSelectedPaper] = useState(null);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     loadSchools();
     loadPapers();
+    loadUser();
   }, []);
+
+  async function loadUser() {
+    const { data: { user } } = await supabase.auth.getUser();
+    setUser(user);
+  }
 
   async function loadSchools() {
     const { data } = await supabase
@@ -65,11 +77,24 @@ export default function ConcoursPage() {
     return grouped;
   }
 
+  // Open secure PDF viewer
+  function openPDF(paper) {
+    if (!user) {
+      alert('Veuillez vous connecter pour acceder aux documents.');
+      return;
+    }
+    if (!canAccessExamPrep) {
+      alert('Veuillez souscrire a un abonnement pour acceder aux documents.');
+      return;
+    }
+    setSelectedPaper(paper);
+    setViewerOpen(true);
+  }
+
   async function generatePrediction() {
     if (!selectedSchool) return;
     setGenerating(true);
     setPrediction(null);
-
     try {
       const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
@@ -80,7 +105,7 @@ export default function ConcoursPage() {
           'anthropic-dangerous-direct-browser-access': 'true'
         },
         body: JSON.stringify({
-          model: 'claude-3-5-sonnet-20241022',
+          model: 'claude-sonnet-4-20250514',
           max_tokens: 4000,
           messages: [{
             role: 'user',
@@ -120,7 +145,6 @@ IMPORTANT: Reponds UNIQUEMENT en JSON valide:
           }]
         })
       });
-
       const data = await response.json();
       const text = data.content[0].text;
       const parsed = JSON.parse(text);
@@ -149,16 +173,40 @@ IMPORTANT: Reponds UNIQUEMENT en JSON valide:
         <div className="max-w-7xl mx-auto px-4 py-8">
           <h1 className="text-3xl font-bold mb-2">Concours du Senegal</h1>
           <p className="text-green-100">Anciennes epreuves et predictions IA pour 2026</p>
+          
+          {/* User status */}
+          <div className="mt-3 flex items-center gap-2">
+            {user ? (
+              <span className="inline-flex items-center gap-1 bg-green-500/30 px-3 py-1 rounded-full text-sm">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                Documents securises
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 bg-orange-500/30 px-3 py-1 rounded-full text-sm">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Connectez-vous pour acceder aux documents
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="grid md:grid-cols-3 gap-6">
+          {/* Sidebar - Schools */}
           <div className="md:col-span-1">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Ecoles et Concours</h2>
             <div className="space-y-2">
               {schools.map(school => (
-                <button key={school.code} onClick={() => { setSelectedSchool(school); setActiveTab('papers'); setPrediction(null); }} className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selectedSchool?.code === school.code ? 'border-green-500 bg-green-50' : 'border-gray-100 bg-white hover:border-green-200'}`}>
+                <button
+                  key={school.code}
+                  onClick={() => { setSelectedSchool(school); setActiveTab('papers'); setPrediction(null); }}
+                  className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selectedSchool?.code === school.code ? 'border-green-500 bg-green-50' : 'border-gray-100 bg-white hover:border-green-200'}`}
+                >
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="font-semibold text-gray-900">{school.code}</h3>
@@ -170,69 +218,101 @@ IMPORTANT: Reponds UNIQUEMENT en JSON valide:
                         </span>
                       )}
                     </div>
-                    <span className={`text-xs px-2 py-1 rounded-full ${LEVEL_COLORS[school.level] || 'bg-gray-100'}`}>{LEVEL_LABELS[school.level] || school.level}</span>
+                    <span className={`text-xs px-2 py-1 rounded-full ${LEVEL_COLORS[school.level] || 'bg-gray-100'}`}>
+                      {LEVEL_LABELS[school.level] || school.level}
+                    </span>
                   </div>
                 </button>
               ))}
             </div>
           </div>
 
+          {/* Main Content */}
           <div className="md:col-span-2">
             {selectedSchool ? (
               <div className="bg-white rounded-xl shadow-sm p-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedSchool.name}</h2>
                 <p className="text-gray-600 mb-4">{selectedSchool.description}</p>
 
+                {/* Tabs */}
                 <div className="flex border-b mb-6">
-                  <button onClick={() => setActiveTab('papers')} className={`px-4 py-2 font-medium border-b-2 transition-colors ${activeTab === 'papers' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
+                  <button
+                    onClick={() => setActiveTab('papers')}
+                    className={`px-4 py-2 font-medium border-b-2 transition-colors ${activeTab === 'papers' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                  >
                     Anciennes Epreuves
-                    {schoolPapers.length > 0 && <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">{schoolPapers.length}</span>}
+                    {schoolPapers.length > 0 && (
+                      <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">{schoolPapers.length}</span>
+                    )}
                   </button>
-                  <button onClick={() => setActiveTab('prediction')} className={`px-4 py-2 font-medium border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'prediction' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
+                  <button
+                    onClick={() => setActiveTab('prediction')}
+                    className={`px-4 py-2 font-medium border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'prediction' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                  >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
                     Prediction IA 2026
                   </button>
                 </div>
 
+                {/* Papers Tab */}
                 {activeTab === 'papers' && (
                   <div>
                     {Object.keys(papersByYear).length > 0 ? (
                       <div className="space-y-4">
-                        {Object.entries(papersByYear).sort(([a], [b]) => parseInt(b) - parseInt(a)).map(([year, docs]) => (
-                          <div key={year} className="border rounded-lg p-4">
-                            <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
-                              <span className="bg-green-100 text-green-800 px-2 py-1 rounded mr-2">{year}</span>
-                              Session {year}
-                            </h3>
-                            <div className="grid sm:grid-cols-2 gap-3">
-                              {docs.epreuve && (
-                                <a href={docs.epreuve.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-green-50 transition-colors group">
-                                  <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
-                                    <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" /></svg>
-                                  </div>
-                                  <div className="flex-1">
-                                    <p className="font-medium text-gray-900 group-hover:text-green-700">Epreuve {year}</p>
-                                    <p className="text-xs text-gray-500">{docs.epreuve.duration_minutes ? `${docs.epreuve.duration_minutes} min - ` : ''}PDF</p>
-                                  </div>
-                                  <svg className="w-5 h-5 text-gray-400 group-hover:text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                </a>
-                              )}
-                              {docs.corrige && (
-                                <a href={docs.corrige.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-green-50 transition-colors group">
-                                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-                                  </div>
-                                  <div className="flex-1">
-                                    <p className="font-medium text-gray-900 group-hover:text-green-700">Corrige {year}</p>
-                                    <p className="text-xs text-gray-500">Avec explications - PDF</p>
-                                  </div>
-                                  <svg className="w-5 h-5 text-gray-400 group-hover:text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                </a>
+                        {Object.entries(papersByYear)
+                          .sort(([a], [b]) => parseInt(b) - parseInt(a))
+                          .map(([year, docs]) => (
+                            <div key={year} className="border rounded-lg p-4">
+                              <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
+                                <span className="bg-green-100 text-green-800 px-2 py-1 rounded mr-2">{year}</span>
+                                Session {year}
+                              </h3>
+                              <div className="grid sm:grid-cols-2 gap-3">
+                                {/* EPREUVE - Secure Button */}
+                                {docs.epreuve && (
+                                  <button
+                                    onClick={() => openPDF(docs.epreuve)}
+                                    className="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-green-50 transition-colors group text-left w-full"
+                                  >
+                                    <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                                      <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" /></svg>
+                                    </div>
+                                    <div className="flex-1">
+                                      <p className="font-medium text-gray-900 group-hover:text-green-700">Epreuve {year}</p>
+                                      <p className="text-xs text-gray-500">{docs.epreuve.duration_minutes ? `${docs.epreuve.duration_minutes} min` : 'PDF securise'}</p>
+                                    </div>
+                                    <svg className="w-5 h-5 text-gray-400 group-hover:text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                  </button>
+                                )}
+
+                                {/* CORRIGE - Secure Button */}
+                                {docs.corrige && (
+                                  <button
+                                    onClick={() => openPDF(docs.corrige)}
+                                    className="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-green-50 transition-colors group text-left w-full"
+                                  >
+                                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                      <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                                    </div>
+                                    <div className="flex-1">
+                                      <p className="font-medium text-gray-900 group-hover:text-green-700">Corrige {year}</p>
+                                      <p className="text-xs text-gray-500">Avec explications - PDF securise</p>
+                                    </div>
+                                    <svg className="w-5 h-5 text-gray-400 group-hover:text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                  </button>
+                                )}
+                              </div>
+                              {docs.epreuve?.description && (
+                                <p className="text-sm text-gray-500 mt-2">{docs.epreuve.description}</p>
                               )}
                             </div>
-                            {docs.epreuve?.description && <p className="text-sm text-gray-500 mt-2">{docs.epreuve.description}</p>}
-                          </div>
-                        ))}
+                          ))}
                       </div>
                     ) : (
                       <div className="text-center py-8">
@@ -246,6 +326,7 @@ IMPORTANT: Reponds UNIQUEMENT en JSON valide:
                   </div>
                 )}
 
+                {/* Prediction Tab */}
                 {activeTab === 'prediction' && (
                   <div>
                     {!prediction && !generating && (
@@ -364,6 +445,19 @@ IMPORTANT: Reponds UNIQUEMENT en JSON valide:
           </div>
         </div>
       </div>
+
+      {/* Secure PDF Viewer Modal */}
+      {viewerOpen && selectedPaper && (
+        <SecurePDFViewer
+          fileUrl={selectedPaper.file_url}
+          fileName={`${selectedPaper.school_code}_${selectedPaper.year}_${selectedPaper.paper_type}`}
+          user={user}
+          onClose={() => {
+            setViewerOpen(false);
+            setSelectedPaper(null);
+          }}
+        />
+      )}
     </div>
   );
 }
