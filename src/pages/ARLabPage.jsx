@@ -571,6 +571,16 @@ function PrecipitationExperiment({ state, setState, setStep, experiment, selecte
   
   return (
     <group>
+      {/* Wooden Experiment Platform */}
+      <mesh position={[0, 0.01, 0]}>
+        <boxGeometry args={[0.9, 0.02, 0.6]} />
+        <meshStandardMaterial color="#8B5A2B" roughness={0.7} />
+      </mesh>
+      <mesh position={[0, 0.005, 0]}>
+        <boxGeometry args={[0.92, 0.01, 0.62]} />
+        <meshStandardMaterial color="#6B4423" roughness={0.8} />
+      </mesh>
+      
       {/* Lab Stand with Clamp */}
       <group position={[-0.25, 0, -0.3]}>
         <mesh position={[0, 0.01, 0]}><boxGeometry args={[0.15, 0.02, 0.12]} /><meshStandardMaterial color="#333" metalness={0.8} /></mesh>
