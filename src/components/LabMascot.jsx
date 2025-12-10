@@ -1,5 +1,5 @@
 ﻿// ============ LAB MASCOT - NICE DESIGN + GRAB FLOW ============
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
 import * as THREE from 'three'
@@ -23,12 +23,14 @@ export function LabMascot({
   const hasObject = useRef(false)
   const homePosition = new THREE.Vector3(-0.6, 0.3, 0.4)
   const completedRef = useRef(false)
+  const [showHeldObject, setShowHeldObject] = useState(false)
   
   useEffect(() => {
     if (isWorking && objectPosition) {
       phase.current = 'goingToObject'
       hasObject.current = false
       completedRef.current = false
+      setShowHeldObject(false)
     }
     if (!isWorking) {
       phase.current = 'returning'
@@ -83,6 +85,7 @@ export function LabMascot({
       } else {
         hasObject.current = true
         phase.current = 'goingToTarget'
+        setShowHeldObject(true)
       }
       groupRef.current.position.copy(currentPos.current)
       groupRef.current.position.y += bob
@@ -95,6 +98,7 @@ export function LabMascot({
         currentPos.current.lerp(target, 0.08)
       } else {
         phase.current = 'pouring'
+        setShowHeldObject(false)
         setTimeout(() => {
           if (!completedRef.current) {
             completedRef.current = true
@@ -297,7 +301,7 @@ export function LabMascot({
       </group>
       
       {/* ============ HELD BOTTLE ============ */}
-      {hasObject.current && objectColor && (
+      {showHeldObject && objectColor && (
         <group position={[0, -0.05, 0.08]}>
           <mesh>
             <cylinderGeometry args={[0.025, 0.025, 0.06, 12]} />
