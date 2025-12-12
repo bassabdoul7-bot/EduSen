@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"
+﻿import { useState, useEffect, useRef } from "react"
 import { usePlan } from "../hooks/usePlan"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { OrbitControls, Html, Environment, Line } from "@react-three/drei"
@@ -8,6 +8,7 @@ import { ArrowLeft, PlayCircle, Camera, X, List, ChevronDown, ChevronUp, Circle,
 import { useNavigate } from "react-router-dom"
 import * as THREE from "three"
 import { LabMascot } from "../components/LabMascot"
+import { LabTutor } from "../components/LabTutor"
 import { experimentRegistry } from '../components/ar/experimentRegistry'
 
 
@@ -2378,14 +2379,14 @@ export default function ARLabPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-4 mb-6"><button onClick={() => navigate(-1)} className="btn-secondary"><ArrowLeft size={20} /></button><div><h1 className="text-2xl font-bold">Laboratoire 3D</h1><p className="text-gray-600 text-sm">Experiences interactives en environnement realiste</p></div></div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-  {[{id:"chemistry",icon:"🧪",name:"Chimie",color:"from-purple-50 to-pink-50"},{id:"physics",icon:"⚡",name:"Physique",color:"from-blue-50 to-cyan-50"},{id:"biology",icon:"🧬",name:"Biologie",color:"from-green-50 to-emerald-50"},{id:"engineering",icon:"⚙️",name:"Ingenierie",color:"from-orange-50 to-amber-50"},{id:"agriculture",icon:"🌾",name:"Agriculture",color:"from-lime-50 to-green-50"},{id:"medicine",icon:"🏥",name:"Medecine",color:"from-red-50 to-rose-50"}].map(s => <div key={s.id} onClick={() => setSubject(s.id)} className={`card p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-br ${s.color}`}><div className="text-4xl mb-3 text-center">{s.icon}</div><h2 className="text-xl font-bold text-center">{s.name}</h2></div>)}
+  {[{id:"chemistry",icon:"🧪",name:"Chimie",color:"from-purple-50 to-pink-50"},{id:"physics",icon:"⚡",name:"Physique",color:"from-blue-50 to-cyan-50"},{id:"biology",icon:"🧬",name:"Biologie",color:"from-green-50 to-emerald-50"},{id:"engineering",icon:"⚙️",name:"Ingenierie",color:"from-orange-50 to-amber-50"},{id:"agriculture",icon:"🌾",name:"Agriculture",color:"from-lime-50 to-green-50"},{id:"medicine",icon:"🏥",name:"Medecine",color:"from-red-50 to-rose-50"}].map(s => <div key={s.id} onClick={() => setSubject(s.id)} className={`card p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-br ${s.color}`}><div className="text-4xl mb-3 text-center">{s.icon}</div><h2 className="text-xl font-bold text-center">{s.name}</h2></div>)}
 </div>
 </div>
   )
 
   if (!level) return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4 mb-6"><button onClick={() => setSubject(null)} className="btn-secondary"><ArrowLeft size={20} /></button><h1 className="text-xl font-bold">{subject === "chemistry" ? "?? Chimie" : subject === "physics" ? "? Physique" : subject === "biology" ? "?? Biologie" : subject === "engineering" ? "?? Ingenierie" : subject === "agriculture" ? "?? Agriculture" : "?? Medecine"}</h1></div>
+      <div className="flex items-center gap-4 mb-6"><button onClick={() => setSubject(null)} className="btn-secondary"><ArrowLeft size={20} /></button><h1 className="text-xl font-bold">{subject === "chemistry" ? "🧪 Chimie" : subject === "physics" ? "⚡ Physique" : subject === "biology" ? "🧬 Biologie" : subject === "engineering" ? "⚙️ Ingenierie" : subject === "agriculture" ? "🌾 Agriculture" : "🏥 Medecine"}</h1></div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div onClick={() => setLevel("lycee")} className="card p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-br from-green-50 to-emerald-50"><School size={40} className="mx-auto mb-3 text-green-600" /><h2 className="text-xl font-bold text-center mb-1">Lycee</h2><p className="text-center text-gray-500 text-sm">{arLabService.getExperimentsByLevel(subject, "lycee").length} experiences</p></div>
         <div onClick={() => setLevel("universite")} className="card p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-br from-purple-50 to-indigo-50"><GraduationCap size={40} className="mx-auto mb-3 text-purple-600" /><h2 className="text-xl font-bold text-center mb-1">Universite</h2><p className="text-center text-gray-500 text-sm">{arLabService.getExperimentsByLevel(subject, "universite").length} experiences</p></div>
@@ -2397,7 +2398,7 @@ export default function ARLabPage() {
     const experiments = arLabService.getExperimentsByLevel(subject, level)
     return (
       <div className="space-y-4">
-        <div className="flex items-center gap-4 mb-4"><button onClick={() => setLevel(null)} className="btn-secondary"><ArrowLeft size={20} /></button><h1 className="text-lg font-bold">{level === "lycee" ? "?? Lycee" : "?? Universite"}</h1></div>
+        <div className="flex items-center gap-4 mb-4"><button onClick={() => setLevel(null)} className="btn-secondary"><ArrowLeft size={20} /></button><h1 className="text-lg font-bold">{level === "lycee" ? "🏫 Lycee" : "?? Universite"}</h1></div>
         {isFree && (
           <div className="bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-xl p-4 mb-4 flex items-center justify-between">
             <div>
@@ -2624,6 +2625,7 @@ function ExperimentView({ experiment, onBack }) {
           </Canvas>
         </div>
         {arMode && <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-bold flex items-center gap-1"><span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />AR</div>}
+        <LabTutor experimentId={experiment.id} currentStep={step} />
         <StepsPanel steps={experiment.steps} currentStep={step} expanded={stepsOpen} onToggle={() => setStepsOpen(!stepsOpen)} isComplete={step >= experiment.steps.length - 1} experiment={experiment} />
       </div>
     </div>
