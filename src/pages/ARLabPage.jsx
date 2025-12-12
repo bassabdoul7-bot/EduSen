@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom"
 import * as THREE from "three"
 import { LabMascot } from "../components/LabMascot"
 
+
 // ============ LAB ENVIRONMENT ============
 
 function LabRoom() {
@@ -450,7 +451,7 @@ function CompletionBanner({ text, experiment }) {
 
 // ============ EXPERIMENTS ============
 
-function AcidBaseExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary, triggerMascotAction }) {
+function AcidBaseExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary, triggerMascotAction, grabbedItem }) {
   const { hclVolume, indicatorAdded, pH, color, neutralized } = state
   const handlePour = (type) => {
     if (type === "hcl" && selectedItem === "hcl") {
@@ -524,15 +525,15 @@ function AcidBaseExperiment({ state, setState, setStep, experiment, selectedItem
         <mesh position={[0.4, -0.025, -0.03]}><boxGeometry args={[0.015, 0.05, 0.08]} /><meshStandardMaterial color="#444" metalness={0.8} /></mesh>
       </group>
       {/* Bottles on shelf */}
-      <ClickableObject position={[-0.4, 0.1, 0.3]} selected={selectedItem === "hcl"} enabled={!hclVolume} onClick={() => setSelectedItem(selectedItem === "hcl" ? null : "hcl")}>
+      {grabbedItem !== "hcl" && <ClickableObject position={[-0.4, 0.1, 0.3]} selected={selectedItem === "hcl"} enabled={!hclVolume} onClick={() => setSelectedItem(selectedItem === "hcl" ? null : "hcl")}>
         <group><mesh position={[0, 0.03, 0]}><cylinderGeometry args={[0.042, 0.035, 0.08, 16]} /><meshPhysicalMaterial color="#ff6b6b" transparent opacity={0.3} roughness={0.1} /></mesh><mesh position={[0, 0.02, 0]}><cylinderGeometry args={[0.036, 0.03, 0.06, 16]} /><meshStandardMaterial color="#ff4444" transparent opacity={0.9} /></mesh><mesh position={[0, 0.075, 0]}><cylinderGeometry args={[0.028, 0.042, 0.02, 16]} /><meshPhysicalMaterial color="#ff6b6b" transparent opacity={0.75} /></mesh><mesh position={[0, 0.095, 0]}><cylinderGeometry args={[0.022, 0.028, 0.025, 16]} /><meshPhysicalMaterial color="#ff6b6b" transparent opacity={0.7} /></mesh><mesh position={[0, 0.115, 0]}><cylinderGeometry args={[0.024, 0.024, 0.02, 16]} /><meshStandardMaterial color="#1a1a1a" roughness={0.8} /></mesh><Html position={[0, 0.16, 0]} center><div className="bg-white px-2 py-1 rounded text-xs font-bold shadow border-2 border-red-500">HCl (Acide)</div></Html></group>
-      </ClickableObject>
-      <ClickableObject position={[0, 0.08, 0.3]} selected={selectedItem === "indicator"} enabled={hclVolume > 0 && !indicatorAdded} onClick={() => setSelectedItem(selectedItem === "indicator" ? null : "indicator")}>
+      </ClickableObject>}
+      {grabbedItem !== "indicator" && <ClickableObject position={[0, 0.08, 0.3]} selected={selectedItem === "indicator"} enabled={hclVolume > 0 && !indicatorAdded} onClick={() => setSelectedItem(selectedItem === "indicator" ? null : "indicator")}>
         <group><mesh position={[0, 0.025, 0]}><cylinderGeometry args={[0.032, 0.026, 0.065, 16]} /><meshPhysicalMaterial color="#9b59b6" transparent opacity={0.3} roughness={0.1} /></mesh><mesh position={[0, 0.015, 0]}><cylinderGeometry args={[0.027, 0.022, 0.045, 16]} /><meshStandardMaterial color="#8e44ad" transparent opacity={0.95} /></mesh><mesh position={[0, 0.062, 0]}><cylinderGeometry args={[0.02, 0.032, 0.015, 16]} /><meshPhysicalMaterial color="#9b59b6" transparent opacity={0.8} /></mesh><mesh position={[0, 0.08, 0]}><cylinderGeometry args={[0.015, 0.02, 0.025, 16]} /><meshPhysicalMaterial color="#9b59b6" transparent opacity={0.75} /></mesh><mesh position={[0, 0.1, 0]}><cylinderGeometry args={[0.017, 0.017, 0.018, 16]} /><meshStandardMaterial color="#2d2d2d" roughness={0.9} /></mesh><Html position={[0, 0.14, 0]} center><div className="bg-purple-100 px-2 py-1 rounded text-xs font-bold shadow border-2 border-purple-500">Indicateur</div></Html></group>
-      </ClickableObject>
-      <ClickableObject position={[0.4, 0.1, 0.3]} selected={selectedItem === "naoh"} enabled={indicatorAdded && !neutralized} onClick={() => setSelectedItem(selectedItem === "naoh" ? null : "naoh")}>
+      </ClickableObject>}
+      {grabbedItem !== "naoh" && <ClickableObject position={[0.4, 0.1, 0.3]} selected={selectedItem === "naoh"} enabled={indicatorAdded && !neutralized} onClick={() => setSelectedItem(selectedItem === "naoh" ? null : "naoh")}>
         <group><mesh position={[0, 0.03, 0]}><cylinderGeometry args={[0.042, 0.035, 0.08, 16]} /><meshPhysicalMaterial color="#4dabf7" transparent opacity={0.3} roughness={0.1} /></mesh><mesh position={[0, 0.02, 0]}><cylinderGeometry args={[0.036, 0.03, 0.06, 16]} /><meshStandardMaterial color="#2196f3" transparent opacity={0.9} /></mesh><mesh position={[0, 0.075, 0]}><cylinderGeometry args={[0.028, 0.042, 0.02, 16]} /><meshPhysicalMaterial color="#4dabf7" transparent opacity={0.75} /></mesh><mesh position={[0, 0.095, 0]}><cylinderGeometry args={[0.022, 0.028, 0.025, 16]} /><meshPhysicalMaterial color="#4dabf7" transparent opacity={0.7} /></mesh><mesh position={[0, 0.115, 0]}><cylinderGeometry args={[0.024, 0.024, 0.02, 16]} /><meshStandardMaterial color="#1a1a1a" roughness={0.8} /></mesh><Html position={[0, 0.16, 0]} center><div className="bg-blue-100 px-2 py-1 rounded text-xs font-bold shadow border-2 border-blue-500">NaOH (Base)</div></Html></group>
-      </ClickableObject>
+      </ClickableObject>}
 
       
     </group>
@@ -739,80 +740,118 @@ function ElectrolysisExperiment({ state, setState, setStep, experiment, selected
   )
 }
 
-function OpticsLensExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+function OpticsLensExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, triggerMascotAction, grabbedItem }) {
   const { lensPlaced, candleLit, screenPlaced, imageFocused, divergentTested } = state
   const [screenPos, setScreenPos] = useState(0.4)
   const [imageSharp, setImageSharp] = useState(false)
   const [lensType, setLensType] = useState('convergente')
-  
+
   const handleAction = (action) => {
-    if (action === "lens" && selectedItem === "lens") { setState(p => ({ ...p, lensPlaced: true })); setSelectedItem(null); setStep(1); toast.success("🔍 Lentille placee!") }
-    else if (action === "candle" && lensPlaced && !candleLit) { setState(p => ({ ...p, candleLit: true })); setStep(2); toast.success("🕯️ Bougie allumee!") }
-    else if (action === "screen" && selectedItem === "screen" && candleLit) { setState(p => ({ ...p, screenPlaced: true })); setSelectedItem(null); setStep(3); toast.success("📺 Ecran place!") }
+    if (action === "lens" && selectedItem === "lens") { triggerMascotAction([-0.4, 0.08, 0.25], [0, 0.1, 0], "#87ceeb", "Lentille!", () => { setState(p => ({ ...p, lensPlaced: true })); setSelectedItem(null); setStep(1); toast.success("🔍 Lentille placee!") }, "lens") }
+    else if (action === "candle" && lensPlaced && !candleLit) { triggerMascotAction([-0.35, 0.1, 0], [-0.35, 0.1, 0], "#ff9500", "Allume!", () => { setState(p => ({ ...p, candleLit: true })); setStep(2); toast.success("🕯️ Bougie allumee!") }, null) }
+    else if (action === "screen" && selectedItem === "screen" && candleLit) { triggerMascotAction([0.4, 0.08, 0.25], [screenPos, 0.1, 0], "#fff", "Ecran!", () => { setState(p => ({ ...p, screenPlaced: true })); setSelectedItem(null); setStep(3); toast.success("📺 Ecran place!") }, "screen") }
     else if (action === "focus" && screenPlaced && !imageFocused) { setScreenPos(0.25); setImageSharp(true); setState(p => ({ ...p, imageFocused: true })); setStep(2); toast.success("Image REELLE nette!") }
     else if (action === "divergent" && imageFocused && !divergentTested) { setLensType("divergente"); setImageSharp(false); setState(p => ({ ...p, divergentTested: true })); setStep(4); toast.success("Lentille divergente - Image VIRTUELLE!") }
   }
-  
+
   return (
     <group>
-      {/* Optical bench */}
-      <mesh position={[0, 0.02, 0]}><boxGeometry args={[1, 0.02, 0.1]} /><meshStandardMaterial color="#444" /></mesh>
-      <Html position={[0, -0.02, 0.08]} center><div className="bg-gray-700 text-white px-2 py-1 rounded text-xs">Banc optique</div></Html>
-      
-      {/* Candle (object) */}
-      <group position={[-0.35, 0.1, 0]}>
-        <mesh><cylinderGeometry args={[0.015, 0.015, 0.1, 16]} /><meshStandardMaterial color="#f5f5dc" /></mesh>
+      {/* Optical bench - wooden base with metal rail */}
+      <mesh position={[0, 0.01, 0]}><boxGeometry args={[1.1, 0.02, 0.15]} /><meshStandardMaterial color="#5c4033" roughness={0.8} /></mesh>
+      <mesh position={[0, 0.025, 0]}><boxGeometry args={[1.0, 0.008, 0.03]} /><meshStandardMaterial color="#888" metalness={0.9} /></mesh>
+      {/* Ruler markings */}
+      {[-0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4].map((x, i) => (
+        <mesh key={i} position={[x, 0.022, 0.05]}><boxGeometry args={[0.002, 0.003, 0.02]} /><meshStandardMaterial color="#333" /></mesh>
+      ))}
+
+      {/* Candle holder with candle */}
+      <group position={[-0.35, 0.03, 0]}>
+        {/* Holder base */}
+        <mesh><cylinderGeometry args={[0.03, 0.035, 0.02, 16]} /><meshStandardMaterial color="#333" metalness={0.7} /></mesh>
+        {/* Candle */}
+        <mesh position={[0, 0.06, 0]}><cylinderGeometry args={[0.012, 0.014, 0.08, 16]} /><meshStandardMaterial color="#f5f5dc" /></mesh>
+        {/* Wick */}
+        <mesh position={[0, 0.105, 0]}><cylinderGeometry args={[0.002, 0.002, 0.015, 8]} /><meshStandardMaterial color="#333" /></mesh>
         {candleLit && <>
-          <mesh position={[0, 0.07, 0]}><coneGeometry args={[0.015, 0.04, 16]} /><meshBasicMaterial color="#ff9500" /></mesh>
-          <pointLight position={[0, 0.08, 0]} color="#ff9500" intensity={1} distance={0.5} />
+          <mesh position={[0, 0.12, 0]}><coneGeometry args={[0.012, 0.035, 16]} /><meshBasicMaterial color="#ff9500" /></mesh>
+          <mesh position={[0, 0.11, 0]}><coneGeometry args={[0.006, 0.02, 16]} /><meshBasicMaterial color="#ffff00" /></mesh>
+          <pointLight position={[0, 0.12, 0]} color="#ff9500" intensity={1.5} distance={0.8} />
         </>}
-        <Html position={[0, -0.08, 0]} center><div className="bg-yellow-100 px-2 py-1 rounded text-xs font-bold">Objet (A)</div></Html>
+        <Html position={[0, -0.03, 0]} center><div className="bg-yellow-100 px-1 py-0.5 rounded text-xs font-bold">Objet A</div></Html>
       </group>
-      
-      {/* Lens */}
-      {lensPlaced && <group position={[0, 0.1, 0]}>
-        <mesh rotation={[0, Math.PI/2, 0]}><cylinderGeometry args={[0.08, 0.08, 0.01, 32]} /><meshPhysicalMaterial color="#87ceeb" transparent opacity={0.4} /></mesh>
-        <Html position={[0, 0.12, 0]} center><div className="bg-blue-200 px-2 py-1 rounded text-xs font-bold">Lentille f'=10cm</div></Html>
-        <Html position={[0, -0.08, 0]} center><div className="bg-gray-500 text-white px-1 rounded text-xs">O</div></Html>
-      </group>}
-      
-      {/* Screen */}
-      {screenPlaced && <group position={[screenPos, 0.1, 0]}>
-        <mesh><boxGeometry args={[0.01, 0.15, 0.12]} /><meshStandardMaterial color="#fff" /></mesh>
-        {candleLit && <mesh position={[-0.006, 0, 0]}><planeGeometry args={[0.01, imageSharp ? 0.06 : 0.1]} /><meshBasicMaterial color={imageSharp ? "#ff6600" : "#ffaa77"} transparent opacity={imageSharp ? 1 : 0.3} /></mesh>}
-        <Html position={[0, -0.1, 0]} center><div className="bg-gray-200 px-2 py-1 rounded text-xs font-bold">Ecran (A')</div></Html>
-      </group>}
-      
+
+      {/* Lens holder - always on bench */}
+      <group position={[0, 0.03, 0]}>
+        <mesh><boxGeometry args={[0.02, 0.04, 0.08]} /><meshStandardMaterial color="#333" metalness={0.6} /></mesh>
+        <mesh position={[0, 0.05, 0]}><boxGeometry args={[0.015, 0.12, 0.01]} /><meshStandardMaterial color="#444" /></mesh>
+        {/* Lens when placed */}
+        {lensPlaced && <group position={[0, 0.08, 0]}>
+          <mesh rotation={[0, Math.PI/2, 0]}><cylinderGeometry args={[0.05, 0.05, 0.008, 32]} /><meshPhysicalMaterial color="#87ceeb" transparent opacity={0.4} transmission={0.8} thickness={0.5} /></mesh>
+          {/* Lens edge */}
+          <mesh rotation={[0, Math.PI/2, 0]}><torusGeometry args={[0.05, 0.003, 8, 32]} /><meshStandardMaterial color="#666" metalness={0.8} /></mesh>
+        </group>}
+        <Html position={[0, 0.15, 0]} center><div className="bg-blue-200 px-1 py-0.5 rounded text-xs font-bold">{lensPlaced ? (lensType === 'convergente' ? "f'=+10cm" : "f'=-10cm") : "Lentille?"}</div></Html>
+        <Html position={[0, -0.03, 0]} center><div className="bg-gray-500 text-white px-1 rounded text-xs">O</div></Html>
+      </group>
+
+      {/* Screen holder - always on bench */}
+      <group position={[screenPos, 0.03, 0]}>
+        <mesh><boxGeometry args={[0.02, 0.04, 0.08]} /><meshStandardMaterial color="#333" metalness={0.6} /></mesh>
+        <mesh position={[0, 0.06, 0]}><boxGeometry args={[0.01, 0.1, 0.01]} /><meshStandardMaterial color="#444" /></mesh>
+        {/* Screen when placed */}
+        {screenPlaced && <group position={[0, 0.08, 0]}>
+          <mesh><boxGeometry args={[0.005, 0.1, 0.08]} /><meshStandardMaterial color="#fff" /></mesh>
+          {candleLit && <mesh position={[-0.004, 0, 0]} rotation={[0, -Math.PI/2, 0]}><planeGeometry args={[0.06, imageSharp ? 0.05 : 0.08]} /><meshBasicMaterial color={imageSharp ? "#ff6600" : "#ffaa77"} transparent opacity={imageSharp ? 1 : 0.3} /></mesh>}
+        </group>}
+        <Html position={[0, -0.03, 0]} center><div className="bg-gray-200 px-1 py-0.5 rounded text-xs font-bold">{screenPlaced ? "Ecran A'" : "Ecran?"}</div></Html>
+      </group>
+
       {/* Light rays when focused */}
-      {imageFocused && <>
-        <Line points={[[-0.35, 0.15, 0], [0, 0.15, 0], [screenPos, 0.07, 0]]} color="#ff0000" lineWidth={2} />
-        <Line points={[[-0.35, 0.15, 0], [0, 0.1, 0], [screenPos, 0.07, 0]]} color="#ff0000" lineWidth={2} />
+      {imageFocused && lensType === 'convergente' && <>
+        <Line points={[[-0.35, 0.12, 0], [0, 0.12, 0], [screenPos, 0.06, 0]]} color="#ff0000" lineWidth={2} />
+        <Line points={[[-0.35, 0.12, 0], [0, 0.08, 0], [screenPos, 0.06, 0]]} color="#ff0000" lineWidth={2} />
       </>}
 
       {/* Target zones */}
-      <TargetZone position={[0, 0.15, 0]} label="🔍 Lentille" active={selectedItem === "lens"} onClick={() => handleAction("lens")} />
-      {lensPlaced && !candleLit && <TargetZone position={[-0.35, 0.15, 0]} label="🕯️ Allumer" active={true} onClick={() => handleAction("candle")} />}
-      {candleLit && <TargetZone position={[0.3, 0.15, 0]} label="📺 Ecran" active={selectedItem === "screen"} onClick={() => handleAction("screen")} />}
-      {screenPlaced && !imageFocused && <TargetZone position={[0.3, 0.2, 0]} label="🎯 Focaliser" active={true} onClick={() => handleAction("focus")} />}
-      {screenPlaced && !imageFocused && <TargetZone position={[0.3, 0.2, 0]} label="🎯 Focaliser" active={true} onClick={() => handleAction("focus")} />}
-      {imageFocused && !divergentTested && <TargetZone position={[0, 0.25, 0]} label="🔄 Divergente" active={true} onClick={() => handleAction("divergent")} />}
-      {imageFocused && !divergentTested && <TargetZone position={[0, 0.25, 0]} label="🔄 Divergente" active={true} onClick={() => handleAction("divergent")} />}
-      {/* Clickable items */}
-      {!lensPlaced && <ClickableObject position={[-0.4, 0.08, 0.25]} selected={selectedItem === "lens"} enabled={true} onClick={() => setSelectedItem(selectedItem === "lens" ? null : "lens")}><group><mesh rotation={[0, Math.PI/2, 0]}><cylinderGeometry args={[0.04, 0.04, 0.005, 32]} /><meshPhysicalMaterial color="#87ceeb" transparent opacity={0.5} /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-blue-100 px-2 py-1 rounded text-xs font-bold">Lentille</div></Html></group></ClickableObject>}
-      {!screenPlaced && candleLit && <ClickableObject position={[0.4, 0.08, 0.25]} selected={selectedItem === "screen"} enabled={true} onClick={() => setSelectedItem(selectedItem === "screen" ? null : "screen")}><group><mesh><boxGeometry args={[0.005, 0.06, 0.05]} /><meshStandardMaterial color="#fff" /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-gray-100 px-2 py-1 rounded text-xs font-bold">Ecran</div></Html></group></ClickableObject>}
+      <TargetZone position={[0, 0.18, 0]} label="🔍" active={selectedItem === "lens"} onClick={() => handleAction("lens")} />
+      {lensPlaced && !candleLit && <TargetZone position={[-0.35, 0.18, 0]} label="🕯️" active={true} onClick={() => handleAction("candle")} />}
+      {candleLit && <TargetZone position={[screenPos, 0.18, 0]} label="📺" active={selectedItem === "screen"} onClick={() => handleAction("screen")} />}
+      {screenPlaced && !imageFocused && <TargetZone position={[screenPos, 0.22, 0]} label="🎯" active={true} onClick={() => handleAction("focus")} />}
+      {imageFocused && !divergentTested && <TargetZone position={[0, 0.25, 0]} label="🔄" active={true} onClick={() => handleAction("divergent")} />}
+
+      {/* Clickable items on front */}
+      {!lensPlaced && grabbedItem !== "lens" && <ClickableObject position={[-0.4, 0.06, 0.2]} selected={selectedItem === "lens"} enabled={true} onClick={() => setSelectedItem(selectedItem === "lens" ? null : "lens")}>
+        <group>
+          <mesh rotation={[0, Math.PI/2, 0]}><cylinderGeometry args={[0.035, 0.035, 0.006, 32]} /><meshPhysicalMaterial color="#87ceeb" transparent opacity={0.5} /></mesh>
+          <mesh rotation={[0, Math.PI/2, 0]}><torusGeometry args={[0.035, 0.002, 8, 32]} /><meshStandardMaterial color="#666" metalness={0.8} /></mesh>
+          <Html position={[0, 0.05, 0]} center><div className="bg-blue-100 px-2 py-1 rounded text-xs font-bold">Lentille</div></Html>
+        </group>
+      </ClickableObject>}
+      {!screenPlaced && candleLit && grabbedItem !== "screen" && <ClickableObject position={[0.4, 0.06, 0.2]} selected={selectedItem === "screen"} enabled={true} onClick={() => setSelectedItem(selectedItem === "screen" ? null : "screen")}>
+        <group>
+          <mesh><boxGeometry args={[0.004, 0.05, 0.04]} /><meshStandardMaterial color="#fff" /></mesh>
+          <Html position={[0, 0.04, 0]} center><div className="bg-gray-100 px-2 py-1 rounded text-xs font-bold">Ecran</div></Html>
+        </group>
+      </ClickableObject>}
+
+      {/* Lab accessories */}
+      <group position={[0.45, 0.03, 0.18]}>
+        <mesh><boxGeometry args={[0.06, 0.04, 0.04]} /><meshStandardMaterial color="#222" /></mesh>
+        <Html position={[0, 0.04, 0]} center><div className="bg-gray-700 text-white px-1 py-0.5 rounded text-xs">Laser</div></Html>
+      </group>
 
       {/* Formula */}
-      {imageFocused && <Html position={[-0.35, 0.35, 0]} center><div className="bg-blue-900 text-white p-2 rounded text-xs"><div className="font-bold">Relation conjugaison</div><div className="text-yellow-300">1/OA' - 1/OA = 1/f'</div><div className="text-green-300 mt-1">OA=-35cm, f'=10cm</div><div className="text-green-300">OA'=+14cm</div></div></Html>}
+      {imageFocused && <Html position={[-0.4, 0.28, 0]} center><div className="bg-blue-900 text-white p-2 rounded text-xs"><div className="font-bold">Relation conjugaison</div><div className="text-yellow-300">1/OA' - 1/OA = 1/f'</div><div className="text-green-300 mt-1">OA=-35cm, f'=10cm</div><div className="text-green-300">OA'=+14cm</div>{lensType === 'divergente' && <div className="text-red-300 mt-1">Image virtuelle!</div>}</div></Html>}
     </group>
   )
 }
 
-function FreeFallExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
+function FreeFallExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, triggerMascotAction, grabbedItem }) {
   const { ballPlaced, released, measured } = state
   const [ballY, setBallY] = useState(0.5)
   const [time, setTime] = useState(0)
   const [falling, setFalling] = useState(false)
-  
+
   useEffect(() => {
     if (falling && ballY > 0.05) {
       const interval = setInterval(() => {
@@ -827,51 +866,87 @@ function FreeFallExperiment({ state, setState, setStep, experiment, selectedItem
       toast.success(`⏱️ t = ${time.toFixed(2)}s, g ≈ 9.8 m/s²`)
     }
   }, [falling, ballY])
-  
+
   const handleAction = (action) => {
-    if (action === "place" && selectedItem === "ball") { setState(p => ({ ...p, ballPlaced: true })); setSelectedItem(null); setStep(1); toast.success("🔵 Bille placee!") }
-    else if (action === "release" && ballPlaced && !released) { setState(p => ({ ...p, released: true })); setFalling(true); setStep(2); toast.success("⬇️ Chute libre!") }
+    if (action === "place" && selectedItem === "ball") { triggerMascotAction([-0.35, 0.08, 0.3], [0.15, 0.5, -0.1], "#3b82f6", "La bille!", () => { setState(p => ({ ...p, ballPlaced: true })); setSelectedItem(null); setStep(1); toast.success("🔵 Bille placee!") }, "ball") }
+    else if (action === "release" && ballPlaced && !released) { triggerMascotAction([0.15, 0.55, -0.1], [0.15, 0.55, -0.1], "#ef4444", "Je lache!", () => { setState(p => ({ ...p, released: true })); setFalling(true); setStep(2); toast.success("⬇️ Chute libre!") }, null) }
     else if (action === "calculate" && measured) { setStep(experiment.steps.length - 1); toast.success("g = 2h/t² ≈ 9.81 m/s²") }
   }
-  
+
   return (
     <group>
-      {/* Stand */}
-      <mesh position={[0, 0.3, -0.1]}><cylinderGeometry args={[0.015, 0.015, 0.6, 16]} /><meshStandardMaterial color="#555" metalness={0.8} /></mesh>
-      <mesh position={[0, 0.01, -0.1]}><cylinderGeometry args={[0.1, 0.1, 0.02, 32]} /><meshStandardMaterial color="#444" /></mesh>
-      <mesh position={[0.08, 0.55, -0.1]} rotation={[0, 0, Math.PI/2]}><cylinderGeometry args={[0.01, 0.01, 0.16, 16]} /><meshStandardMaterial color="#555" /></mesh>
+      {/* Base platform */}
+      <mesh position={[0, 0.005, 0]}><boxGeometry args={[0.8, 0.01, 0.5]} /><meshStandardMaterial color="#5c4033" roughness={0.8} /></mesh>
+      
+      {/* Main stand - metal pole */}
+      <mesh position={[0, 0.32, -0.12]}><cylinderGeometry args={[0.012, 0.015, 0.62, 16]} /><meshStandardMaterial color="#666" metalness={0.9} /></mesh>
+      {/* Stand base */}
+      <mesh position={[0, 0.01, -0.12]}><cylinderGeometry args={[0.08, 0.1, 0.02, 32]} /><meshStandardMaterial color="#333" metalness={0.7} /></mesh>
+      
+      {/* Horizontal arm */}
+      <mesh position={[0.08, 0.58, -0.12]} rotation={[0, 0, Math.PI/2]}><cylinderGeometry args={[0.008, 0.008, 0.16, 16]} /><meshStandardMaterial color="#666" metalness={0.9} /></mesh>
       
       {/* Electromagnet */}
-      <mesh position={[0.15, 0.55, -0.1]}><cylinderGeometry args={[0.03, 0.03, 0.04, 16]} /><meshStandardMaterial color={ballPlaced && !released ? "#ef4444" : "#666"} /></mesh>
-      <Html position={[0.15, 0.6, -0.1]} center><div className="bg-gray-700 text-white px-2 py-1 rounded text-xs">Electroaimant</div></Html>
+      <group position={[0.15, 0.58, -0.12]}>
+        <mesh><cylinderGeometry args={[0.025, 0.025, 0.035, 16]} /><meshStandardMaterial color={ballPlaced && !released ? "#ef4444" : "#555"} emissive={ballPlaced && !released ? "#ef4444" : "#000"} emissiveIntensity={ballPlaced && !released ? 0.3 : 0} /></mesh>
+        <mesh position={[0, 0.02, 0]}><cylinderGeometry args={[0.008, 0.008, 0.01, 8]} /><meshStandardMaterial color="#333" /></mesh>
+        {/* Wire coils */}
+        <mesh><torusGeometry args={[0.028, 0.003, 8, 24]} /><meshStandardMaterial color="#b87333" metalness={0.9} /></mesh>
+      </group>
       
       {/* Ball */}
-      {ballPlaced && <mesh position={[0.15, ballY, -0.1]}><sphereGeometry args={[0.025, 32, 32]} /><meshStandardMaterial color="#3b82f6" metalness={0.8} /></mesh>}
+      {ballPlaced && <mesh position={[0.15, ballY, -0.12]}>
+        <sphereGeometry args={[0.022, 32, 32]} />
+        <meshStandardMaterial color="#3b82f6" metalness={0.85} roughness={0.15} />
+      </mesh>}
       
-      {/* Height marker */}
-      <Html position={[0.3, 0.3, -0.1]} center><div className="bg-yellow-400 px-2 py-1 rounded text-xs font-bold">h = 50cm</div></Html>
+      {/* Height ruler */}
+      <group position={[-0.08, 0.28, -0.12]}>
+        <mesh><boxGeometry args={[0.025, 0.5, 0.008]} /><meshStandardMaterial color="#f5f5dc" /></mesh>
+        {[0, 0.1, 0.2, 0.3, 0.4, 0.5].map((h, i) => (
+          <mesh key={i} position={[0.015, h - 0.25, 0]}><boxGeometry args={[0.01, 0.002, 0.008]} /><meshStandardMaterial color="#333" /></mesh>
+        ))}
+      </group>
+      <Html position={[-0.15, 0.3, -0.1]} center><div className="bg-yellow-400 px-1 py-0.5 rounded text-xs font-bold">h=50cm</div></Html>
       
-      {/* Ground sensor */}
-      <mesh position={[0.15, 0.02, -0.1]}><boxGeometry args={[0.08, 0.02, 0.08]} /><meshStandardMaterial color="#22c55e" /></mesh>
-      <Html position={[0.15, -0.02, -0.1]} center><div className="bg-green-600 text-white px-2 py-1 rounded text-xs">Capteur</div></Html>
+      {/* Ground sensor pad */}
+      <group position={[0.15, 0.015, -0.12]}>
+        <mesh><boxGeometry args={[0.1, 0.015, 0.1]} /><meshStandardMaterial color="#22c55e" /></mesh>
+        <mesh position={[0, 0.01, 0]}><boxGeometry args={[0.06, 0.005, 0.06]} /><meshStandardMaterial color="#166534" /></mesh>
+      </group>
       
-      {/* Timer display */}
-      {released && <Html position={[-0.25, 0.4, 0]} center><div className="bg-gray-900 text-white p-2 rounded text-sm font-mono"><div className="text-green-400">{time.toFixed(3)} s</div></div></Html>}
+      {/* Digital timer */}
+      <group position={[-0.28, 0.15, 0.1]}>
+        <mesh><boxGeometry args={[0.1, 0.06, 0.03]} /><meshStandardMaterial color="#222" /></mesh>
+        <mesh position={[0, 0, 0.016]}><boxGeometry args={[0.08, 0.04, 0.002]} /><meshStandardMaterial color={released ? "#001100" : "#111"} /></mesh>
+        {released && <Html position={[0, 0, 0.02]} center><div className="text-green-400 font-mono text-sm font-bold">{time.toFixed(3)}s</div></Html>}
+      </group>
 
       {/* Target zones */}
-      <TargetZone position={[0.15, 0.5, -0.05]} label="🔵 Placer" active={selectedItem === "ball"} onClick={() => handleAction("place")} />
-      {ballPlaced && !released && <TargetZone position={[0.15, 0.55, 0]} label="⬇️ Lacher" active={true} onClick={() => handleAction("release")} />}
-      {measured && <TargetZone position={[0, 0.3, 0]} label="📊 Calculer g" active={true} onClick={() => handleAction("calculate")} />}
+      <TargetZone position={[0.15, 0.55, -0.05]} label="🔵" active={selectedItem === "ball"} onClick={() => handleAction("place")} />
+      {ballPlaced && !released && <TargetZone position={[0.15, 0.6, 0]} label="⬇️" active={true} onClick={() => handleAction("release")} />}
+      {measured && <TargetZone position={[0, 0.25, 0.1]} label="📊" active={true} onClick={() => handleAction("calculate")} />}
 
-      {/* Clickable items */}
-      {!ballPlaced && <ClickableObject position={[-0.35, 0.08, 0.3]} selected={selectedItem === "ball"} enabled={true} onClick={() => setSelectedItem(selectedItem === "ball" ? null : "ball")}><group><mesh><sphereGeometry args={[0.03, 32, 32]} /><meshStandardMaterial color="#3b82f6" metalness={0.8} /></mesh><Html position={[0, 0.05, 0]} center><div className="bg-blue-100 px-2 py-1 rounded text-xs font-bold">Bille</div></Html></group></ClickableObject>}
+      {/* Clickable ball */}
+      {!ballPlaced && grabbedItem !== "ball" && <ClickableObject position={[-0.35, 0.06, 0.25]} selected={selectedItem === "ball"} enabled={true} onClick={() => setSelectedItem(selectedItem === "ball" ? null : "ball")}>
+        <group>
+          <mesh><sphereGeometry args={[0.025, 32, 32]} /><meshStandardMaterial color="#3b82f6" metalness={0.85} roughness={0.15} /></mesh>
+          <Html position={[0, 0.045, 0]} center><div className="bg-blue-100 px-2 py-1 rounded text-xs font-bold">Bille</div></Html>
+        </group>
+      </ClickableObject>}
+
+      {/* Stopwatch accessory */}
+      <group position={[0.35, 0.04, 0.2]}>
+        <mesh><cylinderGeometry args={[0.025, 0.025, 0.01, 16]} /><meshStandardMaterial color="#333" /></mesh>
+        <mesh position={[0, 0.006, 0]}><circleGeometry args={[0.02, 32]} /><meshStandardMaterial color="#fff" /></mesh>
+        <mesh position={[0, 0.015, 0]}><cylinderGeometry args={[0.004, 0.004, 0.012, 8]} /><meshStandardMaterial color="#666" /></mesh>
+      </group>
 
       {/* Formula */}
-      {measured && <Html position={[-0.25, 0.25, 0]} center><div className="bg-blue-900 text-white p-2 rounded text-xs"><div className="font-bold">Chute Libre</div><div className="text-yellow-300">h = ½gt²</div><div className="text-green-300">g = 2h/t²</div><div className="text-white mt-1">g ≈ 9.81 m/s²</div></div></Html>}
+      {measured && <Html position={[-0.28, 0.3, 0.1]} center><div className="bg-blue-900 text-white p-2 rounded text-xs"><div className="font-bold">Chute Libre</div><div className="text-yellow-300">h = ½gt²</div><div className="text-green-300">g = 2h/t²</div><div className="text-white mt-1">g ≈ 9.81 m/s²</div></div></Html>}
     </group>
   )
 }
-
 function BloodCirculationExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem }) {
   const { heartViewed, pulmonaryTracked, systemicTracked, organsIdentified } = state
   const [bloodFlow, setBloodFlow] = useState(false)
@@ -1201,42 +1276,92 @@ function ParallelCircuitExperiment({ state, setState, setStep, experiment, selec
     </group>
   )
 }
-function PendulumExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary }) {
+function PendulumExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary, triggerMascotAction, grabbedItem }) {
   const { stringAttached, massAttached, swinging, period } = state
   const pendulumRef = useRef()
   useFrame((s) => { if (swinging && pendulumRef.current) pendulumRef.current.rotation.z = Math.sin(s.clock.elapsedTime * Math.PI) * 0.4 })
   const handleAction = (a) => {
-    if (a === "string" && selectedItem === "string") { setState(p => ({ ...p, stringAttached: true })); setSelectedItem(null); setStep(1); toast.success("🧵 Ficelle!") }
-    else if (a === "mass" && selectedItem === "mass") { setState(p => ({ ...p, massAttached: true })); setSelectedItem(null); setStep(2); toast.success("⚖️ Masse!") }
-    else if (a === "swing" && selectedItem === "swing") { const T = calculatePeriod(1); setState(p => ({ ...p, swinging: true, period: T })); setSelectedItem(null); setStep(experiment.steps.length - 1); toast.success(`⏱️ T=${T.toFixed(2)}s`) }
+    if (a === "string" && selectedItem === "string") { triggerMascotAction([-0.4, 0.08, 0.3], [0.18, 0.55, -0.15], "#8B4513", "La ficelle!", () => { setState(p => ({ ...p, stringAttached: true })); setSelectedItem(null); setStep(1); toast.success("🧵 Ficelle!") }, "string") }
+    else if (a === "mass" && selectedItem === "mass") { triggerMascotAction([0, 0.08, 0.3], [0.18, 0.2, -0.15], "#dc2626", "La masse!", () => { setState(p => ({ ...p, massAttached: true })); setSelectedItem(null); setStep(2); toast.success("⚖️ Masse!") }, "mass") }
+    else if (a === "swing" && selectedItem === "swing") { const T = 2.01; setState(p => ({ ...p, swinging: true, period: T })); setSelectedItem(null); setStep(experiment.steps.length - 1); toast.success(`⏱️ T=${T.toFixed(2)}s`) }
   }
   return (
     <group>
+      {/* Base platform */}
+      <mesh position={[0, 0.005, 0]}><boxGeometry args={[0.7, 0.01, 0.5]} /><meshStandardMaterial color="#5c4033" roughness={0.8} /></mesh>
+      
       {/* Stand */}
       <group position={[0, 0, -0.15]}>
-        <mesh position={[0, 0.015, 0]}><boxGeometry args={[0.25, 0.03, 0.15]} /><meshStandardMaterial color="#444" metalness={0.8} /></mesh>
-        <mesh position={[0, 0.3, 0]}><cylinderGeometry args={[0.015, 0.015, 0.55, 16]} /><meshStandardMaterial color="#555" metalness={0.9} /></mesh>
-        <mesh position={[0.1, 0.55, 0]} rotation={[0, 0, Math.PI/2]}><cylinderGeometry args={[0.01, 0.01, 0.2, 16]} /><meshStandardMaterial color="#555" metalness={0.9} /></mesh>
-        {stringAttached && <group ref={pendulumRef} position={[0.18, 0.55, 0]}>
-          <mesh position={[0, -0.18, 0]}><cylinderGeometry args={[0.003, 0.003, 0.35, 8]} /><meshStandardMaterial color="#8B4513" /></mesh>
-          {massAttached && <mesh position={[0, -0.38, 0]}><sphereGeometry args={[0.045, 32, 32]} /><meshStandardMaterial color="#dc2626" metalness={0.7} /></mesh>}
+        {/* Heavy base */}
+        <mesh position={[0, 0.02, 0]}><boxGeometry args={[0.22, 0.03, 0.12]} /><meshStandardMaterial color="#333" metalness={0.8} /></mesh>
+        {/* Vertical pole */}
+        <mesh position={[0, 0.32, 0]}><cylinderGeometry args={[0.012, 0.015, 0.58, 16]} /><meshStandardMaterial color="#555" metalness={0.9} /></mesh>
+        {/* Horizontal arm */}
+        <mesh position={[0.1, 0.58, 0]} rotation={[0, 0, Math.PI/2]}><cylinderGeometry args={[0.008, 0.008, 0.2, 16]} /><meshStandardMaterial color="#555" metalness={0.9} /></mesh>
+        {/* Pivot point */}
+        <mesh position={[0.18, 0.58, 0]}><sphereGeometry args={[0.012, 16, 16]} /><meshStandardMaterial color="#666" metalness={0.9} /></mesh>
+        
+        {/* Pendulum */}
+        {stringAttached && <group ref={pendulumRef} position={[0.18, 0.58, 0]}>
+          {/* String */}
+          <mesh position={[0, -0.18, 0]}><cylinderGeometry args={[0.002, 0.002, 0.35, 8]} /><meshStandardMaterial color="#d4a574" /></mesh>
+          {/* Mass bob */}
+          {massAttached && <group position={[0, -0.38, 0]}>
+            <mesh><sphereGeometry args={[0.04, 32, 32]} /><meshStandardMaterial color="#dc2626" metalness={0.75} roughness={0.2} /></mesh>
+            {/* Hook */}
+            <mesh position={[0, 0.045, 0]}><cylinderGeometry args={[0.005, 0.005, 0.015, 8]} /><meshStandardMaterial color="#888" metalness={0.9} /></mesh>
+          </group>}
         </group>}
       </group>
-
-      <TargetZone position={[0.18, 0.55, -0.15]} label="🧵" active={selectedItem === "string"} onClick={() => handleAction("string")} />
-      <TargetZone position={[0.18, 0.2, -0.15]} label="⚖️" active={selectedItem === "mass" && stringAttached} onClick={() => handleAction("mass")} />
-      <TargetZone position={[0.35, 0.2, -0.15]} label="👆 Lancer" active={selectedItem === "swing" && massAttached} onClick={() => handleAction("swing")} />
-
-      <ClickableObject position={[-0.4, 0.08, 0.3]} selected={selectedItem === "string"} enabled={!stringAttached} onClick={() => setSelectedItem(selectedItem === "string" ? null : "string")}><group><mesh rotation={[Math.PI/2, 0, 0]}><torusGeometry args={[0.035, 0.012, 8, 32]} /><meshStandardMaterial color="#8B4513" /></mesh><Html position={[0, 0.07, 0]} center><div className="bg-white px-2 py-1 rounded text-xs font-bold shadow">Ficelle L=1m</div></Html></group></ClickableObject>
-      <ClickableObject position={[0, 0.08, 0.3]} selected={selectedItem === "mass"} enabled={stringAttached && !massAttached} onClick={() => setSelectedItem(selectedItem === "mass" ? null : "mass")}><group><mesh><sphereGeometry args={[0.035, 32, 32]} /><meshStandardMaterial color="#dc2626" metalness={0.7} /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-red-100 px-2 py-1 rounded text-xs font-bold shadow">Masse 100g</div></Html></group></ClickableObject>
-      <ClickableObject position={[0.4, 0.08, 0.3]} selected={selectedItem === "swing"} enabled={massAttached && !swinging} onClick={() => setSelectedItem(selectedItem === "swing" ? null : "swing")}><group><mesh><boxGeometry args={[0.05, 0.06, 0.018]} /><meshStandardMaterial color="#f59e0b" /></mesh><Html position={[0, 0.06, 0]} center><div className="bg-yellow-400 px-2 py-1 rounded text-xs font-bold">Lancer</div></Html></group></ClickableObject>
-
-      {swinging && <Html position={[0.45, 0.4, 0]} center><div className="bg-blue-900 text-white p-2 rounded text-xs"><div className="font-bold">T = 2π√(L/g)</div><div className="text-lg text-yellow-300">T ≈ 2.01s</div></div></Html>}
       
+      {/* Length marker */}
+      <group position={[-0.1, 0.4, -0.15]}>
+        <mesh><boxGeometry args={[0.02, 0.35, 0.005]} /><meshStandardMaterial color="#f5f5dc" /></mesh>
+        {[0, 0.1, 0.2, 0.3].map((h, i) => (
+          <mesh key={i} position={[0.012, h - 0.15, 0]}><boxGeometry args={[0.008, 0.002, 0.005]} /><meshStandardMaterial color="#333" /></mesh>
+        ))}
+      </group>
+      <Html position={[-0.15, 0.4, -0.12]} center><div className="bg-yellow-100 px-1 py-0.5 rounded text-xs font-bold">L=1m</div></Html>
+
+      {/* Target zones */}
+      <TargetZone position={[0.18, 0.58, -0.1]} label="🧵" active={selectedItem === "string"} onClick={() => handleAction("string")} />
+      <TargetZone position={[0.18, 0.2, -0.1]} label="⚖️" active={selectedItem === "mass" && stringAttached} onClick={() => handleAction("mass")} />
+      {massAttached && !swinging && <TargetZone position={[0.35, 0.25, -0.1]} label="👆" active={selectedItem === "swing"} onClick={() => handleAction("swing")} />}
+
+      {/* Clickable items */}
+      {!stringAttached && grabbedItem !== "string" && <ClickableObject position={[-0.35, 0.06, 0.25]} selected={selectedItem === "string"} enabled={true} onClick={() => setSelectedItem(selectedItem === "string" ? null : "string")}>
+        <group>
+          <mesh rotation={[Math.PI/2, 0, 0]}><torusGeometry args={[0.03, 0.008, 8, 32]} /><meshStandardMaterial color="#d4a574" /></mesh>
+          <Html position={[0, 0.055, 0]} center><div className="bg-white px-2 py-1 rounded text-xs font-bold shadow">Ficelle</div></Html>
+        </group>
+      </ClickableObject>}
+      
+      {!massAttached && stringAttached && grabbedItem !== "mass" && <ClickableObject position={[0, 0.06, 0.25]} selected={selectedItem === "mass"} enabled={true} onClick={() => setSelectedItem(selectedItem === "mass" ? null : "mass")}>
+        <group>
+          <mesh><sphereGeometry args={[0.03, 32, 32]} /><meshStandardMaterial color="#dc2626" metalness={0.75} /></mesh>
+          <Html position={[0, 0.05, 0]} center><div className="bg-red-100 px-2 py-1 rounded text-xs font-bold shadow">100g</div></Html>
+        </group>
+      </ClickableObject>}
+      
+      {massAttached && !swinging && grabbedItem !== "swing" && <ClickableObject position={[0.35, 0.06, 0.25]} selected={selectedItem === "swing"} enabled={true} onClick={() => setSelectedItem(selectedItem === "swing" ? null : "swing")}>
+        <group>
+          <mesh><boxGeometry args={[0.045, 0.05, 0.015]} /><meshStandardMaterial color="#f59e0b" /></mesh>
+          <Html position={[0, 0.045, 0]} center><div className="bg-yellow-400 px-2 py-1 rounded text-xs font-bold">Lancer</div></Html>
+        </group>
+      </ClickableObject>}
+
+      {/* Stopwatch */}
+      <group position={[0.38, 0.04, 0.18]}>
+        <mesh><cylinderGeometry args={[0.022, 0.022, 0.008, 16]} /><meshStandardMaterial color="#333" /></mesh>
+        <mesh position={[0, 0.005, 0]}><circleGeometry args={[0.018, 32]} /><meshStandardMaterial color="#fff" /></mesh>
+        <mesh position={[0, 0.012, 0]}><cylinderGeometry args={[0.003, 0.003, 0.01, 8]} /><meshStandardMaterial color="#666" /></mesh>
+      </group>
+
+      {/* Formula display */}
+      {swinging && <Html position={[0.4, 0.35, 0]} center><div className="bg-blue-900 text-white p-2 rounded text-xs"><div className="font-bold">Pendule Simple</div><div className="text-yellow-300">T = 2π√(L/g)</div><div className="text-green-300 mt-1">L = 1m, g = 9.81</div><div className="text-lg text-white">T ≈ 2.01s</div></div></Html>}
     </group>
   )
 }
-
 // BIOLOGY EXPERIMENTS
 
 function CellObservationExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, setShowSummary }) {
@@ -2411,6 +2536,7 @@ function ExperimentView({ experiment, onBack }) {
       case "simple-circuit": return <CircuitExperiment {...props} />
       case "optics-lens": return <OpticsLensExperiment {...props} />
       case "free-fall": return <FreeFallExperiment {...props} />
+      case "pendulum": return <PendulumExperiment {...props} />
       case "parallel-circuit": return <ParallelCircuitExperiment {...props} />
       case "cell-observation": return <CellObservationExperiment {...props} />
       case "blood-circulation": return <BloodCirculationExperiment {...props} />
@@ -2455,8 +2581,11 @@ function ExperimentView({ experiment, onBack }) {
             gl={{ alpha: arMode }}
             shadows
           >
-            <ambientLight intensity={0.3} />
-            <directionalLight position={[5, 8, 5]} intensity={0.6} castShadow />
+            <ambientLight intensity={0.4} />
+<directionalLight position={[5, 10, 5]} intensity={1} castShadow shadow-mapSize={[2048, 2048]} />
+<directionalLight position={[-3, 5, -5]} intensity={0.3} />
+<pointLight position={[0, 3, 0]} intensity={0.5} color="#fff5e6" />
+<Environment preset="city" background={false} />
             
             {arMode ? (
               // Simple table for AR mode
