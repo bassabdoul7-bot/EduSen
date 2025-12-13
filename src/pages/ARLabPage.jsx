@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"
+﻿import { useState, useEffect, useRef } from "react"
 import { usePlan } from "../hooks/usePlan"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { OrbitControls, Html, Environment, Line } from "@react-three/drei"
@@ -2293,6 +2293,185 @@ function GlucoseTestExperiment({ state, setState, setStep, experiment, selectedI
   )
 }
 
+
+function SpectrophotometryExperiment({ state, setState, setStep, experiment, selectedItem, setSelectedItem, triggerMascotAction, grabbedItem }) {
+  const { samplePrepared, cuvetteInserted, wavelengthSet, blanked, measured } = state
+  const [wavelength, setWavelength] = useState(540)
+  const [absorbance, setAbsorbance] = useState(0)
+  const [concentration, setConcentration] = useState(0)
+
+  const handleAction = (action) => {
+    if (action === "sample" && selectedItem === "sample") {
+      triggerMascotAction([-0.35, 0.08, 0.25], [0, 0.08, 0.15], "#3b82f6", "Je prépare l'échantillon!", () => {
+        setState(p => ({ ...p, samplePrepared: true }))
+        setSelectedItem(null)
+        setStep(1)
+        toast.success("💧 Solution préparée!")
+      }, "sample")
+    }
+    else if (action === "cuvette" && selectedItem === "cuvette" && samplePrepared) {
+      triggerMascotAction([0.35, 0.08, 0.25], [0, 0.15, 0], "#fff", "Je place la cuvette!", () => {
+        setState(p => ({ ...p, cuvetteInserted: true }))
+        setSelectedItem(null)
+        setStep(2)
+        toast.success("📊 Cuvette insérée!")
+      }, "cuvette")
+    }
+    else if (action === "wavelength" && cuvetteInserted && !wavelengthSet) {
+      setState(p => ({ ...p, wavelengthSet: true }))
+      setStep(3)
+      toast.success(`🌈 λ = ${wavelength} nm`)
+    }
+    else if (action === "blank" && wavelengthSet && !blanked) {
+      setState(p => ({ ...p, blanked: true }))
+      setStep(4)
+      toast.success("⚪ Blanc calibré!")
+    }
+    else if (action === "measure" && blanked && !measured) {
+      const abs = 0.45
+      const conc = (abs / 0.015).toFixed(2) // Beer-Lambert: A = εlc
+      setAbsorbance(abs)
+      setConcentration(conc)
+      setState(p => ({ ...p, measured: true }))
+      setStep(experiment.steps.length - 1)
+      toast.success(`🔬 A=${abs}, C=${conc} µM`)
+    }
+  }
+
+  return (
+    <group>
+      {/* Spectrophotometer body */}
+      <mesh position={[0, 0.12, 0]}>
+        <boxGeometry args={[0.4, 0.2, 0.25]} />
+        <meshStandardMaterial color="#2a2a2a" />
+      </mesh>
+      
+      {/* Display screen */}
+      <mesh position={[0, 0.18, 0.13]}>
+        <boxGeometry args={[0.25, 0.12, 0.01]} />
+        <meshStandardMaterial color={blanked ? "#001100" : "#333"} />
+      </mesh>
+      
+      {measured && (
+        <Html position={[0, 0.18, 0.14]} center>
+          <div className="bg-green-900 text-green-400 px-3 py-2 rounded font-mono text-sm">
+            <div>λ: {wavelength} nm</div>
+            <div className="text-xl">A: {absorbance.toFixed(3)}</div>
+            <div>C: {concentration} µM</div>
+          </div>
+        </Html>
+      )}
+
+      {/* Sample compartment door */}
+      <mesh position={[-0.15, 0.08, 0.13]}>
+        <boxGeometry args={[0.08, 0.08, 0.01]} />
+        <meshStandardMaterial color={cuvetteInserted ? "#4ade80" : "#666"} />
+      </mesh>
+
+      {/* Cuvette inside */}
+      {cuvetteInserted && (
+        <group position={[0, 0.08, 0]}>
+          <mesh>
+            <boxGeometry args={[0.04, 0.1, 0.04]} />
+            <meshPhysicalMaterial color="#3b82f6" transparent opacity={0.3} />
+          </mesh>
+          <mesh position={[0, 0, 0]}>
+            <boxGeometry args={[0.035, 0.08, 0.035]} />
+            <meshStandardMaterial color="#1e40af" transparent opacity={0.7} />
+          </mesh>
+        </group>
+      )}
+
+      {/* Light beam effect */}
+      {wavelengthSet && (
+        <mesh position={[0, 0.08, 0]} rotation={[0, Math.PI/2, 0]}>
+          <cylinderGeometry args={[0.01, 0.01, 0.2, 8]} />
+          <meshBasicMaterial color="#fbbf24" transparent opacity={0.6} />
+        </mesh>
+      )}
+
+      {/* Wavelength dial */}
+      <mesh position={[0.15, 0.08, 0.13]}>
+        <cylinderGeometry args={[0.03, 0.03, 0.01, 32]} />
+        <meshStandardMaterial color="#444" />
+      </mesh>
+      <Html position={[0.15, 0.14, 0.13]} center>
+        <div className="bg-gray-700 text-white px-2 py-1 rounded text-xs">{wavelength}nm</div>
+      </Html>
+
+      {/* Wavelength slider */}
+      {cuvetteInserted && !wavelengthSet && (
+        <Html position={[0.3, 0.2, 0]} center>
+          <div className="bg-white p-2 rounded shadow">
+            <div className="text-xs mb-1">λ: {wavelength} nm</div>
+            <input 
+              type="range" 
+              min="400" 
+              max="700" 
+              value={wavelength} 
+              onChange={(e) => setWavelength(Number(e.target.value))}
+              className="w-32"
+            />
+          </div>
+        </Html>
+      )}
+
+      {/* Target zones */}
+      <TargetZone position={[0, 0.15, 0.2]} label="💧 Échantillon" active={selectedItem === "sample"} onClick={() => handleAction("sample")} />
+      {samplePrepared && <TargetZone position={[0, 0.15, 0]} label="📊 Cuvette" active={selectedItem === "cuvette"} onClick={() => handleAction("cuvette")} />}
+      {cuvetteInserted && !wavelengthSet && <TargetZone position={[0.15, 0.15, 0.13]} label="🌈 λ" active={true} onClick={() => handleAction("wavelength")} />}
+      {wavelengthSet && !blanked && <TargetZone position={[-0.15, 0.15, 0.13]} label="⚪ Blanc" active={true} onClick={() => handleAction("blank")} />}
+      {blanked && !measured && <TargetZone position={[0, 0.25, 0.13]} label="🔬 Mesurer" active={true} onClick={() => handleAction("measure")} />}
+
+      {/* Clickable items */}
+      {!samplePrepared && grabbedItem !== "sample" && (
+        <ClickableObject position={[-0.35, 0.08, 0.25]} selected={selectedItem === "sample"} enabled={true} onClick={() => setSelectedItem(selectedItem === "sample" ? null : "sample")}>
+          <group>
+            <mesh>
+              <cylinderGeometry args={[0.025, 0.025, 0.06, 16]} />
+              <meshPhysicalMaterial color="#3b82f6" transparent opacity={0.6} />
+            </mesh>
+            <mesh position={[0, 0, 0]}>
+              <cylinderGeometry args={[0.02, 0.02, 0.05, 16]} />
+              <meshStandardMaterial color="#1e40af" transparent opacity={0.8} />
+            </mesh>
+            <Html position={[0, 0.06, 0]} center>
+              <div className="bg-blue-600 text-white px-2 py-1 rounded text-xs font-bold">Solution CuSO₄</div>
+            </Html>
+          </group>
+        </ClickableObject>
+      )}
+
+      {!cuvetteInserted && samplePrepared && grabbedItem !== "cuvette" && (
+        <ClickableObject position={[0.35, 0.08, 0.25]} selected={selectedItem === "cuvette"} enabled={true} onClick={() => setSelectedItem(selectedItem === "cuvette" ? null : "cuvette")}>
+          <group>
+            <mesh>
+              <boxGeometry args={[0.04, 0.1, 0.04]} />
+              <meshPhysicalMaterial color="#fff" transparent opacity={0.3} />
+            </mesh>
+            <Html position={[0, 0.08, 0]} center>
+              <div className="bg-white px-2 py-1 rounded text-xs font-bold shadow border">Cuvette</div>
+            </Html>
+          </group>
+        </ClickableObject>
+      )}
+
+      {/* Formula display */}
+      {measured && (
+        <Html position={[-0.35, 0.3, 0]} center>
+          <div className="bg-blue-900 text-white p-2 rounded text-xs">
+            <div className="font-bold">Loi Beer-Lambert</div>
+            <div className="text-yellow-300">A = ε × l × c</div>
+            <div className="text-green-300 mt-1">ε = 15 M⁻¹cm⁻¹</div>
+            <div className="text-green-300">l = 1 cm</div>
+            <div className="text-white">c = {concentration} µM</div>
+          </div>
+        </Html>
+      )}
+    </group>
+  )
+}
+
 function PlaceholderExperiment({ name }) {
   return (
     <group>
@@ -2371,11 +2550,7 @@ export default function ARLabPage() {
     }
   }
 
-
-
-
-
-  if (!subject) return (
+if (!subject) return (
    <div className="space-y-6">
       <div className="flex items-center gap-4 mb-6"><button onClick={() => navigate(-1)} className="btn-secondary"><ArrowLeft size={20} /></button><div><h1 className="text-2xl font-bold">Laboratoire 3D</h1><p className="text-gray-600 text-sm">Experiences interactives en environnement realiste</p></div></div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -2491,7 +2666,7 @@ function ExperimentView({ experiment, onBack }) {
   // Mascot control states
   const [mascotTarget, setMascotTarget] = useState(null)
   const [mascotWorking, setMascotWorking] = useState(false)
-  const [mascotMessage, setMascotMessage] = useState("Salut! Moi c'est Ziz 👋")
+  const [mascotMessage, setMascotMessage] = useState("Salut! Moi c'est Ziz ðŸ‘‹")
   const [pendingAction, setPendingAction] = useState(null)
   
   // Helper function to trigger mascot action
@@ -2518,7 +2693,7 @@ function ExperimentView({ experiment, onBack }) {
     setMascotWorking(false)
     setMascotTarget(null)
     setGrabbedItem(null)
-    setMascotMessage("C'est fait! ✅")
+    setMascotMessage("C'est fait! âœ…")
     setTimeout(() => setMascotMessage(""), 2000)
   }
   const reset = () => { setState(initialState); setStep(0); setSelectedItem(null); toast.success("?? Reset!") }
@@ -2629,6 +2804,7 @@ function ExperimentView({ experiment, onBack }) {
     </div>
   )
 }
+
 
 
 
