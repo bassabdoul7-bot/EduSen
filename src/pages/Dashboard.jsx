@@ -1,149 +1,106 @@
-import { useAuth } from '../context/AuthContext'
-import { MessageSquare, GraduationCap, Award, FlaskConical, FileText, Sparkles, TrendingUp, Zap, Crown, ArrowRight } from 'lucide-react'
+﻿import { useAuth } from '../context/AuthContext'
+import { MessageSquare, GraduationCap, Award, FlaskConical, FileText, Sparkles, Crown, ArrowRight, BookOpen } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 export default function Dashboard() {
   const { profile } = useAuth()
 
   const quickLinks = [
-    { 
-      title: 'Tuteur IA', 
-      description: 'Posez vos questions', 
-      icon: MessageSquare, 
+    {
+      title: 'Tuteur IA',
+      description: 'Posez vos questions',
+      icon: MessageSquare,
       link: '/chatbot',
-      bgColor: 'bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500',
-      hoverBg: 'hover:from-purple-600 hover:via-pink-600 hover:to-rose-600'
+      iconBg: 'bg-purple-500',
     },
-    { 
-      title: 'Labo Virtuel', 
-      description: '50+ expériences 3D', 
-      icon: FlaskConical, 
+    {
+      title: 'Labo Virtuel',
+      description: '50+ expériences 3D',
+      icon: FlaskConical,
       link: '/ar-lab',
-      bgColor: 'bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500',
-      hoverBg: 'hover:from-green-600 hover:via-emerald-600 hover:to-teal-600'
+      iconBg: 'bg-emerald-500',
     },
-    { 
-      title: 'Concours', 
-      description: 'Épreuves & prédictions IA', 
-      icon: FileText, 
+    {
+      title: 'Concours',
+      description: 'Épreuves et prédictions IA',
+      icon: FileText,
       link: '/concours',
-      bgColor: 'bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500',
-      hoverBg: 'hover:from-orange-600 hover:via-amber-600 hover:to-yellow-600'
+      iconBg: 'bg-orange-500',
     },
-    { 
-      title: 'Bourses', 
-      description: 'Trouvez des opportunités', 
-      icon: Award, 
+    {
+      title: 'Bourses',
+      description: 'Trouvez des opportunités',
+      icon: Award,
       link: '/scholarships',
-      bgColor: 'bg-gradient-to-br from-blue-500 via-cyan-500 to-sky-500',
-      hoverBg: 'hover:from-blue-600 hover:via-cyan-600 hover:to-sky-600'
+      iconBg: 'bg-blue-500',
     },
-    { 
-      title: 'Admissions', 
-      description: 'Universités à l\'étranger', 
-      icon: GraduationCap, 
+    {
+      title: 'Admissions',
+      description: 'Universites a l etranger',
+      icon: GraduationCap,
       link: '/admissions',
-      bgColor: 'bg-gradient-to-br from-indigo-500 via-purple-500 to-violet-500',
-      hoverBg: 'hover:from-indigo-600 hover:via-purple-600 hover:to-violet-600'
+      iconBg: 'bg-indigo-500',
     },
   ]
 
   return (
-    <div className="min-h-screen p-4 pb-24 relative overflow-hidden">
-      <div className="absolute top-20 left-10 w-72 h-72 bg-purple-300/30 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute top-60 right-10 w-96 h-96 bg-blue-300/20 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-40 left-20 w-80 h-80 bg-pink-300/20 rounded-full blur-3xl animate-pulse"></div>
+    <div className="min-h-screen relative overflow-hidden pb-36">
+      <div className="fixed inset-0 bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50"></div>
+      <div className="fixed top-0 -left-40 w-80 h-80 bg-senegal-green/30 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+      <div className="fixed top-0 -right-40 w-80 h-80 bg-senegal-yellow/40 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+      <div className="fixed -bottom-40 left-20 w-80 h-80 bg-senegal-red/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       
-      <div className="max-w-4xl mx-auto space-y-6 relative z-10">
-        
-        <div className="relative overflow-hidden rounded-3xl backdrop-blur-2xl bg-white/80 p-1 shadow-2xl border border-white/40">
-          <div className="bg-gradient-to-br from-senegal-green via-senegal-yellow to-senegal-red rounded-3xl p-6 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-white/20 rounded-full blur-2xl animate-pulse"></div>
-            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/20 rounded-full blur-2xl animate-pulse"></div>
-            <div className="relative z-10 flex items-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-white/30 backdrop-blur-sm flex items-center justify-center shadow-lg">
-                <Sparkles className="text-white" size={28} />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-white drop-shadow-lg">
-                  Bienvenue, {profile?.full_name || 'Abdoul'}! 👋
-                </h1>
-                <p className="text-white/90 text-sm">Que souhaitez-vous faire aujourd'hui?</p>
-              </div>
+      <div className="relative z-10 max-w-4xl mx-auto p-4 space-y-5">
+        <div className="backdrop-blur-xl bg-white/40 rounded-3xl border border-white/50 shadow-2xl p-6">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-senegal-green via-senegal-yellow to-senegal-red flex items-center justify-center shadow-lg">
+              <Sparkles className="text-white" size={28} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Salut, {profile?.full_name?.split(' ')[0] || 'Étudiant'}! 👋
+              </h1>
+              <p className="text-gray-700 text-sm">Prêt à apprendre aujourd'hui?</p>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
-          <div className="group relative overflow-hidden rounded-2xl backdrop-blur-xl bg-white/70 border border-white/40 p-4 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <div className="relative flex flex-col items-center text-center">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-2 shadow-lg group-hover:scale-110 transition-transform">
-                <Zap size={20} className="text-white" />
-              </div>
-              <p className="text-2xl font-bold text-gray-900">0</p>
-              <p className="text-xs text-gray-600">Sessions IA</p>
-            </div>
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 px-1">
+            <BookOpen className="text-purple-600" size={20} />
+            <h2 className="text-lg font-bold text-gray-900">Mes Outils</h2>
           </div>
 
-          <div className="group relative overflow-hidden rounded-2xl backdrop-blur-xl bg-white/70 border border-white/40 p-4 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95">
-            <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <div className="relative flex flex-col items-center text-center">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center mb-2 shadow-lg group-hover:scale-110 transition-transform">
-                <FlaskConical size={20} className="text-white" />
-              </div>
-              <p className="text-2xl font-bold text-gray-900">0</p>
-              <p className="text-xs text-gray-600">Expériences</p>
-            </div>
-          </div>
-
-          <div className="group relative overflow-hidden rounded-2xl backdrop-blur-xl bg-white/70 border border-white/40 p-4 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95">
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <div className="relative flex flex-col items-center text-center">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center mb-2 shadow-lg group-hover:scale-110 transition-transform">
-                <TrendingUp size={20} className="text-white" />
-              </div>
-              <p className="text-2xl font-bold text-gray-900">0d</p>
-              <p className="text-xs text-gray-600">Streak</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 px-2">
-            <div className="w-1 h-6 bg-gradient-to-b from-purple-500 to-blue-500 rounded-full"></div>
-            <h2 className="text-lg font-bold text-gray-900">Accès Rapide</h2>
-          </div>
-          
-          {quickLinks.map((link) => (
-            <Link key={link.link} to={link.link} className="block group">
-              <div className="relative overflow-hidden rounded-3xl backdrop-blur-xl bg-white/70 border-2 border-white/40 p-5 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] active:scale-95">
-                <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-white/20 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
-                <div className="relative z-10 flex items-center gap-4">
-                  <div className={'w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 ' + link.bgColor + ' ' + link.hoverBg}>
-                    <link.icon size={28} className="text-white" />
+          <div className="grid gap-3">
+            {quickLinks.map((link) => (
+              <Link key={link.link} to={link.link} className="block group">
+                <div className="backdrop-blur-xl bg-white/30 hover:bg-white/50 rounded-2xl border border-white/50 shadow-lg hover:shadow-2xl p-4 transition-all duration-300 hover:-translate-y-1">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${link.iconBg} flex items-center justify-center flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform`}>
+                      <link.icon size={26} className="text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-gray-900 text-lg">{link.title}</h3>
+                      <p className="text-sm text-gray-700">{link.description}</p>
+                    </div>
+                    <ArrowRight className="text-gray-500 group-hover:text-gray-700 group-hover:translate-x-2 transition-all" size={22} />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-gray-900 text-lg">{link.title}</h3>
-                    <p className="text-sm text-gray-600">{link.description}</p>
-                  </div>
-                  <ArrowRight className="text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all" size={24} />
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
+          </div>
         </div>
 
-        <div className="rounded-3xl backdrop-blur-xl bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-blue-500/10 border-2 border-white/40 p-6 shadow-xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-yellow-300/30 to-orange-300/30 rounded-full blur-3xl animate-pulse"></div>
+        <div className="backdrop-blur-xl bg-gradient-to-br from-purple-500/90 to-blue-600/90 rounded-3xl border border-white/30 shadow-2xl p-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-white/20 rounded-full blur-2xl"></div>
           <div className="relative flex items-start gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-lg">
+            <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 shadow-lg">
               <Crown className="text-white" size={28} />
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-gray-900 text-lg mb-1">Passez à Premium 👑</h3>
-              <p className="text-sm text-gray-600 mb-4">Débloquez toutes les fonctionnalités: Tuteur IA illimité, Labo complet, Bourses...</p>
-              <Link to="/premium" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-bold shadow-lg hover:shadow-2xl hover:scale-105 active:scale-95 transition-all">
+              <h3 className="font-bold text-white text-xl mb-1">Passe à Premium! 👑</h3>
+              <p className="text-white/95 text-sm mb-4">Accès illimité au tuteur IA, laboratoire complet et plus encore!</p>
+              <Link to="/premium" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-purple-600 text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all">
                 Découvrir Premium
                 <ArrowRight size={16} />
               </Link>
@@ -152,6 +109,24 @@ export default function Dashboard() {
         </div>
 
       </div>
+
+      <style>{`
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
     </div>
   )
 }

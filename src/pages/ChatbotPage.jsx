@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { FeatureGate } from '../components/FeatureGate'
 import { useAuth } from '../context/AuthContext'
 import { usePremium } from '../context/PremiumContext'
@@ -448,7 +448,7 @@ export default function ChatbotPage() {
     }
   }
 
-  return (
+  useEffect(() => { document.body.setAttribute("data-chatbot", "true"); return () => document.body.removeAttribute("data-chatbot"); }, []); return (
     <FeatureGate feature="ai_tutor">
     <div className='flex flex-col md:flex-row h-[calc(100vh-8rem)] gap-0 md:gap-4'>
       {/* Mobile Header */}
@@ -725,7 +725,7 @@ export default function ChatbotPage() {
         )}
 
         {/* Input Area */}
-        <div className='space-y-2'>
+        <div className="fixed bottom-20 left-0 right-0 bg-white border-t shadow-lg p-4 space-y-2 z-50">
           {isPremium && (
             <div className='flex gap-2'>
               <button
