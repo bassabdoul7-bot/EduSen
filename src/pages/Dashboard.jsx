@@ -67,7 +67,7 @@ export default function Dashboard() {
 
         <div className="space-y-4">
           <div className="flex items-center gap-2 px-1">
-            <BookOpen className="text-purple-600" size={20} />
+            <BookOpen className="text-senegal-green" size={20} />
             <h2 className="text-lg font-bold text-gray-900">Mes Outils</h2>
           </div>
 
@@ -91,7 +91,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="backdrop-blur-xl bg-gradient-to-br from-purple-500/90 to-blue-600/90 rounded-3xl border border-white/30 shadow-2xl p-6 relative overflow-hidden">
+        <div className="backdrop-blur-xl bg-gradient-to-br from-senegal-green/90 via-senegal-yellow/90 to-senegal-red/90 rounded-3xl border border-white/30 shadow-2xl p-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-40 h-40 bg-white/20 rounded-full blur-2xl"></div>
           <div className="relative flex items-start gap-4">
             <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 shadow-lg">
@@ -100,7 +100,7 @@ export default function Dashboard() {
             <div className="flex-1">
               <h3 className="font-bold text-white text-xl mb-1">Passe à Premium! 👑</h3>
               <p className="text-white/95 text-sm mb-4">Accès illimité au tuteur IA, laboratoire complet et plus encore!</p>
-              <Link to="/premium" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-purple-600 text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all">
+              <Link to="/premium" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-senegal-green text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all">
                 Découvrir Premium
                 <ArrowRight size={16} />
               </Link>
