@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef } from "react"
 import { usePlan } from "../hooks/usePlan"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { OrbitControls, Html, Environment, Line } from "@react-three/drei"
@@ -7,7 +7,9 @@ import toast from "react-hot-toast"
 import { ArrowLeft, PlayCircle, Camera, X, List, ChevronDown, ChevronUp, Circle, CheckCircle, RotateCcw, MousePointer, Hand, GraduationCap, School } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import * as THREE from "three"
-import { LabMascot } from "../components/LabMascot"
+import { LabHands } from "../components/LabHands"
+import { VoiceGuide } from '../components/VoiceGuide'
+import { useGuidedExperiment, acidBaseSteps } from '../components/ar/GuidedExperiment'
 import { LabTutor } from "../components/LabTutor"
 import { experimentRegistry } from '../components/ar/experimentRegistry'
 
@@ -2302,11 +2304,11 @@ function SpectrophotometryExperiment({ state, setState, setStep, experiment, sel
 
   const handleAction = (action) => {
     if (action === "sample" && selectedItem === "sample") {
-      triggerMascotAction([-0.35, 0.08, 0.25], [0, 0.08, 0.15], "#3b82f6", "Je prépare l'échantillon!", () => {
+      triggerMascotAction([-0.35, 0.08, 0.25], [0, 0.08, 0.15], "#3b82f6", "Je pr�pare l'�chantillon!", () => {
         setState(p => ({ ...p, samplePrepared: true }))
         setSelectedItem(null)
         setStep(1)
-        toast.success("💧 Solution préparée!")
+        toast.success("?? Solution pr�par�e!")
       }, "sample")
     }
     else if (action === "cuvette" && selectedItem === "cuvette" && samplePrepared) {
@@ -2314,27 +2316,27 @@ function SpectrophotometryExperiment({ state, setState, setStep, experiment, sel
         setState(p => ({ ...p, cuvetteInserted: true }))
         setSelectedItem(null)
         setStep(2)
-        toast.success("📊 Cuvette insérée!")
+        toast.success("?? Cuvette ins�r�e!")
       }, "cuvette")
     }
     else if (action === "wavelength" && cuvetteInserted && !wavelengthSet) {
       setState(p => ({ ...p, wavelengthSet: true }))
       setStep(3)
-      toast.success(`🌈 λ = ${wavelength} nm`)
+      toast.success(`?? ? = ${wavelength} nm`)
     }
     else if (action === "blank" && wavelengthSet && !blanked) {
       setState(p => ({ ...p, blanked: true }))
       setStep(4)
-      toast.success("⚪ Blanc calibré!")
+      toast.success("? Blanc calibr�!")
     }
     else if (action === "measure" && blanked && !measured) {
       const abs = 0.45
-      const conc = (abs / 0.015).toFixed(2) // Beer-Lambert: A = εlc
+      const conc = (abs / 0.015).toFixed(2) // Beer-Lambert: A = elc
       setAbsorbance(abs)
       setConcentration(conc)
       setState(p => ({ ...p, measured: true }))
       setStep(experiment.steps.length - 1)
-      toast.success(`🔬 A=${abs}, C=${conc} µM`)
+      toast.success(`?? A=${abs}, C=${conc} �M`)
     }
   }
 
@@ -2355,9 +2357,9 @@ function SpectrophotometryExperiment({ state, setState, setStep, experiment, sel
       {measured && (
         <Html position={[0, 0.18, 0.14]} center>
           <div className="bg-green-900 text-green-400 px-3 py-2 rounded font-mono text-sm">
-            <div>λ: {wavelength} nm</div>
+            <div>?: {wavelength} nm</div>
             <div className="text-xl">A: {absorbance.toFixed(3)}</div>
-            <div>C: {concentration} µM</div>
+            <div>C: {concentration} �M</div>
           </div>
         </Html>
       )}
@@ -2403,7 +2405,7 @@ function SpectrophotometryExperiment({ state, setState, setStep, experiment, sel
       {cuvetteInserted && !wavelengthSet && (
         <Html position={[0.3, 0.2, 0]} center>
           <div className="bg-white p-2 rounded shadow">
-            <div className="text-xs mb-1">λ: {wavelength} nm</div>
+            <div className="text-xs mb-1">?: {wavelength} nm</div>
             <input 
               type="range" 
               min="400" 
@@ -2417,11 +2419,11 @@ function SpectrophotometryExperiment({ state, setState, setStep, experiment, sel
       )}
 
       {/* Target zones */}
-      <TargetZone position={[0, 0.15, 0.2]} label="💧 Échantillon" active={selectedItem === "sample"} onClick={() => handleAction("sample")} />
-      {samplePrepared && <TargetZone position={[0, 0.15, 0]} label="📊 Cuvette" active={selectedItem === "cuvette"} onClick={() => handleAction("cuvette")} />}
-      {cuvetteInserted && !wavelengthSet && <TargetZone position={[0.15, 0.15, 0.13]} label="🌈 λ" active={true} onClick={() => handleAction("wavelength")} />}
-      {wavelengthSet && !blanked && <TargetZone position={[-0.15, 0.15, 0.13]} label="⚪ Blanc" active={true} onClick={() => handleAction("blank")} />}
-      {blanked && !measured && <TargetZone position={[0, 0.25, 0.13]} label="🔬 Mesurer" active={true} onClick={() => handleAction("measure")} />}
+      <TargetZone position={[0, 0.15, 0.2]} label="?? �chantillon" active={selectedItem === "sample"} onClick={() => handleAction("sample")} />
+      {samplePrepared && <TargetZone position={[0, 0.15, 0]} label="?? Cuvette" active={selectedItem === "cuvette"} onClick={() => handleAction("cuvette")} />}
+      {cuvetteInserted && !wavelengthSet && <TargetZone position={[0.15, 0.15, 0.13]} label="?? ?" active={true} onClick={() => handleAction("wavelength")} />}
+      {wavelengthSet && !blanked && <TargetZone position={[-0.15, 0.15, 0.13]} label="? Blanc" active={true} onClick={() => handleAction("blank")} />}
+      {blanked && !measured && <TargetZone position={[0, 0.25, 0.13]} label="?? Mesurer" active={true} onClick={() => handleAction("measure")} />}
 
       {/* Clickable items */}
       {!samplePrepared && grabbedItem !== "sample" && (
@@ -2436,7 +2438,7 @@ function SpectrophotometryExperiment({ state, setState, setStep, experiment, sel
               <meshStandardMaterial color="#1e40af" transparent opacity={0.8} />
             </mesh>
             <Html position={[0, 0.06, 0]} center>
-              <div className="bg-blue-600 text-white px-2 py-1 rounded text-xs font-bold">Solution CuSO₄</div>
+              <div className="bg-blue-600 text-white px-2 py-1 rounded text-xs font-bold">Solution CuSO4</div>
             </Html>
           </group>
         </ClickableObject>
@@ -2461,10 +2463,10 @@ function SpectrophotometryExperiment({ state, setState, setStep, experiment, sel
         <Html position={[-0.35, 0.3, 0]} center>
           <div className="bg-blue-900 text-white p-2 rounded text-xs">
             <div className="font-bold">Loi Beer-Lambert</div>
-            <div className="text-yellow-300">A = ε × l × c</div>
-            <div className="text-green-300 mt-1">ε = 15 M⁻¹cm⁻¹</div>
+            <div className="text-yellow-300">A = e � l � c</div>
+            <div className="text-green-300 mt-1">e = 15 M?�cm?�</div>
             <div className="text-green-300">l = 1 cm</div>
-            <div className="text-white">c = {concentration} µM</div>
+            <div className="text-white">c = {concentration} �M</div>
           </div>
         </Html>
       )}
@@ -2554,17 +2556,17 @@ if (!subject) return (
    <div className="space-y-6">
       <div className="flex items-center gap-4 mb-6"><button onClick={() => navigate(-1)} className="btn-secondary"><ArrowLeft size={20} /></button><div><h1 className="text-2xl font-bold">Laboratoire 3D</h1><p className="text-gray-600 text-sm">Experiences interactives en environnement realiste</p></div></div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-  {[{id:"chemistry",icon:"🧪",name:"Chimie",color:"from-purple-50 to-pink-50"},{id:"physics",icon:"⚡",name:"Physique",color:"from-blue-50 to-cyan-50"},{id:"biology",icon:"🧬",name:"Biologie",color:"from-green-50 to-emerald-50"},{id:"engineering",icon:"⚙️",name:"Ingenierie",color:"from-orange-50 to-amber-50"},{id:"agriculture",icon:"🌾",name:"Agriculture",color:"from-lime-50 to-green-50"},{id:"medicine",icon:"🏥",name:"Medecine",color:"from-red-50 to-rose-50"}].map(s => <div key={s.id} onClick={() => setSubject(s.id)} className={`card p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-br ${s.color}`}><div className="text-4xl mb-3 text-center">{s.icon}</div><h2 className="text-xl font-bold text-center">{s.name}</h2></div>)}
+  {[{id:"chemistry",icon:"??",name:"Chimie",color:"from-purple-50 to-pink-50"},{id:"physics",icon:"?",name:"Physique",color:"from-blue-50 to-cyan-50"},{id:"biology",icon:"??",name:"Biologie",color:"from-green-50 to-emerald-50"},{id:"engineering",icon:"??",name:"Ingenierie",color:"from-orange-50 to-amber-50"},{id:"agriculture",icon:"??",name:"Agriculture",color:"from-lime-50 to-green-50"},{id:"medicine",icon:"??",name:"Medecine",color:"from-red-50 to-rose-50"}].map(s => <div key={s.id} onClick={() => setSubject(s.id)} className={`card p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-br ${s.color}`}><div className="text-4xl mb-3 text-center">{s.icon}</div><h2 className="text-xl font-bold text-center">{s.name}</h2></div>)}
 </div>
 </div>
   )
 
   if (!level) return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4 mb-6"><button onClick={() => setSubject(null)} className="btn-secondary"><ArrowLeft size={20} /></button><h1 className="text-xl font-bold">{subject === "chemistry" ? "🧪 Chimie" : subject === "physics" ? "⚡ Physique" : subject === "biology" ? "🧬 Biologie" : subject === "engineering" ? "⚙️ Ingenierie" : subject === "agriculture" ? "🌾 Agriculture" : "🏥 Medecine"}</h1></div>
+      <div className="flex items-center gap-4 mb-6"><button onClick={() => setSubject(null)} className="btn-secondary"><ArrowLeft size={20} /></button><h1 className="text-xl font-bold">{subject === "chemistry" ? "?? Chimie" : subject === "physics" ? "? Physique" : subject === "biology" ? "?? Biologie" : subject === "engineering" ? "?? Ingenierie" : subject === "agriculture" ? "?? Agriculture" : "?? Medecine"}</h1></div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div onClick={() => setLevel("lycee")} className="card p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-br from-green-50 to-emerald-50"><School size={40} className="mx-auto mb-3 text-green-600" /><h2 className="text-xl font-bold text-center mb-1">🏫 Lycee</h2><p className="text-center text-gray-500 text-sm">{arLabService.getExperimentsByLevel(subject, "lycee").length} experiences</p></div>
-        <div onClick={() => setLevel("universite")} className="card p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-br from-purple-50 to-indigo-50"><GraduationCap size={40} className="mx-auto mb-3 text-purple-600" /><h2 className="text-xl font-bold text-center mb-1">🎓 Universite</h2><p className="text-center text-gray-500 text-sm">{arLabService.getExperimentsByLevel(subject, "universite").length} experiences</p></div>
+        <div onClick={() => setLevel("lycee")} className="card p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-br from-green-50 to-emerald-50"><School size={40} className="mx-auto mb-3 text-green-600" /><h2 className="text-xl font-bold text-center mb-1">?? Lycee</h2><p className="text-center text-gray-500 text-sm">{arLabService.getExperimentsByLevel(subject, "lycee").length} experiences</p></div>
+        <div onClick={() => setLevel("universite")} className="card p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-br from-purple-50 to-indigo-50"><GraduationCap size={40} className="mx-auto mb-3 text-purple-600" /><h2 className="text-xl font-bold text-center mb-1">?? Universite</h2><p className="text-center text-gray-500 text-sm">{arLabService.getExperimentsByLevel(subject, "universite").length} experiences</p></div>
       </div>
     </div>
   )
@@ -2573,7 +2575,7 @@ if (!subject) return (
     const experiments = arLabService.getExperimentsByLevel(subject, level)
     return (
       <div className="space-y-4">
-        <div className="flex items-center gap-4 mb-4"><button onClick={() => setLevel(null)} className="btn-secondary"><ArrowLeft size={20} /></button><h1 className="text-lg font-bold">{level === "lycee" ? "🏫 Lycee" : "🎓 Universite"}</h1></div>
+        <div className="flex items-center gap-4 mb-4"><button onClick={() => setLevel(null)} className="btn-secondary"><ArrowLeft size={20} /></button><h1 className="text-lg font-bold">{level === "lycee" ? "?? Lycee" : "?? Universite"}</h1></div>
         {isFree && (
           <div className="bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-xl p-4 mb-4 flex items-center justify-between">
             <div>
@@ -2603,7 +2605,7 @@ if (!subject) return (
               >
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-bold text-sm flex items-center gap-2">
-                    {isLocked && <span className="text-orange-500">🔒</span>}
+                    {isLocked && <span className="text-orange-500">??</span>}
                     {exp.name}
                   </h3>
                   <span className={`px-1.5 py-0.5 rounded text-xs ${exp.difficulty === "Facile" ? "bg-green-100 text-green-700" : exp.difficulty === "Moyen" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{exp.difficulty}</span>
@@ -2611,7 +2613,7 @@ if (!subject) return (
                 <p className="text-gray-600 text-xs mb-2">{exp.description}</p>
                 {isLocked ? (
                   <button className="w-full text-sm py-1.5 bg-gray-200 text-gray-500 rounded-lg">
-                    <span className="inline mr-1">🔒</span> Premium requis
+                    <span className="inline mr-1">??</span> Premium requis
                   </button>
                 ) : (
                   <button className="btn-primary w-full text-sm py-1.5">
@@ -2666,7 +2668,7 @@ function ExperimentView({ experiment, onBack }) {
   // Mascot control states
   const [mascotTarget, setMascotTarget] = useState(null)
   const [mascotWorking, setMascotWorking] = useState(false)
-  const [mascotMessage, setMascotMessage] = useState("Salut! Moi c'est Ziz ðŸ‘‹")
+  const [mascotMessage, setMascotMessage] = useState("Salut! Moi c'est Ziz 👋")
   const [pendingAction, setPendingAction] = useState(null)
   
   // Helper function to trigger mascot action
@@ -2693,7 +2695,7 @@ function ExperimentView({ experiment, onBack }) {
     setMascotWorking(false)
     setMascotTarget(null)
     setGrabbedItem(null)
-    setMascotMessage("C'est fait! âœ…")
+    setMascotMessage("C'est fait! ✅")
     setTimeout(() => setMascotMessage(""), 2000)
   }
   const reset = () => { setState(initialState); setStep(0); setSelectedItem(null); toast.success("?? Reset!") }
@@ -2778,7 +2780,17 @@ function ExperimentView({ experiment, onBack }) {
               // Full lab environment
               <FullLabEnvironment>
                 {renderExperiment()}
-                <LabMascot 
+                                {/* Voice Guide */}
+                {voiceEnabled && guidedExperiment.hasStarted && guidedExperiment.currentStep && (
+                  <VoiceGuide 
+                    text={guidedExperiment.currentStep.instruction}
+                    onComplete={() => {
+                      console.log('Voice instruction completed')
+                    }}
+                  />
+                )}
+
+                <LabHands 
                   targetPosition={mascotTarget}
                   objectPosition={mascotObjectPos}
                   objectColor={mascotObjectColor}

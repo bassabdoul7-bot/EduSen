@@ -31,3 +31,8 @@ npm-debug.log*
 # Temp files
 *.tmp
 .temp/
+
+.env
+edusen-analysis.txt
+*.backup
+*.backup2
