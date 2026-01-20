@@ -74,23 +74,23 @@ export default function Layout() {
         <>
           {/* Backdrop */}
           <div 
-            className="fixed inset-0 bg-black/40 z-40 animate-fadeIn"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 animate-fadeIn"
             onClick={() => setMenuOpen(false)}
           ></div>
           
           {/* Panel */}
-          <div className="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-gray-50 shadow-2xl z-50 animate-slideInRight overflow-y-auto">
+          <div className="fixed top-0 right-0 h-full w-80 max-w-[85vw] backdrop-blur-2xl bg-white/20 shadow-2xl z-50 border-l border-white/30 animate-slideInRight overflow-y-auto">
             <div className="p-4 space-y-4">
               
               {/* Panel Header */}
-              <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+              <div className="flex items-center justify-between pb-3 border-b border-white/20">
                 <div className="flex items-center gap-2">
                   <div className="w-1 h-6 bg-senegal-green rounded-full"></div>
                   <h2 className="text-xl font-bold text-gray-900">Menu</h2>
                 </div>
                 <button 
                   onClick={() => setMenuOpen(false)}
-                  className="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50"
+                  className="w-9 h-9 rounded-lg backdrop-blur-xl bg-white/20 hover:bg-white/30 border border-white/30 flex items-center justify-center"
                 >
                   <X size={18} />
                 </button>
@@ -104,7 +104,7 @@ export default function Layout() {
                     onClick={() => handleMenuItemClick(item.path)}
                     className="w-full group"
                   >
-                    <div className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm hover:shadow-md hover:border-gray-200 transition-all">
+                    <div className="backdrop-blur-xl bg-white/20 hover:bg-white/30 rounded-xl p-3 border border-white/30 hover:border-white/50 shadow-sm hover:shadow-md transition-all">
                       <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-lg ${item.iconBg} flex items-center justify-center group-hover:scale-105 transition-transform`}>
                           <item.icon size={20} className="text-white" />
@@ -120,7 +120,7 @@ export default function Layout() {
               {/* Sign Out */}
               <button
                 onClick={handleSignOut}
-                className="w-full bg-white rounded-xl p-3 border border-red-100 shadow-sm hover:shadow-md hover:border-red-200 transition-all"
+                className="w-full backdrop-blur-xl bg-red-500/20 hover:bg-red-500/30 rounded-xl p-3 border border-red-300/30 hover:border-red-300/50 shadow-sm hover:shadow-md transition-all"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg bg-red-500 flex items-center justify-center">
