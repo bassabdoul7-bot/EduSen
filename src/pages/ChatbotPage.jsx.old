@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { FeatureGate } from '../components/FeatureGate'
 import { useAuth } from '../context/AuthContext'
 import { usePremium } from '../context/PremiumContext'
@@ -450,17 +450,10 @@ export default function ChatbotPage() {
 
   useEffect(() => { document.body.setAttribute("data-chatbot", "true"); return () => document.body.removeAttribute("data-chatbot"); }, []); return (
     <FeatureGate feature="ai_tutor">
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Aurora Background */}
-      <div className="fixed inset-0 bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 -z-10"></div>
-      <div className="fixed top-0 -left-40 w-80 h-80 bg-senegal-green/30 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob -z-10"></div>
-      <div className="fixed top-0 -right-40 w-80 h-80 bg-senegal-yellow/40 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000 -z-10"></div>
-      <div className="fixed -bottom-40 left-20 w-80 h-80 bg-senegal-red/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000 -z-10"></div>
-      
     <div className='flex flex-col md:flex-row h-[calc(100vh-8rem)] gap-0 md:gap-4'>
       {/* Mobile Header */}
       <div className='md:hidden mb-4'>
-        <div className='flex items-center justify-between p-3 backdrop-blur-xl bg-gradient-to-r from-senegal-green/90 to-senegal-yellow/90 text-white rounded-2xl border border-white/30 shadow-lg'>
+        <div className='flex items-center justify-between p-3 bg-senegal-green text-white rounded-lg'>
           <button
             onClick={() => setShowSidebar(!showSidebar)}
             className='px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors text-sm font-semibold'
@@ -488,7 +481,7 @@ export default function ChatbotPage() {
             onClick={() => setShowSidebar(false)}
           />
           
-          <div className='fixed md:relative inset-y-0 left-0 w-80 md:w-80 backdrop-blur-2xl bg-white/30 border-r border-white/30 z-50 md:z-0 flex flex-col shadow-2xl md:shadow-none transition-transform duration-300 p-4 h-full'>
+          <div className='fixed md:relative inset-y-0 left-0 w-80 md:w-80 bg-white z-50 md:z-0 flex flex-col shadow-2xl md:shadow-none transition-transform duration-300 card p-4 h-full'>
             <div className='flex items-center justify-between mb-4'>
               <h3 className='font-bold text-gray-800'>💬 Historique</h3>
               <div className='flex gap-2'>
@@ -579,8 +572,8 @@ export default function ChatbotPage() {
                     }}
                     className={'p-2 rounded-lg border-2 transition-all hover:scale-105 ' + 
                       (selectedSubject.id === subject.id
-                        ? 'backdrop-blur-xl bg-gradient-to-r from-senegal-green/90 to-senegal-yellow/90 text-white border-white/30 shadow-xl'
-                        : 'backdrop-blur-xl bg-white/40 hover:bg-white/60 border-white/30 hover:border-white/50')
+                        ? 'bg-senegal-green text-white border-senegal-green shadow-lg'
+                        : 'bg-white border-gray-200 hover:border-senegal-green')
                     }
                   >
                     <div className='text-xl mb-1'>{subject.icon}</div>
@@ -590,7 +583,7 @@ export default function ChatbotPage() {
               </div>
             </div>
           ) : (
-            <div className='flex items-center justify-between p-3 backdrop-blur-xl bg-gradient-to-r from-senegal-green/90 to-senegal-yellow/90 text-white rounded-2xl border border-white/30 shadow-lg'>
+            <div className='flex items-center justify-between p-3 bg-senegal-green text-white rounded-lg'>
               <div className='flex items-center gap-3'>
                 <button
                   onClick={() => setShowSidebar(!showSidebar)}
@@ -633,7 +626,7 @@ export default function ChatbotPage() {
                   }}
                   className={'p-3 rounded-lg border-2 transition-all ' + 
                     (selectedSubject.id === subject.id
-                      ? 'backdrop-blur-xl bg-gradient-to-r from-senegal-green/90 to-senegal-yellow/90 text-white border-white/30 shadow-xl'
+                      ? 'bg-senegal-green text-white border-senegal-green shadow-lg'
                       : 'bg-white border-gray-200')
                   }
                 >
@@ -685,7 +678,7 @@ export default function ChatbotPage() {
         </div>
 
         {/* Messages Area */}
-        <div className='flex-1 overflow-y-auto backdrop-blur-xl bg-white/20 border border-white/30 rounded-2xl mb-4 p-3 md:p-4'>
+        <div className='flex-1 overflow-y-auto card mb-4 p-3 md:p-4'>
           <div className='space-y-3 md:space-y-4'>
             {messages.map((msg, idx) => (
               <div
@@ -694,8 +687,9 @@ export default function ChatbotPage() {
               >
                 <div
                   className={'max-w-[85%] md:max-w-[80%] p-3 md:p-4 rounded-lg text-sm md:text-base ' + 
-                    (msg.role === 'user' ? 'backdrop-blur-xl bg-gradient-to-r from-senegal-green/90 to-senegal-yellow/90 text-white border border-white/30 shadow-lg'
-                      : 'backdrop-blur-xl bg-white/40 border border-white/30 text-gray-900')
+                    (msg.role === 'user'
+                      ? 'bg-senegal-green text-white'
+                      : 'bg-gray-100 text-gray-900')
                   }
                 >
                   <div className='whitespace-pre-wrap break-words'>{msg.content}</div>
@@ -731,7 +725,7 @@ export default function ChatbotPage() {
         )}
 
         {/* Input Area */}
-        <div className="fixed bottom-20 left-0 right-0 backdrop-blur-2xl bg-white/30 border-t border-white/30 shadow-lg p-4 space-y-2 z-50">
+        <div className="fixed bottom-20 left-0 right-0 bg-white border-t shadow-lg p-4 space-y-2 z-50">
           {isPremium && (
             <div className='flex gap-2'>
               <button
@@ -769,21 +763,7 @@ export default function ChatbotPage() {
           </div>
         </div>
       </div>
-        </div>
     </div>
-    
-    
-          <style>{`
-        @keyframes blob {
-          0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-          100% { transform: translate(0px, 0px) scale(1); }
-        }
-        .animate-blob { animation: blob 7s infinite; }
-        .animation-delay-2000 { animation-delay: 2s; }
-        .animation-delay-4000 { animation-delay: 4s; }
-      `}</style>
     </FeatureGate>
   )
 }

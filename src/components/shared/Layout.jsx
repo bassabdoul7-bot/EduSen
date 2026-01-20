@@ -49,22 +49,22 @@ export default function Layout() {
     <div className="min-h-screen bg-gray-50 pb-20">
 
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-transparent border-b border-white/10">
+      <header className="sticky top-0 z-40 bg-gray-900/60 backdrop-blur-md border-b border-white/[0.05]">
         <div className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-senegal-green via-senegal-yellow to-senegal-red flex items-center justify-center shadow-sm">
               <Sparkles className="text-white" size={20} />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-gray-900">EduSen</h1>
-              <p className="text-xs text-gray-600">{profile?.full_name}</p>
+              <h1 className="text-lg font-black text-white">EduSen</h1>
+              <p className="text-xs text-white/60">{profile?.full_name}</p>
             </div>
           </div>
           <button 
             onClick={() => setMenuOpen(!menuOpen)} 
-            className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+            className="w-10 h-10 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] flex items-center justify-center transition-colors"
           >
-            {menuOpen ? <X size={20} /> : <Menu size={20} />}
+            {menuOpen ? <X size={20} className="text-white" /> : <Menu size={20} className="text-white" />}
           </button>
         </div>
       </header>
