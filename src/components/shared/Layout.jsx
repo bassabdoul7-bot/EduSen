@@ -151,10 +151,10 @@ export default function Layout() {
                 onClick={() => navigate(tab.path)} 
                 className="flex flex-col items-center gap-1 px-3 py-2"
               >
-                <div className={active ? 'w-11 h-11 rounded-xl flex items-center justify-center bg-gradient-to-br from-purple-500 to-blue-500 shadow-md' : 'w-11 h-11 rounded-xl flex items-center justify-center bg-gray-100'}>
+                <div className={active ? 'w-11 h-11 rounded-xl flex items-center justify-center bg-gradient-to-br from-senegal-green via-senegal-yellow to-senegal-red shadow-md' : 'w-11 h-11 rounded-xl flex items-center justify-center bg-gray-100'}>
                   <tab.icon size={22} className={active ? 'text-white' : 'text-gray-600'} />
                 </div>
-                <span className={active ? 'text-xs font-semibold text-purple-600' : 'text-xs font-medium text-gray-600'}>{tab.label}</span>
+                <span className={active ? 'text-xs font-semibold text-senegal-green' : 'text-xs font-medium text-gray-600'}>{tab.label}</span>
               </button>
             )
           })}

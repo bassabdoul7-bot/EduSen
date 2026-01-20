@@ -42,9 +42,7 @@ export default function Dashboard() {
             <Link to="/scholarships" className="text-gray-600 hover:text-gray-900 transition-colors">
               🎓 Bourses
             </Link>
-            <Link to="/ar-lab" className="text-gray-600 hover:text-gray-900 transition-colors">
-              🧪 Labo
-            </Link>
+            <Link to="/admissions" className="text-gray-600 hover:text-gray-900 transition-colors">🎓 Admissions</Link>
           </div>
         </div>
 
