@@ -1,13 +1,12 @@
-import { defineConfig } from 'vite'
+﻿import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  plugins: [
-    react(),
-    // Temporarily disable PWA for development
-    // VitePWA will be enabled later
-  ],
+  plugins: [react()],
   server: {
-    port: 3000
+    host: true,
+    port: 3000,
+    strictPort: true,
+    allowedHosts: ['.trycloudflare.com']
   }
 })

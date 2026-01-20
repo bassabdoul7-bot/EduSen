@@ -2,9 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* iOS Safe Area Fix - Dark Background */
+html {
+  background-color: #064e3b;
+}
+
+body {
+  background-color: #064e3b;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply text-gray-900;
   }
 }
 
@@ -12,15 +26,12 @@
   .btn-primary {
     @apply bg-senegal-green text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium;
   }
-  
   .btn-secondary {
     @apply bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium;
   }
-  
   .input-field {
     @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-senegal-green focus:border-transparent;
   }
-  
   .card {
     @apply bg-white rounded-lg shadow-md p-6;
   }
@@ -43,24 +54,6 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #006b2f;
-}
-
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fade-in {
-  animation: fade-in 0.6s ease-out;
-}
-
-.animate-slide-up {
-  animation: slide-up 0.6s ease-out backwards;
 }
 
 @keyframes fade-in {
