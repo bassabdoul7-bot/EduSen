@@ -1,110 +1,50 @@
 ﻿import { useAuth } from '../context/AuthContext'
-import { MessageSquare, GraduationCap, Award, FlaskConical, FileText, Sparkles, Crown, ArrowRight, BookOpen } from 'lucide-react'
+import { Sparkles, TrendingUp, Clock } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 export default function Dashboard() {
   const { profile } = useAuth()
 
-  const quickLinks = [
-    {
-      title: 'Tuteur IA',
-      description: 'Posez vos questions',
-      icon: MessageSquare,
-      link: '/chatbot',
-      iconBg: 'bg-purple-500',
-    },
-    {
-      title: 'Labo Virtuel',
-      description: '50+ expériences 3D',
-      icon: FlaskConical,
-      link: '/ar-lab',
-      iconBg: 'bg-emerald-500',
-    },
-    {
-      title: 'Concours',
-      description: 'Épreuves et prédictions IA',
-      icon: FileText,
-      link: '/concours',
-      iconBg: 'bg-orange-500',
-    },
-    {
-      title: 'Bourses',
-      description: 'Trouvez des opportunités',
-      icon: Award,
-      link: '/scholarships',
-      iconBg: 'bg-blue-500',
-    },
-    {
-      title: 'Admissions',
-      description: 'Universites a l etranger',
-      icon: GraduationCap,
-      link: '/admissions',
-      iconBg: 'bg-indigo-500',
-    },
-  ]
-
   return (
-    <div className="min-h-screen relative overflow-hidden pb-36">
+    <div className="min-h-screen relative overflow-hidden pb-24">
+      {/* Background */}
       <div className="fixed inset-0 bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50"></div>
       <div className="fixed top-0 -left-40 w-80 h-80 bg-senegal-green/30 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
       <div className="fixed top-0 -right-40 w-80 h-80 bg-senegal-yellow/40 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
       <div className="fixed -bottom-40 left-20 w-80 h-80 bg-senegal-red/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       
-      <div className="relative z-10 max-w-4xl mx-auto p-4 space-y-5">
-        <div className="backdrop-blur-xl bg-white/40 rounded-3xl border border-white/50 shadow-2xl p-6">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-senegal-green via-senegal-yellow to-senegal-red flex items-center justify-center shadow-lg">
-              <Sparkles className="text-white" size={28} />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Salut, {profile?.full_name?.split(' ')[0] || 'Étudiant'}! 👋
-              </h1>
-              <p className="text-gray-700 text-sm">Prêt à apprendre aujourd'hui?</p>
-            </div>
-          </div>
-        </div>
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-10rem)] px-4">
 
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 px-1">
-            <BookOpen className="text-senegal-green" size={20} />
-            <h2 className="text-lg font-bold text-gray-900">Mes Outils</h2>
-          </div>
+        {/* Main Welcome */}
+        <div className="text-center max-w-md">
+          <h1 className="text-4xl font-bold text-gray-900 mb-3">
+            Salut, {profile?.full_name?.split(' ')[0] || 'Etudiant'}! 👋
+          </h1>
+          
+          <p className="text-gray-600 text-lg mb-8">
+            Pret a apprendre aujourd'hui?
+          </p>
 
-          <div className="grid gap-3">
-            {quickLinks.map((link) => (
-              <Link key={link.link} to={link.link} className="block group">
-                <div className="backdrop-blur-xl bg-white/30 hover:bg-white/50 rounded-2xl border border-white/50 shadow-lg hover:shadow-2xl p-4 transition-all duration-300 hover:-translate-y-1">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${link.iconBg} flex items-center justify-center flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform`}>
-                      <link.icon size={26} className="text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-gray-900 text-lg">{link.title}</h3>
-                      <p className="text-sm text-gray-700">{link.description}</p>
-                    </div>
-                    <ArrowRight className="text-gray-500 group-hover:text-gray-700 group-hover:translate-x-2 transition-all" size={22} />
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
+          {/* Single Featured Card */}
+          <Link to="/chatbot" className="block group mb-6">
+            <div className="backdrop-blur-xl bg-gradient-to-br from-emerald-500 to-teal-500 rounded-3xl p-6 shadow-2xl hover:shadow-3xl transition-all hover:scale-105 active:scale-95 border border-white/30">
+              <div className="text-5xl mb-3">🤖</div>
+              <h2 className="text-2xl font-bold text-white mb-2">Pose une question</h2>
+              <p className="text-white/90">Ton tuteur IA est pret</p>
+            </div>
+          </Link>
 
-        <div className="backdrop-blur-xl bg-gradient-to-br from-senegal-green/90 via-senegal-yellow/90 to-senegal-red/90 rounded-3xl border border-white/30 shadow-2xl p-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-40 h-40 bg-white/20 rounded-full blur-2xl"></div>
-          <div className="relative flex items-start gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 shadow-lg">
-              <Crown className="text-white" size={28} />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-white text-xl mb-1">Passe à Premium! 👑</h3>
-              <p className="text-white/95 text-sm mb-4">Accès illimité au tuteur IA, laboratoire complet et plus encore!</p>
-              <Link to="/premium" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-senegal-green text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all">
-                Découvrir Premium
-                <ArrowRight size={16} />
-              </Link>
-            </div>
+          {/* Quick Links - Text Only */}
+          <div className="flex justify-center gap-6 text-sm">
+            <Link to="/concours" className="text-gray-600 hover:text-gray-900 transition-colors">
+              📝 Concours
+            </Link>
+            <Link to="/scholarships" className="text-gray-600 hover:text-gray-900 transition-colors">
+              🎓 Bourses
+            </Link>
+            <Link to="/ar-lab" className="text-gray-600 hover:text-gray-900 transition-colors">
+              🧪 Labo
+            </Link>
           </div>
         </div>
 
@@ -117,15 +57,9 @@ export default function Dashboard() {
           66% { transform: translate(-20px, 20px) scale(0.9); }
           100% { transform: translate(0px, 0px) scale(1); }
         }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
+        .animate-blob { animation: blob 7s infinite; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
       `}</style>
     </div>
   )
