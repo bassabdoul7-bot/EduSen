@@ -457,10 +457,10 @@ export default function ChatbotPage() {
       <div className="fixed top-0 -right-40 w-80 h-80 bg-senegal-yellow/40 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000 -z-10"></div>
       <div className="fixed -bottom-40 left-20 w-80 h-80 bg-senegal-red/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000 -z-10"></div>
       
-    <div className='flex flex-col md:flex-row h-[calc(100vh-8rem)] gap-0 md:gap-4'>
+    <div className='flex flex-col md:flex-row h-[calc(100vh-8rem)] pb-24 gap-0 md:gap-4'>
       {/* Mobile Header */}
       <div className='md:hidden mb-4'>
-        <div className='flex items-center justify-between p-3 backdrop-blur-xl bg-gradient-to-r from-senegal-green/90 to-senegal-yellow/90 text-white rounded-2xl border border-white/30 shadow-lg'>
+        <div className='flex items-center justify-between p-3 backdrop-blur-md bg-emerald-900/80 border-emerald-700/50 text-white rounded-2xl border border-white/30 shadow-lg'>
           <button
             onClick={() => setShowSidebar(!showSidebar)}
             className='px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors text-sm font-semibold'
@@ -579,7 +579,7 @@ export default function ChatbotPage() {
                     }}
                     className={'p-2 rounded-lg border-2 transition-all hover:scale-105 ' + 
                       (selectedSubject.id === subject.id
-                        ? 'backdrop-blur-xl bg-gradient-to-r from-senegal-green/90 to-senegal-yellow/90 text-white border-white/30 shadow-xl'
+                        ? 'backdrop-blur-md bg-emerald-900/80 border-emerald-700/50 text-white border-white/30 shadow-xl'
                         : 'backdrop-blur-xl bg-white/40 hover:bg-white/60 border-white/30 hover:border-white/50')
                     }
                   >
@@ -590,7 +590,7 @@ export default function ChatbotPage() {
               </div>
             </div>
           ) : (
-            <div className='flex items-center justify-between p-3 backdrop-blur-xl bg-gradient-to-r from-senegal-green/90 to-senegal-yellow/90 text-white rounded-2xl border border-white/30 shadow-lg'>
+            <div className='flex items-center justify-between p-3 backdrop-blur-md bg-emerald-900/80 border-emerald-700/50 text-white rounded-2xl border border-white/30 shadow-lg'>
               <div className='flex items-center gap-3'>
                 <button
                   onClick={() => setShowSidebar(!showSidebar)}
@@ -633,7 +633,7 @@ export default function ChatbotPage() {
                   }}
                   className={'p-3 rounded-lg border-2 transition-all ' + 
                     (selectedSubject.id === subject.id
-                      ? 'backdrop-blur-xl bg-gradient-to-r from-senegal-green/90 to-senegal-yellow/90 text-white border-white/30 shadow-xl'
+                      ? 'backdrop-blur-md bg-emerald-900/80 border-emerald-700/50 text-white border-white/30 shadow-xl'
                       : 'bg-white border-gray-200')
                   }
                 >
@@ -694,7 +694,7 @@ export default function ChatbotPage() {
               >
                 <div
                   className={'max-w-[85%] md:max-w-[80%] p-3 md:p-4 rounded-lg text-sm md:text-base ' + 
-                    (msg.role === 'user' ? 'backdrop-blur-xl bg-gradient-to-r from-senegal-green/90 to-senegal-yellow/90 text-white border border-white/30 shadow-lg'
+                    (msg.role === 'user' ? 'backdrop-blur-md bg-emerald-900/80 border-emerald-700/50 text-white border border-white/30 shadow-lg'
                       : 'backdrop-blur-xl bg-white/40 border border-white/30 text-gray-900')
                   }
                 >
@@ -731,7 +731,7 @@ export default function ChatbotPage() {
         )}
 
         {/* Input Area */}
-        <div className="fixed bottom-20 left-0 right-0 backdrop-blur-2xl bg-white/30 border-t border-white/30 shadow-lg p-4 space-y-2 z-50">
+        <div className="fixed bottom-28 left-0 right-0 backdrop-blur-2xl bg-white/30 border-t border-white/30 shadow-lg p-4 space-y-2 z-50">
           {isPremium && (
             <div className='flex gap-2'>
               <button

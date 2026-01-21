@@ -28,12 +28,15 @@ export default function Dashboard() {
           </div>
           {/* Glass Hero Card */}
           <Link to="/chatbot" className="block group mb-8">
-            <div className="relative overflow-hidden rounded-3xl backdrop-blur-sm bg-white/[0.02] border border-white/[0.08] p-10 shadow-2xl hover:bg-white/[0.05] hover:border-white/[0.15] transition-all duration-300 hover:scale-[1.02] active:scale-98">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-400/20 rounded-full blur-2xl"></div>
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-yellow-500/20 via-amber-500/15 to-orange-500/10 border border-yellow-400/30 p-10 shadow-2xl hover:shadow-yellow-500/20 backdrop-blur-md transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+              {/* Glow effects */}
+              <div className="absolute -top-10 -right-10 w-48 h-48 bg-yellow-400/20 rounded-full blur-3xl"></div>
+              <div className="absolute -bottom-8 -left-8 w-40 h-40 bg-amber-500/15 rounded-full blur-2xl"></div>
+              
               <div className="relative">
                 <div className="text-7xl mb-4">🤖</div>
-                <h2 className="text-4xl font-black text-white mb-2 leading-tight">Pose une question</h2>
-                <p className="text-emerald-200 text-lg">Ton tuteur IA est pret</p>
+                <h2 className="text-4xl font-black text-white mb-2 leading-tight drop-shadow-lg">Pose une question</h2>
+                <p className="text-yellow-100 text-lg font-medium">Ton tuteur IA est prêt</p>
               </div>
             </div>
           </Link>

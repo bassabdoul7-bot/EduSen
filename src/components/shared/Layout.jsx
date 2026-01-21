@@ -26,7 +26,7 @@ export default function Layout() {
   ]
 
   const menuItems = [
-    { path: '/ar-lab', icon: FlaskConical, label: 'Labo Virtuel', iconBg: 'bg-emerald-500' },
+    // { path: '/ar-lab', icon: FlaskConical, label: 'Labo Virtuel', iconBg: 'bg-emerald-500' },
     { path: '/messages', icon: Mail, label: 'Messages', iconBg: 'bg-blue-500' },
     { path: '/forum', icon: MessageCircle, label: 'Forum', iconBg: 'bg-green-500' },
     { path: '/scholarships', icon: Award, label: 'Bourses', iconBg: 'bg-orange-500' },
