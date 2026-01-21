@@ -4,7 +4,7 @@ const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
 export const chatService = {
-  sendMessage: async (userId, subject, message, conversationHistory, conversationId = null) => {
+  sendMessage: async (userId, subject, message, conversationHistory, conversationId = null, onStream = null) => {
     try {
       const response = await fetch(GROQ_API_URL, {
         method: 'POST',
@@ -25,7 +25,8 @@ export const chatService = {
             }))
           ],
           temperature: 0.7,
-          max_tokens: 2000
+          max_tokens: 2000,
+          stream: true  // Enable streaming
         })
       })
 
@@ -33,16 +34,41 @@ export const chatService = {
         throw new Error('API Error: ' + response.status)
       }
 
-      const data = await response.json()
-      
-      if (!data.choices || !data.choices[0]) {
-        throw new Error('Format de réponse invalide')
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let reply = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value)
+        const lines = chunk.split('\n').filter(line => line.trim() !== '')
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6)
+            if (data === '[DONE]') continue
+
+            try {
+              const parsed = JSON.parse(data)
+              const content = parsed.choices[0]?.delta?.content
+              if (content) {
+                reply += content
+                if (onStream) {
+                  onStream(content)  // Stream each chunk to UI
+                }
+              }
+            } catch (e) {
+              // Skip invalid JSON
+            }
+          }
+        }
       }
 
-      const reply = data.choices[0].message.content
       const updatedMessages = [...conversationHistory, { role: 'assistant', content: reply }]
 
-      // Update existing conversation or create new one
+      // Save to database
       if (conversationId) {
         await supabase
           .from('chatbot_conversations')
@@ -52,7 +78,7 @@ export const chatService = {
           })
           .eq('id', conversationId)
       } else {
-        await supabase
+        const { data: newConv } = await supabase
           .from('chatbot_conversations')
           .insert({
             user_id: userId,
@@ -60,6 +86,10 @@ export const chatService = {
             messages: updatedMessages,
             updated_at: new Date().toISOString()
           })
+          .select()
+          .single()
+        
+        conversationId = newConv?.id
       }
 
       return { reply, conversationId }
@@ -77,7 +107,6 @@ export const chatService = {
       .eq('subject', subject)
       .order('updated_at', { ascending: false })
       .limit(1)
-
     return { data, error }
   },
 
@@ -88,7 +117,6 @@ export const chatService = {
       .eq('user_id', userId)
       .eq('subject', subject)
       .order('updated_at', { ascending: false })
-    
     return { data, error }
   },
 
@@ -97,7 +125,6 @@ export const chatService = {
       .from('chatbot_conversations')
       .delete()
       .eq('id', conversationId)
-    
     return { error }
   },
 
@@ -112,7 +139,6 @@ export const chatService = {
       })
       .select()
       .single()
-    
     return { data, error }
   }
 }

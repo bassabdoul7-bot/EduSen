@@ -242,9 +242,14 @@ export default function ChatbotPage() {
 
     const userMessage = { role: 'user', content: inputMessage }
     const updatedMessages = [...messages, userMessage]
-    setMessages(updatedMessages)
+    
+    // Add empty assistant message for streaming
+    const assistantMessage = { role: 'assistant', content: '' }
+    setMessages([...updatedMessages, assistantMessage])
     setInputMessage('')
     setLoading(true)
+    
+    let streamedContent = ''
 
     try {
       const response = await chatService.sendMessage(
@@ -252,11 +257,15 @@ export default function ChatbotPage() {
         selectedSubject.id,
         inputMessage,
         updatedMessages,
-        currentConversationId
+        currentConversationId,
+        (chunk) => {
+          // Streaming callback - updates message in real-time
+          streamedContent += chunk
+          setMessages([...updatedMessages, { role: 'assistant', content: streamedContent }])
+        }
       )
 
       if (response.reply) {
-        setMessages([...updatedMessages, { role: 'assistant', content: response.reply }])
         await incrementMessageCount()
         setMessageCount(prev => prev + 1)
         await loadAllConversations()
@@ -451,11 +460,10 @@ export default function ChatbotPage() {
   useEffect(() => { document.body.setAttribute("data-chatbot", "true"); return () => document.body.removeAttribute("data-chatbot"); }, []); return (
     <FeatureGate feature="ai_tutor">
     <div className="min-h-screen relative overflow-hidden">
-      {/* Aurora Background */}
-      <div className="fixed inset-0 bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 -z-10"></div>
-      <div className="fixed top-0 -left-40 w-80 h-80 bg-senegal-green/30 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob -z-10"></div>
-      <div className="fixed top-0 -right-40 w-80 h-80 bg-senegal-yellow/40 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000 -z-10"></div>
-      <div className="fixed -bottom-40 left-20 w-80 h-80 bg-senegal-red/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000 -z-10"></div>
+      {/* Emerald Background - Same as Dashboard */}
+      <div className="fixed inset-0 bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-950 -z-10"></div>
+      <div className="fixed top-0 left-1/4 w-96 h-96 bg-emerald-600/8 rounded-full blur-3xl -z-10"></div>
+      <div className="fixed bottom-0 right-1/4 w-96 h-96 bg-emerald-600/8 rounded-full blur-3xl -z-10"></div>
       
     <div className='flex flex-col md:flex-row h-[calc(100vh-8rem)] pb-24 gap-0 md:gap-4'>
       {/* Mobile Header */}
@@ -678,15 +686,15 @@ export default function ChatbotPage() {
               </span>
             ) : (
               <span className='text-gray-600 text-xs md:text-sm'>
-                /10
+                {messageCount}/10
               </span>
             )}
           </div>
         </div>
 
         {/* Messages Area */}
-        <div className='flex-1 overflow-y-auto backdrop-blur-xl bg-white/20 border border-white/30 rounded-2xl mb-4 p-3 md:p-4'>
-          <div className='space-y-3 md:space-y-4'>
+          <div className='overflow-y-auto mb-4 p-3 md:p-4' style={{height: 'calc(100vh - 20rem)'}}>
+          <div className='max-w-4xl mx-auto'><div className='space-y-3 md:space-y-4 pb-4'>
             {messages.map((msg, idx) => (
               <div
                 key={idx}
@@ -709,7 +717,7 @@ export default function ChatbotPage() {
                 </div>
               </div>
             )}
-            <div ref={messagesEndRef} />
+            </div><div ref={messagesEndRef} />
           </div>
         </div>
 
@@ -762,28 +770,15 @@ export default function ChatbotPage() {
             <button
               onClick={sendMessage}
               disabled={loading || !inputMessage.trim()}
-              className='btn-primary px-4 md:px-6'
+              className='w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-br from-yellow-500 to-emerald-500 hover:from-yellow-400 hover:to-emerald-400 disabled:from-gray-400 disabled:to-gray-500 shadow-lg hover:shadow-yellow-500/50 transition-all duration-300 flex items-center justify-center group active:scale-95 disabled:cursor-not-allowed'
             >
-              {loading ? <Loader2 className='animate-spin' size={18} /> : <Send size={18} />}
+              {loading ? <Loader2 className='animate-spin text-white' size={20} /> : <Send size={20} className='text-white group-hover:scale-110 transition-transform' />}
             </button>
           </div>
         </div>
       </div>
         </div>
     </div>
-    
-    
-          <style>{`
-        @keyframes blob {
-          0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-          100% { transform: translate(0px, 0px) scale(1); }
-        }
-        .animate-blob { animation: blob 7s infinite; }
-        .animation-delay-2000 { animation-delay: 2s; }
-        .animation-delay-4000 { animation-delay: 4s; }
-      `}</style>
     </FeatureGate>
   )
 }
