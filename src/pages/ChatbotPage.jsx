@@ -461,9 +461,9 @@ export default function ChatbotPage() {
     <FeatureGate feature="ai_tutor">
     <div className="min-h-screen relative overflow-hidden">
       {/* Emerald Background - Same as Dashboard */}
-      <div className="fixed inset-0 bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-950 -z-10"></div>
-      <div className="fixed top-0 left-1/4 w-96 h-96 bg-emerald-600/8 rounded-full blur-3xl -z-10"></div>
-      <div className="fixed bottom-0 right-1/4 w-96 h-96 bg-emerald-600/8 rounded-full blur-3xl -z-10"></div>
+      <div className="fixed inset-0 bg-[#0a1f14] -z-10"></div>
+      
+      
       
     <div className='flex flex-col md:flex-row h-[calc(100vh-8rem)] pb-24 gap-0 md:gap-4'>
       {/* Mobile Header */}

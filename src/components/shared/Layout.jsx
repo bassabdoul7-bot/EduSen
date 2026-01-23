@@ -129,7 +129,7 @@ export default function Layout() {
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-emerald-950/95 backdrop-blur-md border-t border-emerald-800/20 shadow-2xl" style={{paddingBottom: "env(safe-area-inset-bottom)"}}>
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#0a1f14] backdrop-blur-md border-t border-emerald-800/20 shadow-2xl" style={{paddingBottom: "env(safe-area-inset-bottom)"}}>
         <div className="flex items-center justify-around px-2 py-2 max-w-lg mx-auto">
           {mainTabs.map((tab) => {
             const active = isActive(tab.path)

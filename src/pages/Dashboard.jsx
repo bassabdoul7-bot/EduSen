@@ -1,68 +1,87 @@
 ﻿import { useAuth } from '../context/AuthContext'
-import { MessageSquare, Sparkles } from 'lucide-react'
+import { MessageSquare, Sparkles, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
+
 export default function Dashboard() {
   const { profile } = useAuth()
+  
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-950 pb-24 relative overflow-hidden">
-      {/* Subtle glow effects */}
-      <div className="fixed top-0 left-1/4 w-96 h-96 bg-emerald-600/8 rounded-full blur-3xl"></div>
-      <div className="fixed bottom-0 right-1/4 w-96 h-96 bg-emerald-600/8 rounded-full blur-3xl"></div>
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-10rem)] px-4">
-        <div className="text-center max-w-md w-full">
-          {/* Bold Welcome */}
-          {/* Logo */}
-          <div className="mb-8 flex justify-center">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-senegal-green via-senegal-yellow to-senegal-red flex items-center justify-center shadow-lg">
-              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
+    <div className="min-h-screen bg-[#0a1f14] pb-24 relative overflow-hidden">
+      
+      {/* Video Background Hero Section */}
+      <div className="relative h-[70vh] flex items-center justify-center overflow-hidden">
+        {/* Video Background */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-40"
+        >
+          <source src="/videos/hero-education.mp4" type="video/mp4" />
+          {/* Fallback gradient if video doesn't load */}
+        </video>
+        
+        {/* Dark overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-[#0a1f14]"></div>
+        
+        {/* Hero Content */}
+        <div className="relative z-10 text-center px-4 max-w-4xl">
+          {/* Logo/Brand */}
+          <div className="mb-6 flex justify-center">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-senegal-green via-senegal-yellow to-senegal-red flex items-center justify-center shadow-2xl">
+              <Sparkles className="text-white" size={40} />
             </div>
           </div>
-
-          <div className="mb-8">
-            <h1 className="text-4xl md:text-5xl font-black text-white mb-2">
-              Salut, {profile?.full_name?.split(' ')[0] || 'Etudiant'}! 👋
-            </h1>
-            <p className="text-emerald-300 text-lg">Pret a apprendre aujourd'hui?</p>
-          </div>
-          {/* Glass Hero Card */}
-          <Link to="/chatbot" className="block group mb-8">
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-yellow-500/20 via-amber-500/15 to-orange-500/10 border border-yellow-400/30 p-10 shadow-2xl hover:shadow-yellow-500/20 backdrop-blur-md transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
-              {/* Glow effects */}
-              <div className="absolute -top-10 -right-10 w-48 h-48 bg-yellow-400/20 rounded-full blur-3xl"></div>
-              <div className="absolute -bottom-8 -left-8 w-40 h-40 bg-amber-500/15 rounded-full blur-2xl"></div>
-              
-              <div className="relative">
-                <div className="text-7xl mb-4">🤖</div>
-                <h2 className="text-4xl font-black text-white mb-2 leading-tight drop-shadow-lg">Pose une question</h2>
-                <p className="text-yellow-100 text-lg font-medium">Ton tuteur IA est prêt</p>
-              </div>
-            </div>
+          
+          {/* Welcome Text */}
+          <h1 className="text-5xl md:text-7xl font-black text-white mb-4 drop-shadow-2xl">
+            Bienvenue, {profile?.full_name?.split(' ')[0] || 'Etudiant'}
+          </h1>
+          
+          <p className="text-xl md:text-2xl text-white/90 mb-8 font-medium drop-shadow-lg">
+            Excellence académique pour le Sénégal 🇸🇳
+          </p>
+          
+          {/* CTA Button */}
+          <Link to="/chatbot">
+            <button className="group px-8 py-4 bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-400 hover:to-yellow-300 text-black font-bold text-lg rounded-full shadow-2xl hover:shadow-yellow-500/50 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-3 mx-auto">
+              <MessageSquare size={24} />
+              <span>Commencer à apprendre</span>
+              <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
+            </button>
           </Link>
-          {/* Glass Quick Access Icons */}
-          <div className="flex justify-center gap-6 text-sm">
-            <Link to="/concours" className="flex flex-col items-center gap-2 text-emerald-200 hover:text-white transition-colors group">
-              <div className="w-14 h-14 rounded-2xl backdrop-blur-sm bg-white/[0.02] border border-white/[0.08] hover:bg-white/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-all">
-                📝
+        </div>
+      </div>
+      
+      {/* Quick Access Section */}
+      <div className="relative z-10 px-4 -mt-20">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-3 gap-4">
+            <Link to="/concours" className="group">
+              <div className="backdrop-blur-xl bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl p-6 text-center transition-all hover:scale-105 hover:shadow-xl">
+                <div className="text-4xl mb-3">📝</div>
+                <h3 className="text-white font-semibold text-sm md:text-base">Concours</h3>
               </div>
-              <span className="font-semibold">Concours</span>
             </Link>
-            <Link to="/scholarships" className="flex flex-col items-center gap-2 text-emerald-200 hover:text-white transition-colors group">
-              <div className="w-14 h-14 rounded-2xl backdrop-blur-sm bg-white/[0.02] border border-white/[0.08] hover:bg-white/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-all">
-                🎓
+            
+            <Link to="/scholarships" className="group">
+              <div className="backdrop-blur-xl bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl p-6 text-center transition-all hover:scale-105 hover:shadow-xl">
+                <div className="text-4xl mb-3">🎓</div>
+                <h3 className="text-white font-semibold text-sm md:text-base">Bourses</h3>
               </div>
-              <span className="font-semibold">Bourses</span>
             </Link>
-            <Link to="/admissions" className="flex flex-col items-center gap-2 text-emerald-200 hover:text-white transition-colors group">
-              <div className="w-14 h-14 rounded-2xl backdrop-blur-sm bg-white/[0.02] border border-white/[0.08] hover:bg-white/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-all">
-                ✈️
+            
+            <Link to="/admissions" className="group">
+              <div className="backdrop-blur-xl bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl p-6 text-center transition-all hover:scale-105 hover:shadow-xl">
+                <div className="text-4xl mb-3">✈️</div>
+                <h3 className="text-white font-semibold text-sm md:text-base">Admissions</h3>
               </div>
-              <span className="font-semibold">Admissions</span>
             </Link>
           </div>
         </div>
       </div>
+      
     </div>
   )
 }
