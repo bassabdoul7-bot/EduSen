@@ -48,14 +48,16 @@ export default function Layout() {
   return (
     <div className="min-h-screen" style={{paddingBottom: "calc(5rem + env(safe-area-inset-bottom))"}}>
 
-      {/* Floating Menu Button */}
-      <button
-        onClick={() => setMenuOpen(!menuOpen)}
-        className="fixed top-6 right-4 z-50 w-12 h-12 rounded-full bg-emerald-900/80 backdrop-blur-md border border-emerald-700/50 flex items-center justify-center shadow-lg hover:bg-emerald-800/80 transition-all"
-        style={{top: "calc(env(safe-area-inset-top) + 1.5rem)"}}
-      >
-        {menuOpen ? <X size={22} className="text-white" /> : <Menu size={22} className="text-white" />}
-      </button>
+      {/* Floating Menu Button - Hidden on chatbot page */}
+      {location.pathname !== '/chatbot' && (
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="fixed top-6 right-4 z-50 w-12 h-12 rounded-full bg-emerald-900/80 backdrop-blur-md border border-emerald-700/50 flex items-center justify-center shadow-lg hover:bg-emerald-800/80 transition-all"
+          style={{top: "calc(env(safe-area-inset-top) + 1.5rem)"}}
+        >
+          {menuOpen ? <X size={22} className="text-white" /> : <Menu size={22} className="text-white" />}
+        </button>
+      )}
 
       {/* Side Panel Menu */}
       {menuOpen && (

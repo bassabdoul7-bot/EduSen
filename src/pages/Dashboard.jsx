@@ -17,6 +17,14 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-[#0a1f14] pb-24 relative overflow-hidden">
 
+      {/* Floating Logo with Senegal Flag Colors - Aligned with Menu */}
+      <div 
+        className="fixed top-6 left-4 z-50 w-12 h-12 rounded-2xl bg-gradient-to-br from-senegal-green via-senegal-yellow to-senegal-red flex items-center justify-center shadow-lg backdrop-blur-sm"
+        style={{top: "calc(env(safe-area-inset-top) + 1.5rem)"}}
+      >
+        <Sparkles className="text-white" size={22} />
+      </div>
+
       {/* Hero Section with Video/Gradient */}
       <div className="relative h-[70vh] flex items-center justify-center overflow-hidden">
         
@@ -52,13 +60,6 @@ export default function Dashboard() {
 
         {/* Hero Content */}
         <div className="relative z-10 text-center px-4 max-w-4xl">
-          {/* Logo/Brand */}
-          <div className="mb-6 flex justify-center">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-senegal-green via-senegal-yellow to-senegal-red flex items-center justify-center shadow-2xl">
-              <Sparkles className="text-white" size={40} />
-            </div>
-          </div>
-
           {/* Welcome Text */}
           <h1 className="text-4xl md:text-7xl font-black text-white mb-4 drop-shadow-2xl leading-tight">
             Bienvenue, {profile?.full_name?.split(' ')[0] || 'Etudiant'}
