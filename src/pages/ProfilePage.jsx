@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { usePremium } from '../context/PremiumContext'
 import { profileService } from '../services/supabase'
@@ -119,7 +119,7 @@ export default function ProfilePage() {
       if (updateError) throw updateError
 
       setAvatarUrl(newAvatarUrl)
-      toast.success('Photo de profil mise à jour!')
+      toast.success('Photo de profil mise Ã  jour!')
       
       // Force reload to show new image
       setTimeout(() => {
@@ -146,10 +146,10 @@ export default function ProfilePage() {
     })
 
     if (!error) {
-      toast.success('Profil mis à jour!')
+      toast.success('Profil mis Ã  jour!')
       setIsEditing(false)
     } else {
-      toast.error('Erreur lors de la mise à jour')
+      toast.error('Erreur lors de la mise Ã  jour')
     }
     setSaving(false)
   }
@@ -177,10 +177,10 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className='max-w-4xl mx-auto space-y-6'>
+    <div className='min-h-screen bg-[#0a1f14] pb-24 px-4 pt-20'><div className='max-w-4xl mx-auto space-y-6'>
       {/* Header */}
       <div className='flex items-center justify-between'>
-        <h1 className='text-3xl font-bold'>Mon Profil</h1>
+        <h1 className='text-3xl font-bold text-white'>Mon Profil</h1>
         <button
           onClick={handleSignOut}
           className='btn-secondary flex items-center gap-2'
@@ -191,7 +191,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Profile Card */}
-      <div className='card'>
+      <div className='backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6 shadow-lg'>
         <div className='flex items-start gap-6'>
           {/* Avatar */}
           <div className='relative group flex-shrink-0'>
@@ -199,11 +199,11 @@ export default function ProfilePage() {
               <img
                 src={`${avatarUrl}?t=${Date.now()}`}
                 alt='Avatar'
-                className='w-24 h-24 rounded-full object-cover border-4 border-senegal-green'
+                className='w-24 h-24 rounded-full object-cover border-4 border-senegal-yellow'
                 key={avatarUrl}
               />
             ) : (
-              <div className='w-24 h-24 rounded-full bg-gradient-to-br from-senegal-green to-green-600 flex items-center justify-center text-white text-3xl font-bold border-4 border-senegal-green'>
+              <div className='w-24 h-24 rounded-full bg-gradient-to-br from-senegal-green to-green-600 flex items-center justify-center text-white text-3xl font-bold border-4 border-senegal-yellow'>
                 {(fullName || user?.email || 'U')[0].toUpperCase()}
               </div>
             )}
@@ -232,7 +232,7 @@ export default function ProfilePage() {
             {isEditing ? (
               <div className='space-y-4'>
                 <div>
-                  <label className='block text-sm font-medium mb-2'>Nom complet</label>
+                  <label className='block text-sm font-medium text-gray-300 mb-2'>Nom complet</label>
                   <input
                     type='text'
                     value={fullName}
@@ -243,7 +243,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <label className='block text-sm font-medium mb-2'>Bio</label>
+                  <label className='block text-sm font-medium text-gray-300 mb-2'>Bio</label>
                   <textarea
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
@@ -280,7 +280,7 @@ export default function ProfilePage() {
             ) : (
               <div>
                 <div className='flex items-center gap-3 mb-2'>
-                  <h2 className='text-2xl font-bold'>{fullName || 'Utilisateur'}</h2>
+                  <h2 className='text-2xl font-bold text-white'>{fullName || 'Utilisateur'}</h2>
                   {isPremium && (
                     <span className='flex items-center gap-1 bg-gradient-to-r from-senegal-yellow to-yellow-600 text-white px-3 py-1 rounded-full text-sm font-semibold'>
                       <Crown size={16} />
@@ -289,18 +289,18 @@ export default function ProfilePage() {
                   )}
                 </div>
 
-                <div className='flex items-center gap-2 text-gray-600 mb-3'>
+                <div className='flex items-center gap-2 text-gray-300 mb-3'>
                   <Mail size={16} />
                   <span>{user?.email}</span>
                 </div>
 
-                <div className='flex items-center gap-2 text-gray-600 mb-4'>
+                <div className='flex items-center gap-2 text-gray-300 mb-4'>
                   <Calendar size={16} />
                   <span>Membre depuis {new Date(user?.created_at).toLocaleDateString('fr-FR')}</span>
                 </div>
 
                 {bio && (
-                  <p className='text-gray-700 mb-4'>{bio}</p>
+                  <p className='text-gray-200 mb-4'>{bio}</p>
                 )}
 
                 <button
@@ -317,38 +317,38 @@ export default function ProfilePage() {
       </div>
 
       {/* Statistics */}
-      <div className='card'>
-        <h3 className='text-xl font-bold mb-4 flex items-center gap-2'>
+      <div className='backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6 shadow-lg'>
+        <h3 className='text-xl font-bold text-white mb-4 flex items-center gap-2'>
           <TrendingUp size={24} className='text-senegal-green' />
           Statistiques
         </h3>
 
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-          <div className='bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500'>
+          <div className='bg-blue-500/20 backdrop-blur-sm p-4 rounded-lg border-l-4 border-blue-500'>
             <div className='flex items-center justify-between'>
               <div>
-                <p className='text-sm text-gray-600'>Sujets créés</p>
-                <p className='text-3xl font-bold text-blue-600'>{stats.topicsCount}</p>
+                <p className='text-sm text-gray-300'>Sujets créés</p>
+                <p className='text-3xl font-bold text-blue-300'>{stats.topicsCount}</p>
               </div>
               <MessageSquare size={32} className='text-blue-500' />
             </div>
           </div>
 
-          <div className='bg-green-50 p-4 rounded-lg border-l-4 border-green-500'>
+          <div className='bg-green-500/20 backdrop-blur-sm p-4 rounded-lg border-l-4 border-green-500'>
             <div className='flex items-center justify-between'>
               <div>
-                <p className='text-sm text-gray-600'>Réponses postées</p>
-                <p className='text-3xl font-bold text-green-600'>{stats.postsCount}</p>
+                <p className='text-sm text-gray-300'>Réponses postées</p>
+                <p className='text-3xl font-bold text-green-300'>{stats.postsCount}</p>
               </div>
               <Award size={32} className='text-green-500' />
             </div>
           </div>
 
-          <div className='bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500'>
+          <div className='bg-purple-500/20 backdrop-blur-sm p-4 rounded-lg border-l-4 border-purple-500'>
             <div className='flex items-center justify-between'>
               <div>
-                <p className='text-sm text-gray-600'>Points</p>
-                <p className='text-3xl font-bold text-purple-600'>
+                <p className='text-sm text-gray-300'>Points</p>
+                <p className='text-3xl font-bold text-purple-300'>
                   {stats.topicsCount * 10 + stats.postsCount * 5}
                 </p>
               </div>
@@ -359,8 +359,8 @@ export default function ProfilePage() {
       </div>
 
       {/* Premium Status */}
-      <div className='card'>
-        <h3 className='text-xl font-bold mb-4 flex items-center gap-2'>
+      <div className='backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6 shadow-lg'>
+        <h3 className='text-xl font-bold text-white mb-4 flex items-center gap-2'>
           <Crown size={24} className='text-senegal-yellow' />
           Statut Premium
         </h3>
@@ -370,7 +370,7 @@ export default function ProfilePage() {
             <div className='flex items-center gap-3 mb-4'>
               <Crown size={32} />
               <div>
-                <h4 className='text-2xl font-bold'>Vous êtes Premium!</h4>
+                <h4 className='text-2xl font-bold text-white'>Vous êtes Premium!</h4>
                 <p className='text-green-100'>Profitez de toutes les fonctionnalités illimitées</p>
               </div>
             </div>
@@ -380,30 +380,30 @@ export default function ProfilePage() {
                 Expire le: {new Date(subscription.expires_at).toLocaleDateString('fr-FR')}
               </p>
             ) : (
-              <p className='text-sm'>Abonnement à vie ✨</p>
+              <p className='text-sm'>Abonnement Ã  vie ✨</p>
             )}
           </div>
         ) : (
-          <div className='bg-gray-50 p-6 rounded-lg'>
+          <div className='bg-white/10 backdrop-blur-sm p-6 rounded-lg'>
             <h4 className='text-xl font-semibold mb-2'>Compte Gratuit</h4>
-            <p className='text-gray-600 mb-4'>
-              Passez à Premium pour débloquer toutes les fonctionnalités!
+            <p className='text-gray-300 mb-4'>
+              Passez Ã  Premium pour débloquer toutes les fonctionnalités!
             </p>
             <ul className='space-y-2 mb-4'>
-              <li className='flex items-center gap-2 text-gray-700'>
-                <span className='text-senegal-green'>✓</span>
+              <li className='flex items-center gap-2 text-gray-200'>
+                <span className='text-senegal-green'>âœ“</span>
                 Messages IA illimités
               </li>
-              <li className='flex items-center gap-2 text-gray-700'>
-                <span className='text-senegal-green'>✓</span>
+              <li className='flex items-center gap-2 text-gray-200'>
+                <span className='text-senegal-green'>âœ“</span>
                 Analyse de photos et PDF
               </li>
-              <li className='flex items-center gap-2 text-gray-700'>
-                <span className='text-senegal-green'>✓</span>
+              <li className='flex items-center gap-2 text-gray-200'>
+                <span className='text-senegal-green'>âœ“</span>
                 Accès complet aux bourses
               </li>
-              <li className='flex items-center gap-2 text-gray-700'>
-                <span className='text-senegal-green'>✓</span>
+              <li className='flex items-center gap-2 text-gray-200'>
+                <span className='text-senegal-green'>âœ“</span>
                 Forum illimité
               </li>
             </ul>
@@ -412,24 +412,24 @@ export default function ProfilePage() {
               className='btn-primary flex items-center gap-2'
             >
               <Crown size={20} />
-              Passer à Premium
+              Passer Ã  Premium
             </button>
           </div>
         )}
       </div>
 
       {/* Account Settings */}
-      <div className='card'>
-        <h3 className='text-xl font-bold mb-4 flex items-center gap-2'>
-          <Settings size={24} className='text-gray-600' />
+      <div className='backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6 shadow-lg'>
+        <h3 className='text-xl font-bold text-white mb-4 flex items-center gap-2'>
+          <Settings size={24} className='text-gray-300' />
           Paramètres du compte
         </h3>
 
         <div className='space-y-4'>
-          <div className='flex items-center justify-between p-4 bg-gray-50 rounded-lg'>
+          <div className='flex items-center justify-between p-4 bg-white/10 backdrop-blur-sm rounded-lg'>
             <div>
               <p className='font-semibold'>Notifications par email</p>
-              <p className='text-sm text-gray-600'>Recevoir des emails pour les nouvelles bourses</p>
+              <p className='text-sm text-gray-300'>Recevoir des emails pour les nouvelles bourses</p>
             </div>
             <label className='relative inline-flex items-center cursor-pointer'>
               <input type='checkbox' className='sr-only peer' />
@@ -437,10 +437,10 @@ export default function ProfilePage() {
             </label>
           </div>
 
-          <div className='flex items-center justify-between p-4 bg-gray-50 rounded-lg'>
+          <div className='flex items-center justify-between p-4 bg-white/10 backdrop-blur-sm rounded-lg'>
             <div>
               <p className='font-semibold'>Langue</p>
-              <p className='text-sm text-gray-600'>Choisir la langue de l'interface</p>
+              <p className='text-sm text-gray-300'>Choisir la langue de l'interface</p>
             </div>
             <select className='input-field w-32'>
               <option value='fr'>Français</option>
@@ -452,12 +452,12 @@ export default function ProfilePage() {
 
       {/* Danger Zone */}
       <div className='card border-2 border-red-200'>
-        <h3 className='text-xl font-bold mb-4 text-red-600'>Zone dangereuse</h3>
+        <h3 className='text-xl font-bold text-white mb-4 text-red-600'>Zone dangereuse</h3>
         <div className='space-y-3'>
           <div className='flex items-center justify-between'>
             <div>
               <p className='font-semibold'>Supprimer le compte</p>
-              <p className='text-sm text-gray-600'>Cette action est irréversible</p>
+              <p className='text-sm text-gray-300'>Cette action est irréversible</p>
             </div>
             <button className='px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors'>
               Supprimer
@@ -465,6 +465,6 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
-    </div>
+    </div></div>
   )
 }
