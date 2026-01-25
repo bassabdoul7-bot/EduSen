@@ -5,6 +5,7 @@ import { usePremium } from '../context/PremiumContext'
 import { chatService } from '../services/chat'
 import { Send, Loader2, Crown, Camera, FileText, Download, Trash2, MessageSquarePlus, Clock } from 'lucide-react'
 import toast from 'react-hot-toast'
+import Message from '../components/chatbot/Message'
 import ImageUpload from '../components/ImageUpload'
 import Tesseract from 'tesseract.js'
 import * as pdfjsLib from 'pdfjs-dist'
@@ -63,7 +64,7 @@ export default function ChatbotPage() {
     const { data } = await chatService.getAllConversations(user.id, selectedSubject.id)
     if (data && data.length > 0) {
       setConversations(data)
-      loadConversation(data[0])
+      // Load conversations but don't auto-start
     } else {
       setConversations([])
       startNewConversation()
@@ -71,6 +72,7 @@ export default function ChatbotPage() {
   }
 
   const loadConversation = (conversation) => {
+    setShowSidebar(false) // Close sidebar when loading conversation
     setCurrentConversationId(conversation.id)
     if (conversation.messages && conversation.messages.length > 0) {
       setMessages(conversation.messages)

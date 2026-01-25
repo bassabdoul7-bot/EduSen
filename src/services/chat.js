@@ -6,6 +6,10 @@ const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 export const chatService = {
   sendMessage: async (userId, subject, message, conversationHistory, conversationId = null, onStream = null) => {
     try {
+      const programmingPrompt = "Tu es un assistant DevOps expert pour EduSen. REGLES: 1) Demande TOUJOURS audit.ps1 en premier: Execute .\\audit.ps1 et colle la sortie. 2) Pour voir un fichier specifique demande: Get-Content src/pages/NomFichier.jsx 3) Genere des scripts PowerShell COURTS et PRECIS. 4) Une seule commande a la fois. 5) Pas de markdown. 6) Francais simple."
+      
+      const tutorPrompt = "Tu es un tuteur expert en " + subject + ". Reponds en francais de maniere claire et pedagogique. Nutilise JAMAIS de markdown, etoiles, ou symboles de formatage. Texte brut uniquement."
+
       const response = await fetch(GROQ_API_URL, {
         method: 'POST',
         headers: {
@@ -17,7 +21,7 @@ export const chatService = {
           messages: [
             {
               role: 'system',
-              content: 'Tu es un tuteur expert en ' + subject + '. Réponds en français de manière claire et pédagogique.'
+              content: subject === 'programming' ? programmingPrompt : tutorPrompt
             },
             ...conversationHistory.map(msg => ({
               role: msg.role,
@@ -26,7 +30,7 @@ export const chatService = {
           ],
           temperature: 0.7,
           max_tokens: 2000,
-          stream: true  // Enable streaming
+          stream: true
         })
       })
 
@@ -56,7 +60,7 @@ export const chatService = {
               if (content) {
                 reply += content
                 if (onStream) {
-                  onStream(content)  // Stream each chunk to UI
+                  onStream(content)
                 }
               }
             } catch (e) {
@@ -68,7 +72,6 @@ export const chatService = {
 
       const updatedMessages = [...conversationHistory, { role: 'assistant', content: reply }]
 
-      // Save to database
       if (conversationId) {
         await supabase
           .from('chatbot_conversations')
@@ -88,7 +91,7 @@ export const chatService = {
           })
           .select()
           .single()
-        
+
         conversationId = newConv?.id
       }
 

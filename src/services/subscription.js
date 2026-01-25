@@ -1,5 +1,10 @@
 ﻿import { supabase } from './supabase'
 
+// Bypass emails - unlimited access
+const BYPASS_EMAILS = [
+  'sales@getagenter.com'
+]
+
 export const subscriptionService = {
   // Get user subscription
   getSubscription: async (userId) => {
