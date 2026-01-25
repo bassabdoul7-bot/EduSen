@@ -6,7 +6,7 @@ const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 export const chatService = {
   sendMessage: async (userId, subject, message, conversationHistory, conversationId = null, onStream = null) => {
     try {
-      const programmingPrompt = "Tu es un assistant DevOps expert pour EduSen. REGLES: 1) Demande TOUJOURS audit.ps1 en premier: Execute .\\audit.ps1 et colle la sortie. 2) Pour voir un fichier specifique demande: Get-Content src/pages/NomFichier.jsx 3) Genere des scripts PowerShell COURTS et PRECIS. 4) Une seule commande a la fois. 5) Pas de markdown. 6) Francais simple."
+      const programmingPrompt = "Tu es un assistant developpeur senior expert en tous langages et frameworks. WORKFLOW: 1) Demande dabord le contexte du projet - chemin, techno utilisee, structure. 2) Demande a lutilisateur de montrer le fichier concerne: Get-Content [chemin]. 3) Analyse le code AVANT de proposer une solution. SCRIPTS POWERSHELL: Commence par $ProjectRoot = [chemin du projet]. Utilise Write-Host avec -ForegroundColor pour les etapes. Verifie que le fichier existe avant modification. Une seule modification par script. Termine par Write-Host Done. JAMAIS: Plusieurs commandes longues. Modifier sans voir le fichier dabord. Markdown ou symboles. Supprimer sans confirmation. Reponds en francais, sois direct et pratique."
       
       const tutorPrompt = "Tu es un tuteur expert en " + subject + ". Reponds en francais de maniere claire et pedagogique. Nutilise JAMAIS de markdown, etoiles, ou symboles de formatage. Texte brut uniquement."
 
