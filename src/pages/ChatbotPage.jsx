@@ -469,8 +469,8 @@ export default function ChatbotPage() {
       
     <div className='flex flex-col md:flex-row h-[calc(100vh-8rem)] pb-24 gap-0 md:gap-4'>
       {/* Mobile Header */}
-      <div className='md:hidden mb-4'>
-        <div className='flex items-center justify-between p-3 backdrop-blur-md bg-emerald-900/80 border-emerald-700/50 text-white rounded-2xl border border-white/30 shadow-lg'>
+      <div className='md:hidden mb-4 sticky top-0 z-30'>
+        <div className='flex items-center justify-between p-3 backdrop-blur-md bg-emerald-900/90 border-emerald-700/50 text-white rounded-2xl border border-white/30 shadow-lg'>
           <button
             onClick={() => setShowSidebar(!showSidebar)}
             className='px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors text-sm font-semibold'
@@ -600,7 +600,7 @@ export default function ChatbotPage() {
               </div>
             </div>
           ) : (
-            <div className='flex items-center justify-between p-3 backdrop-blur-md bg-emerald-900/80 border-emerald-700/50 text-white rounded-2xl border border-white/30 shadow-lg'>
+            <div className='flex items-center justify-between p-3 backdrop-blur-md bg-emerald-900/90 border-emerald-700/50 text-white rounded-2xl border border-white/30 shadow-lg'>
               <div className='flex items-center gap-3'>
                 <button
                   onClick={() => setShowSidebar(!showSidebar)}
@@ -695,7 +695,7 @@ export default function ChatbotPage() {
         </div>
 
         {/* Messages Area */}
-          <div className='overflow-y-auto mb-4 p-3 md:p-4' style={{height: 'calc(100vh - 20rem)'}}>
+          <div className='overflow-y-auto mb-4 p-3 md:p-4' style={{height: 'calc(100vh - 28rem)'}}>
           <div className='max-w-4xl mx-auto'><div className='space-y-3 md:space-y-4 pb-4'>
             {messages.map((msg, idx) => (
               <div
@@ -781,6 +781,15 @@ export default function ChatbotPage() {
       </div>
         </div>
     </div>
+          {/* Floating Subject Selector */}
+      <button
+        onClick={() => setShowAllSubjects(true)}
+        className="fixed top-4 left-4 z-50 flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-yellow-500 to-yellow-400 text-black font-bold rounded-full shadow-xl hover:shadow-yellow-500/50 transition-all hover:scale-105 active:scale-95"
+      >
+        <span className="text-xl">{selectedSubject.icon}</span>
+        <span className="text-sm">{selectedSubject.name}</span>
+        <span className="text-xs opacity-70">▼</span>
+      </button>
     </FeatureGate>
   )
 }
