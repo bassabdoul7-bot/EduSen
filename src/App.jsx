@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+﻿import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { PremiumProvider } from './context/PremiumContext'
 import { Toaster } from 'react-hot-toast'
@@ -18,6 +18,7 @@ import SponsorPage from './pages/SponsorPage'
 import ARLabPage from './pages/ARLabPage'
 import ConcoursPage from './pages/ConcoursPage'
 import PricingPage from './pages/PricingPage'
+import ResetPassword from './pages/ResetPassword'
 
 // Layout
 import Layout from './components/shared/Layout'
@@ -32,6 +33,7 @@ function App() {
             <Route path='/login' element={<Login />} />
             <Route path='/register' element={<Register />} />
             <Route path='/pricing' element={<PricingPage />} />
+            <Route path='/reset-password' element={<ResetPassword />} />
             
             <Route path='/' element={<ProtectedRoute><Layout /></ProtectedRoute>}>
               <Route index element={<Dashboard />} />
