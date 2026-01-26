@@ -81,9 +81,9 @@ export default function Register() {
       toast.error(error.message || "Erreur lors de l'inscription")
     } else {
       if (selectedPlan === 'student') {
-        // Paid plan - redirect to payment
-        toast.success('Compte cree! Passez au paiement.')
-        navigate('/payment?plan=student')
+        // Account created - go to login
+          toast.success('Compte cree! Verifiez votre email.')
+          navigate('/login')
       } else {
         toast.success('Compte cree! Verifiez votre email.')
         navigate('/login')

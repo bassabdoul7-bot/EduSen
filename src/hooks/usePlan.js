@@ -5,6 +5,7 @@ import { canAccess, PLANS, FEATURES, PLAN_INFO } from '../services/tiers'
 // Admin emails get full access
 const ADMIN_EMAILS = [
   'sales@getagenter.com',
+  'daouda15@hotmail.com',
 ]
 
 export function usePlan() {

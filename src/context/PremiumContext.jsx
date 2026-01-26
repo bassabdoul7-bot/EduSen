@@ -4,6 +4,9 @@ import { subscriptionService } from '../services/subscription'
 
 const PremiumContext = createContext({})
 
+// VIP emails that always get premium
+const VIP_EMAILS = ['daouda15@hotmail.com']
+
 export const usePremium = () => {
   const context = useContext(PremiumContext)
   if (!context) {
@@ -16,7 +19,10 @@ export const PremiumProvider = ({ children }) => {
   const { user, profile } = useAuth()
   const [isPremium, setIsPremium] = useState(false)
   const [subscription, setSubscription] = useState(null)
-  const [loading, setLoading] = useState(false)  // Start with false!
+  const [loading, setLoading] = useState(false)
+
+  // Check if user is VIP
+  const isVIP = user && VIP_EMAILS.includes(user.email)
 
   useEffect(() => {
     if (!user) {
@@ -25,12 +31,18 @@ export const PremiumProvider = ({ children }) => {
       return
     }
 
+    // VIP bypass - always premium
+    if (isVIP) {
+      setIsPremium(true)
+      return
+    }
+
     // Check profile plan first (new tier system)
     if (profile?.plan === 'student') {
       setIsPremium(true)
     }
 
-    // Load subscription in background - don't block UI
+    // Load subscription in background
     const loadSub = async () => {
       try {
         const { data } = await subscriptionService.getSubscription(user.id)
@@ -46,11 +58,13 @@ export const PremiumProvider = ({ children }) => {
     }
     
     loadSub()
-  }, [user, profile])
+  }, [user, profile, isVIP])
 
   const checkCanSendMessage = async () => {
     if (!user) return { allowed: false, remaining: 0 }
-    if (isPremium || profile?.plan === 'student') {
+    
+    // VIP always allowed
+    if (isVIP || isPremium || profile?.plan === 'student') {
       return { allowed: true, remaining: 999 }
     }
     
@@ -62,7 +76,7 @@ export const PremiumProvider = ({ children }) => {
   }
 
   const incrementMessageCount = async () => {
-    if (!user || isPremium || profile?.plan === 'student') return
+    if (!user || isVIP || isPremium || profile?.plan === 'student') return
     try {
       await subscriptionService.incrementAIMessages(user.id)
     } catch (err) {
@@ -71,7 +85,7 @@ export const PremiumProvider = ({ children }) => {
   }
 
   const value = {
-    isPremium,
+    isPremium: isPremium || isVIP,
     subscription,
     loading,
     checkCanSendMessage,

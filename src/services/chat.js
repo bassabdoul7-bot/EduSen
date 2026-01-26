@@ -39,34 +39,57 @@ export const chatService = {
       }
 
       const reader = response.body.getReader()
-      const decoder = new TextDecoder()
+      const decoder = new TextDecoder('utf-8')
       let reply = ''
+      let buffer = ''
 
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
 
-        const chunk = decoder.decode(value)
-        const lines = chunk.split('\n').filter(line => line.trim() !== '')
+        // Decode with stream mode to handle partial UTF-8 characters
+        buffer += decoder.decode(value, { stream: true })
+        
+        // Process complete lines only
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || '' // Keep incomplete line in buffer
 
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6)
-            if (data === '[DONE]') continue
+          const trimmed = line.trim()
+          if (!trimmed || !trimmed.startsWith('data: ')) continue
+          
+          const data = trimmed.slice(6)
+          if (data === '[DONE]') continue
 
-            try {
-              const parsed = JSON.parse(data)
-              const content = parsed.choices[0]?.delta?.content
-              if (content) {
-                reply += content
-                if (onStream) {
-                  onStream(content)
-                }
+          try {
+            const parsed = JSON.parse(data)
+            const content = parsed.choices[0]?.delta?.content
+            if (content) {
+              reply += content
+              if (onStream) {
+                onStream(content)
               }
-            } catch (e) {
-              // Skip invalid JSON
             }
+          } catch (e) {
+            // Skip invalid JSON
           }
+        }
+      }
+
+      // Process any remaining buffer
+      if (buffer.trim() && buffer.startsWith('data: ')) {
+        const data = buffer.trim().slice(6)
+        if (data !== '[DONE]') {
+          try {
+            const parsed = JSON.parse(data)
+            const content = parsed.choices[0]?.delta?.content
+            if (content) {
+              reply += content
+              if (onStream) {
+                onStream(content)
+              }
+            }
+          } catch (e) {}
         }
       }
 
