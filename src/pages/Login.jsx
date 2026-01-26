@@ -35,7 +35,7 @@ export default function Login() {
     }
     setResetLoading(true)
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/reset-password'
+      redirectTo: 'https://edusen.netlify.app/reset-password'
     })
     if (error) {
       toast.error('Erreur: ' + error.message)
