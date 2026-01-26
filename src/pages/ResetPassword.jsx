@@ -2,45 +2,62 @@
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../services/supabase'
 import toast from 'react-hot-toast'
-import { Lock, Check } from 'lucide-react'
+import { Lock, Check, Loader2 } from 'lucide-react'
 
 export default function ResetPassword() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [verifying, setVerifying] = useState(true)
+  const [session, setSession] = useState(null)
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Check if we have access token in URL (Supabase adds it)
-    const hashParams = new URLSearchParams(window.location.hash.substring(1))
-    const accessToken = hashParams.get('access_token')
-    
-    if (!accessToken) {
-      // No token, check if already logged in via recovery
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (!session) {
-          toast.error('Lien invalide ou expire')
-          navigate('/login')
-        }
-      })
-    }
-  }, [navigate])
+    // Listen for auth state changes (Supabase handles token exchange)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth event:', event)
+      
+      if (event === 'PASSWORD_RECOVERY') {
+        setSession(session)
+        setVerifying(false)
+        toast.success('Vous pouvez maintenant changer votre mot de passe')
+      } else if (event === 'SIGNED_IN' && session) {
+        setSession(session)
+        setVerifying(false)
+      }
+    })
+
+    // Also check current session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setSession(session)
+        setVerifying(false)
+      } else {
+        // Give it a moment for the auth state change to fire
+        setTimeout(() => {
+          setVerifying(false)
+        }, 2000)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     if (password !== confirmPassword) {
       toast.error('Les mots de passe ne correspondent pas')
       return
     }
-    
+
     if (password.length < 6) {
       toast.error('Le mot de passe doit avoir au moins 6 caracteres')
       return
     }
 
     setLoading(true)
-    
+
     const { error } = await supabase.auth.updateUser({
       password: password
     })
@@ -49,10 +66,42 @@ export default function ResetPassword() {
       toast.error('Erreur: ' + error.message)
     } else {
       toast.success('Mot de passe mis a jour!')
+      await supabase.auth.signOut()
       navigate('/login')
     }
-    
+
     setLoading(false)
+  }
+
+  // Show loading while verifying token
+  if (verifying) {
+    return (
+      <div className="min-h-screen bg-[#0a1f14] flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 text-center">
+          <Loader2 className="animate-spin mx-auto mb-4" size={48} />
+          <p className="text-gray-600">Verification du lien...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // No valid session after verification
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-[#0a1f14] flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 text-center">
+          <div className="text-5xl mb-4">😕</div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Lien invalide ou expire</h1>
+          <p className="text-gray-600 mb-6">Veuillez demander un nouveau lien de reinitialisation</p>
+          <button
+            onClick={() => navigate('/login')}
+            className="btn-primary"
+          >
+            Retour a la connexion
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -84,7 +133,7 @@ export default function ResetPassword() {
               />
             </div>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Confirmer le mot de passe
