@@ -1045,10 +1045,10 @@ export default function StudyGroupsPage() {
   const renderModals = () => (
     <>
       {showCreateGroup && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50">
-          <div className="bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="p-5 space-y-4">
-              <div className="flex items-center justify-between">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-[60]">
+          <div className="bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-lg max-h-[85vh] overflow-y-auto">
+            <div className="p-5 pb-8 space-y-4">
+              <div className="flex items-center justify-between sticky top-0 bg-white pt-1 pb-2 z-10">
                 <h2 className="text-xl font-black">Creer un groupe</h2>
                 <button onClick={() => setShowCreateGroup(false)} className="p-2 rounded-lg hover:bg-gray-100"><X size={20} /></button>
               </div>
