@@ -1,1 +1,0 @@
-mongodb+srv://terango_launch:Madotiv1@cluster0.qmna2ji.mongodb.net/?appName=Cluster0
