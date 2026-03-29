@@ -1,12 +1,14 @@
-﻿import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { FeatureGate } from '../components/FeatureGate'
 import { useAuth } from '../context/AuthContext'
 import { usePremium } from '../context/PremiumContext'
 import { chatService } from '../services/chat'
-import { Send, Loader2, Crown, Camera, FileText, Download, Trash2, MessageSquarePlus, Clock } from 'lucide-react'
+import {
+  Send, Loader2, Crown, Camera, FileText, Download, Trash2,
+  MessageSquarePlus, Clock, Mic, MicOff, Volume2, VolumeX,
+  Brain, Zap, HelpCircle, BookOpen, ArrowLeft, X, ChevronDown
+} from 'lucide-react'
 import toast from 'react-hot-toast'
-import Message from '../components/chatbot/Message'
-import ImageUpload from '../components/ImageUpload'
 import Tesseract from 'tesseract.js'
 import * as pdfjsLib from 'pdfjs-dist'
 import { Document, Paragraph, TextRun, Packer, AlignmentType, HeadingLevel } from 'docx'
@@ -15,781 +17,496 @@ import { jsPDF } from 'jspdf'
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
 
 const SUBJECTS = [
-  { id: 'math', name: 'Mathematiques', icon: '🔢' },
+  { id: 'math', name: 'Maths', icon: '📐' },
   { id: 'physics', name: 'Physique', icon: '⚛️' },
   { id: 'chemistry', name: 'Chimie', icon: '🧪' },
-  { id: 'biology', name: 'Biologie', icon: '🧬' },
+  { id: 'biology', name: 'SVT', icon: '🧬' },
   { id: 'french', name: 'Francais', icon: '📖' },
   { id: 'english', name: 'Anglais', icon: '🇬🇧' },
-  { id: 'history', name: 'Histoire', icon: '📜' },
-  { id: 'geography', name: 'Geographie', icon: '🌍' },
-  { id: 'philosophy', name: 'Philosophie', icon: '💭' },
+  { id: 'history', name: 'Histoire-Geo', icon: '🌍' },
+  { id: 'philosophy', name: 'Philo', icon: '💭' },
   { id: 'economics', name: 'Economie', icon: '💰' },
-  { id: 'programming', name: 'Programmation', icon: '💻' },
+  { id: 'programming', name: 'Code', icon: '💻' },
   { id: 'medicine', name: 'Medecine', icon: '⚕️' },
-  { id: 'humanities', name: 'Sciences Humaines', icon: '🧠' },
-  { id: 'general', name: 'Questions Generales', icon: '💬' }
+  { id: 'general', name: 'General', icon: '💬' }
+]
+
+const MODES = [
+  { id: 'tutor', name: 'Tuteur', icon: Brain, desc: 'Cours et explications' },
+  { id: 'solver', name: 'Resoudre', icon: Zap, desc: 'Resoudre un exercice' },
+  { id: 'quiz', name: 'Quiz', icon: HelpCircle, desc: 'Tester mes connaissances' },
 ]
 
 export default function ChatbotPage() {
   const { user, profile } = useAuth()
   const { isPremium, checkCanSendMessage, incrementMessageCount } = usePremium()
+
   const [selectedSubject, setSelectedSubject] = useState(SUBJECTS[0])
-  const [showAllSubjects, setShowAllSubjects] = useState(false)
+  const [mode, setMode] = useState('tutor')
   const [messages, setMessages] = useState([])
   const [inputMessage, setInputMessage] = useState('')
   const [loading, setLoading] = useState(false)
-  const [showImageUpload, setShowImageUpload] = useState(false)
-  const [processingImage, setProcessingImage] = useState(false)
-  const [exporting, setExporting] = useState(false)
   const [conversations, setConversations] = useState([])
   const [currentConversationId, setCurrentConversationId] = useState(null)
-  const [showSidebar, setShowSidebar] = useState(false)
   const [messageCount, setMessageCount] = useState(0)
-  const messagesEndRef = useRef(null)
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
+  // UI state
+  const [showSubjects, setShowSubjects] = useState(false)
+  const [showSidebar, setShowSidebar] = useState(false)
+  const [showModes, setShowModes] = useState(false)
+  const [showUpload, setShowUpload] = useState(false)
+  const [processingImage, setProcessingImage] = useState(false)
+  const [exporting, setExporting] = useState(false)
+
+  // Voice state
+  const [isListening, setIsListening] = useState(false)
+  const [isSpeaking, setIsSpeaking] = useState(false)
+  const recognitionRef = useRef(null)
+
+  const messagesEndRef = useRef(null)
+  const fileInputRef = useRef(null)
 
   useEffect(() => {
-    scrollToBottom()
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
   useEffect(() => {
     loadAllConversations()
   }, [selectedSubject])
 
+  // Load voices for TTS
+  useEffect(() => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.getVoices()
+    }
+  }, [])
+
   const loadAllConversations = async () => {
     const { data } = await chatService.getAllConversations(user.id, selectedSubject.id)
-    if (data && data.length > 0) {
+    if (data?.length > 0) {
       setConversations(data)
-      // Load conversations but don't auto-start
     } else {
       setConversations([])
       startNewConversation()
     }
   }
 
-  const loadConversation = (conversation) => {
-    setShowSidebar(false) // Close sidebar when loading conversation
-    setCurrentConversationId(conversation.id)
-    if (conversation.messages && conversation.messages.length > 0) {
-      setMessages(conversation.messages)
-    } else {
-      setMessages([{
-        role: 'assistant',
-        content: 'Bonjour! Je suis votre tuteur en ' + selectedSubject.name + '. Comment puis-je vous aider aujourd\'hui?'
-      }])
-    }
+  const loadConversation = (conv) => {
+    setShowSidebar(false)
+    setCurrentConversationId(conv.id)
+    setMessages(conv.messages?.length > 0 ? conv.messages : [{ role: 'assistant', content: getWelcome(null, null) }])
   }
 
   const startNewConversation = async () => {
-    const { data, error } = await chatService.createNewConversation(user.id, selectedSubject.id)
+    const { data } = await chatService.createNewConversation(user.id, selectedSubject.id)
     if (data) {
       setCurrentConversationId(data.id)
-      setMessages([{
-        role: 'assistant',
-        content: 'Bonjour! Je suis votre tuteur en ' + selectedSubject.name + '. Comment puis-je vous aider aujourd\'hui?'
-      }])
+      setMessages([{ role: 'assistant', content: getWelcome(null, null) }])
       await loadAllConversations()
-      toast.success('Nouvelle conversation creee!')
     }
   }
 
-  const deleteConversation = async (conversationId) => {
-    if (confirm('Voulez-vous vraiment supprimer cette conversation?')) {
-      await chatService.deleteConversation(conversationId)
-      await loadAllConversations()
-      toast.success('Conversation supprimee!')
-    }
+  const deleteConversation = async (id) => {
+    await chatService.deleteConversation(id)
+    await loadAllConversations()
+    toast.success('Supprime')
   }
 
-  const getConversationTitle = (conversation) => {
-    if (!conversation.messages || conversation.messages.length === 0) {
-      return 'Nouvelle conversation'
-    }
-    const firstUserMessage = conversation.messages.find(m => m.role === 'user')
-    if (firstUserMessage) {
-      return firstUserMessage.content.substring(0, 40) + (firstUserMessage.content.length > 40 ? '...' : '')
-    }
-    return 'Conversation'
+  function getWelcome(subjectName, currentMode) {
+    const name = profile?.full_name?.split(' ')[0] || 'cher etudiant'
+    const sub = subjectName || selectedSubject.name
+    const m = currentMode || mode
+    if (m === 'quiz') return `Salut ${name}! Je vais generer un quiz en ${sub} pour tester tes connaissances. Dis-moi le sujet et ton niveau (BFEM, BAC, Licence).`
+    if (m === 'solver') return `Salut ${name}! Envoie-moi un exercice (texte ou photo) en ${sub} et je le resous etape par etape.`
+    return `Salut ${name}! Je suis ton tuteur en ${sub}. Pose-moi n'importe quelle question, je t'explique tout clairement.`
   }
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffInHours = (now - date) / (1000 * 60 * 60)
-    
-    if (diffInHours < 24) {
-      return 'Aujourd\'hui'
-    } else if (diffInHours < 48) {
-      return 'Hier'
-    } else {
-      return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
-    }
+  const getTitle = (conv) => {
+    const first = conv.messages?.find(m => m.role === 'user')
+    return first ? first.content.substring(0, 35) + (first.content.length > 35 ? '...' : '') : 'Nouvelle conversation'
   }
 
-  const extractTextFromImage = async (imageData) => {
-    setProcessingImage(true)
-    try {
-      const result = await Tesseract.recognize(imageData, 'fra+eng', {
-        logger: (m) => {
-          if (m.status === 'recognizing text') {
-            console.log('OCR Progress: ' + Math.round(m.progress * 100) + '%')
-          }
-        }
-      })
-      
-      if (!result.data.text.trim()) {
-        toast.error('Aucun texte detecte dans l\'image')
-        return null
-      }
-      
-      return result.data.text
-    } catch (error) {
-      console.error('OCR Error:', error)
-      toast.error('Erreur lors de la lecture de l\'image')
-      return null
-    } finally {
-      setProcessingImage(false)
-    }
-  }
-
-  const extractTextFromPDF = async (file) => {
-    setProcessingImage(true)
-    
-    try {
-      const arrayBuffer = await file.arrayBuffer()
-      const typedArray = new Uint8Array(arrayBuffer)
-      
-      const loadingTask = pdfjsLib.getDocument({
-        data: typedArray,
-        verbosity: 0
-      })
-      
-      const pdf = await loadingTask.promise
-      let fullText = ''
-      const maxPages = Math.min(pdf.numPages, 20)
-      
-      for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
-        try {
-          const page = await pdf.getPage(pageNum)
-          const textContent = await page.getTextContent()
-          const pageText = textContent.items
-            .map((item) => item.str)
-            .join(' ')
-            .trim()
-          
-          if (pageText) {
-            fullText += '\nPage ' + pageNum + ':\n' + pageText + '\n'
-          }
-        } catch (pageError) {
-          console.error('Error on page ' + pageNum + ':', pageError)
-        }
-      }
-      
-      if (!fullText.trim()) {
-        toast.error('PDF vide ou texte non extractible')
-        return null
-      }
-      
-      return fullText
-    } catch (error) {
-      console.error('PDF Error:', error)
-      toast.error('Erreur: PDF invalide ou corrompu')
-      return null
-    } finally {
-      setProcessingImage(false)
-    }
-  }
-
-  const handleImageCapture = async (imageData) => {
-    if (!isPremium) {
-      toast.error('Fonctionnalite Premium uniquement!')
-      return
-    }
-
-    const extractedText = await extractTextFromImage(imageData)
-    if (extractedText) {
-      setInputMessage('[Image analysee]\n\n' + extractedText)
-      setShowImageUpload(false)
-      toast.success('Texte extrait!')
-    }
-  }
-
-  const handlePDFUpload = async (file) => {
-    if (!isPremium) {
-      toast.error('Fonctionnalite Premium uniquement!')
-      return
-    }
-
-    const extractedText = await extractTextFromPDF(file)
-    if (extractedText) {
-      const truncated = extractedText.substring(0, 3000)
-      setInputMessage('[PDF: ' + file.name + ']\n\n' + truncated + (extractedText.length > 3000 ? '...(tronque)' : ''))
-      setShowImageUpload(false)
-      toast.success('PDF analyse!')
-    }
-  }
+  // ============ SEND MESSAGE ============
 
   const sendMessage = async () => {
     if (!inputMessage.trim() || loading) return
-
     const canSend = await checkCanSendMessage()
-    if (!canSend.allowed) {
-      toast.error('Limite de messages atteinte! Passez a Premium.')
-      return
-    }
+    if (!canSend.allowed) { toast.error('Limite atteinte! Passez a Premium.'); return }
 
     const userMessage = { role: 'user', content: inputMessage }
     const updatedMessages = [...messages, userMessage]
-    
-    // Add empty assistant message for streaming
-    const assistantMessage = { role: 'assistant', content: '' }
-    setMessages([...updatedMessages, assistantMessage])
+    setMessages([...updatedMessages, { role: 'assistant', content: '' }])
     setInputMessage('')
     setLoading(true)
-    
-    let streamedContent = ''
 
+    let streamedContent = ''
     try {
       const response = await chatService.sendMessage(
-        user.id,
-        selectedSubject.id,
-        inputMessage,
-        updatedMessages,
+        user.id, selectedSubject.id, inputMessage, updatedMessages,
         currentConversationId,
         (chunk) => {
-          // Streaming callback - updates message in real-time
           streamedContent += chunk
           setMessages([...updatedMessages, { role: 'assistant', content: streamedContent }])
-        }
+        },
+        mode
       )
-
       if (response.reply) {
         await incrementMessageCount()
         setMessageCount(prev => prev + 1)
         await loadAllConversations()
       }
     } catch (error) {
-      toast.error('Erreur lors de l\'envoi')
-      console.error(error)
+      toast.error("Erreur d'envoi")
     } finally {
       setLoading(false)
     }
   }
 
-  const exportToWord = async () => {
-    if (messages.length === 0) {
-      toast.error('Aucune conversation a exporter')
+  // ============ VOICE ============
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop()
+      setIsListening(false)
       return
     }
 
-    setExporting(true)
-    toast.loading('Creation du document Word...', { id: 'export' })
+    const recognition = chatService.startListening((transcript, isFinal) => {
+      setInputMessage(transcript)
+      if (isFinal) {
+        setIsListening(false)
+      }
+    })
 
-    try {
-      const doc = new Document({
-        sections: [{
-          properties: {},
-          children: [
-            new Paragraph({
-              text: 'EduSen - Plateforme Educative',
-              heading: HeadingLevel.HEADING_1,
-              alignment: AlignmentType.CENTER,
-              spacing: { after: 200 }
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: 'Matiere: ' + selectedSubject.name,
-                  bold: true
-                })
-              ],
-              spacing: { after: 100 }
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: 'Etudiant: ' + (profile?.full_name || 'Etudiant'),
-                  bold: true
-                })
-              ],
-              spacing: { after: 100 }
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: 'Date: ' + new Date().toLocaleDateString('fr-FR'),
-                  bold: true
-                })
-              ],
-              spacing: { after: 400 }
-            }),
-            ...messages.flatMap((msg, idx) => [
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: msg.role === 'user' ? 'QUESTION:' : 'REPONSE:',
-                    bold: true,
-                    color: msg.role === 'user' ? '006838' : '0066CC',
-                    size: 24
-                  })
-                ],
-                spacing: { before: idx === 0 ? 0 : 300, after: 100 }
-              }),
-              new Paragraph({
-                text: msg.content,
-                spacing: { after: 200 }
-              })
-            ]),
-            new Paragraph({
-              text: '(c) EduSen - Excellence Academique pour le Senegal',
-              alignment: AlignmentType.CENTER,
-              italics: true
-            })
-          ]
-        }]
-      })
+    if (!recognition) {
+      toast.error('Reconnaissance vocale non supportee')
+      return
+    }
 
-      const blob = await Packer.toBlob(doc)
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'EduSen-' + selectedSubject.id + '-' + Date.now() + '.docx'
-      a.click()
-      window.URL.revokeObjectURL(url)
-      
-      toast.success('Document Word telecharge!', { id: 'export' })
-    } catch (error) {
-      console.error('Export error:', error)
-      toast.error('Erreur lors de l\'export Word', { id: 'export' })
-    } finally {
-      setExporting(false)
+    recognition.onerror = () => setIsListening(false)
+    recognition.onend = () => setIsListening(false)
+    recognitionRef.current = recognition
+    setIsListening(true)
+    toast.success('Parlez maintenant...')
+  }
+
+  const toggleSpeaking = (text) => {
+    if (isSpeaking) {
+      chatService.stopSpeaking()
+      setIsSpeaking(false)
+    } else {
+      chatService.speak(text)
+      setIsSpeaking(true)
+      // Reset when done
+      if ('speechSynthesis' in window) {
+        const check = setInterval(() => {
+          if (!window.speechSynthesis.speaking) {
+            setIsSpeaking(false)
+            clearInterval(check)
+          }
+        }, 500)
+      }
     }
   }
+
+  // ============ IMAGE/PDF ============
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!isPremium) { toast.error('Fonctionnalite Premium'); return }
+
+    setProcessingImage(true)
+    setShowUpload(false)
+
+    try {
+      if (file.type === 'application/pdf') {
+        const arrayBuffer = await file.arrayBuffer()
+        const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer), verbosity: 0 }).promise
+        let text = ''
+        for (let i = 1; i <= Math.min(pdf.numPages, 20); i++) {
+          const page = await pdf.getPage(i)
+          const content = await page.getTextContent()
+          text += content.items.map(item => item.str).join(' ') + '\n'
+        }
+        if (text.trim()) {
+          setInputMessage('[PDF: ' + file.name + ']\n\n' + text.substring(0, 4000))
+          toast.success('PDF analyse!')
+        } else toast.error('PDF vide ou non extractible')
+      } else {
+        // Image OCR
+        const result = await Tesseract.recognize(file, 'fra+eng')
+        if (result.data.text.trim()) {
+          setInputMessage('[Image analysee]\n\n' + result.data.text)
+          toast.success('Texte extrait de l\'image!')
+        } else toast.error('Aucun texte detecte')
+      }
+    } catch (err) {
+      toast.error('Erreur d\'analyse')
+    } finally {
+      setProcessingImage(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  // ============ EXPORT ============
 
   const exportToPDF = async () => {
-    if (messages.length === 0) {
-      toast.error('Aucune conversation a exporter')
-      return
-    }
-
+    if (messages.length < 2) return
     setExporting(true)
-    toast.loading('Creation du PDF...', { id: 'export' })
-
     try {
       const doc = new jsPDF()
-      let yPosition = 20
+      let y = 20
+      doc.setFontSize(18)
+      doc.setTextColor(0, 133, 61)
+      doc.text('EduSen - ' + selectedSubject.name, 105, y, { align: 'center' })
+      y += 10
+      doc.setFontSize(10)
+      doc.setTextColor(100)
+      doc.text(profile?.full_name || 'Etudiant' + ' - ' + new Date().toLocaleDateString('fr-FR'), 105, y, { align: 'center' })
+      y += 15
 
-      doc.setFontSize(20)
-      doc.setTextColor(0, 104, 56)
-      doc.text('EduSen - Plateforme Educative', 105, yPosition, { align: 'center' })
-      yPosition += 15
-
-      doc.setFontSize(12)
-      doc.setTextColor(0, 0, 0)
-      doc.text('Matiere: ' + selectedSubject.name, 20, yPosition)
-      yPosition += 7
-      doc.text('Etudiant: ' + (profile?.full_name || 'Etudiant'), 20, yPosition)
-      yPosition += 7
-      doc.text('Date: ' + new Date().toLocaleDateString('fr-FR'), 20, yPosition)
-      yPosition += 15
-
-      doc.setDrawColor(200, 200, 200)
-      doc.line(20, yPosition, 190, yPosition)
-      yPosition += 10
-
-      messages.forEach((msg) => {
-        if (yPosition > 270) {
-          doc.addPage()
-          yPosition = 20
-        }
-
-        doc.setFontSize(11)
-        if (msg.role === 'user') {
-          doc.setTextColor(0, 104, 56)
-          doc.setFont(undefined, 'bold')
-          doc.text('QUESTION:', 20, yPosition)
-        } else {
-          doc.setTextColor(0, 102, 204)
-          doc.setFont(undefined, 'bold')
-          doc.text('REPONSE:', 20, yPosition)
-        }
-        yPosition += 7
-
-        doc.setTextColor(0, 0, 0)
-        doc.setFont(undefined, 'normal')
+      messages.forEach(msg => {
+        if (y > 270) { doc.addPage(); y = 20 }
         doc.setFontSize(10)
-        
-        const lines = doc.splitTextToSize(msg.content, 170)
+        doc.setTextColor(msg.role === 'user' ? 0 : 0, msg.role === 'user' ? 133 : 66, msg.role === 'user' ? 61 : 204)
+        doc.setFont(undefined, 'bold')
+        doc.text(msg.role === 'user' ? 'QUESTION:' : 'REPONSE:', 15, y)
+        y += 6
+        doc.setTextColor(30, 30, 30)
+        doc.setFont(undefined, 'normal')
+        doc.setFontSize(9)
+        const lines = doc.splitTextToSize(msg.content, 180)
         lines.forEach(line => {
-          if (yPosition > 280) {
-            doc.addPage()
-            yPosition = 20
-          }
-          doc.text(line, 20, yPosition)
-          yPosition += 5
+          if (y > 280) { doc.addPage(); y = 20 }
+          doc.text(line, 15, y)
+          y += 4.5
         })
-        
-        yPosition += 5
+        y += 5
       })
-
-      const pageCount = doc.internal.getNumberOfPages()
-      for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i)
-        doc.setFontSize(8)
-        doc.setTextColor(128, 128, 128)
-        doc.text(
-          '(c) EduSen - Excellence Academique | Page ' + i + '/' + pageCount,
-          105,
-          290,
-          { align: 'center' }
-        )
-      }
-
-      doc.save('EduSen-' + selectedSubject.id + '-' + Date.now() + '.pdf')
-      toast.success('PDF telecharge!', { id: 'export' })
-    } catch (error) {
-      console.error('Export error:', error)
-      toast.error('Erreur lors de l\'export PDF', { id: 'export' })
-    } finally {
-      setExporting(false)
-    }
+      doc.save('EduSen-' + selectedSubject.id + '.pdf')
+      toast.success('PDF telecharge!')
+    } catch (e) { toast.error('Erreur export') }
+    setExporting(false)
   }
 
-  useEffect(() => { document.body.setAttribute("data-chatbot", "true"); return () => document.body.removeAttribute("data-chatbot"); }, []); return (
+  // ============ RENDER ============
+
+  return (
     <FeatureGate feature="ai_tutor">
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Emerald Background - Same as Dashboard */}
-      <div className="fixed inset-0 bg-[#0a1f14] -z-10"></div>
-      
-      
-      
-    <div className='flex flex-col md:flex-row h-[calc(100vh-8rem)] pb-24 gap-0 md:gap-4'>
-      {/* Mobile Header */}
-      <div className='md:hidden mb-4 sticky top-0 z-30'>
-        <div className='flex items-center justify-between p-3 backdrop-blur-md bg-emerald-900/90 border-emerald-700/50 text-white rounded-2xl border border-white/30 shadow-lg'>
-          <button
-            onClick={() => setShowSidebar(!showSidebar)}
-            className='px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors text-sm font-semibold'
-          >
-            Historique
+    <div className="min-h-screen bg-[#0a1f14] flex flex-col" style={{ height: 'calc(100vh - 5rem)' }}>
+
+      {/* Top Bar */}
+      <div className="flex-shrink-0 px-3 pt-14 pb-2">
+        <div className="flex items-center justify-between">
+          <button onClick={() => setShowSubjects(true)}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.07] border border-white/10 hover:bg-white/[0.12] transition-all">
+            <span className="text-lg">{selectedSubject.icon}</span>
+            <span className="text-xs font-bold text-white">{selectedSubject.name}</span>
+            <ChevronDown size={14} className="text-white/40" />
           </button>
-          <div className='flex items-center gap-2'>
-            <div className='text-xl'>{selectedSubject.icon}</div>
-            <div className='font-semibold text-sm'>{selectedSubject.name}</div>
+
+          <div className="flex items-center gap-2">
+            {/* Mode Selector */}
+            <div className="flex bg-white/[0.05] rounded-lg p-0.5 border border-white/10">
+              {MODES.map(m => (
+                <button key={m.id} onClick={() => { setMode(m.id); setMessages([{ role: 'assistant', content: getWelcome(null, m.id) }]) }}
+                  className={`px-2.5 py-1.5 rounded-md text-[10px] font-bold transition-all flex items-center gap-1 ${
+                    mode === m.id ? 'bg-senegal-green text-white' : 'text-white/30'
+                  }`}>
+                  <m.icon size={12} /> {m.name}
+                </button>
+              ))}
+            </div>
+
+            <button onClick={() => setShowSidebar(true)}
+              className="p-2 rounded-lg bg-white/[0.07] border border-white/10 hover:bg-white/[0.12]">
+              <Clock size={16} className="text-white/50" />
+            </button>
           </div>
-          <button
-            onClick={() => setShowAllSubjects(true)}
-            className='px-3 py-2 text-xs font-semibold bg-white text-senegal-green rounded-lg'
-          >
-            Changer
-          </button>
         </div>
       </div>
 
-      {/* Sidebar */}
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-3 py-2">
+        <div className="max-w-2xl mx-auto space-y-3">
+          {messages.map((msg, idx) => (
+            <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-[88%] rounded-2xl px-4 py-3 ${
+                msg.role === 'user'
+                  ? 'bg-senegal-green text-white rounded-br-md'
+                  : 'bg-white/[0.07] border border-white/[0.08] rounded-bl-md text-white/80'
+              }`}>
+                <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+
+                {/* AI message actions */}
+                {msg.role === 'assistant' && msg.content && idx > 0 && (
+                  <div className="flex items-center gap-2 mt-2 pt-2 border-t border-white/[0.06]">
+                    <button onClick={() => toggleSpeaking(msg.content)}
+                      className="p-1.5 rounded-lg hover:bg-white/10 transition-all">
+                      {isSpeaking ? <VolumeX size={14} className="text-orange-400" /> : <Volume2 size={14} className="text-white/30" />}
+                    </button>
+                    <button onClick={() => { navigator.clipboard.writeText(msg.content); toast.success('Copie!') }}
+                      className="text-[10px] text-white/20 hover:text-white/40 transition-all">
+                      Copier
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+          {loading && (
+            <div className="flex justify-start">
+              <div className="bg-white/[0.07] rounded-2xl px-4 py-3 rounded-bl-md">
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-1">
+                    <div className="w-2 h-2 rounded-full bg-senegal-green animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <div className="w-2 h-2 rounded-full bg-senegal-green animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <div className="w-2 h-2 rounded-full bg-senegal-green animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </div>
+                  <span className="text-xs text-white/30">
+                    {mode === 'quiz' ? 'Generation du quiz...' : mode === 'solver' ? 'Resolution en cours...' : 'Reflexion...'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+      </div>
+
+      {/* Input Area */}
+      <div className="flex-shrink-0 px-3 pb-3 pt-2 bg-[#0a1f14] border-t border-white/[0.06]">
+        {/* Processing indicator */}
+        {processingImage && (
+          <div className="flex items-center gap-2 mb-2 px-3 py-2 bg-white/[0.05] rounded-xl">
+            <Loader2 size={14} className="animate-spin text-senegal-green" />
+            <span className="text-xs text-white/40">Analyse en cours...</span>
+          </div>
+        )}
+
+        <div className="max-w-2xl mx-auto">
+          {/* Quick actions */}
+          <div className="flex items-center gap-2 mb-2">
+            {isPremium && (
+              <button onClick={() => fileInputRef.current?.click()}
+                className="p-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] transition-all">
+                <Camera size={16} className="text-white/40" />
+              </button>
+            )}
+            {messages.length > 2 && (
+              <button onClick={exportToPDF} disabled={exporting}
+                className="p-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] transition-all">
+                <Download size={16} className="text-white/40" />
+              </button>
+            )}
+            <button onClick={startNewConversation}
+              className="p-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] transition-all">
+              <MessageSquarePlus size={16} className="text-white/40" />
+            </button>
+            <div className="flex-1" />
+            {!isPremium && (
+              <span className="text-[10px] text-white/20">{messageCount}/10</span>
+            )}
+          </div>
+
+          {/* Input */}
+          <div className="flex gap-2">
+            <div className="flex-1 relative">
+              <textarea
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}
+                placeholder={mode === 'quiz' ? 'Ex: Quiz sur les derivees niveau BAC S2...' : mode === 'solver' ? 'Collez l\'exercice ici ou envoyez une photo...' : 'Posez votre question...'}
+                className="w-full pl-4 pr-12 py-3 rounded-xl bg-white/[0.07] border border-white/10 focus:border-senegal-green/50 outline-none text-sm text-white placeholder-white/25 resize-none"
+                rows="1"
+                disabled={loading}
+                style={{ minHeight: '44px', maxHeight: '120px' }}
+                onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px' }}
+              />
+              {/* Mic button inside input */}
+              <button onClick={toggleListening}
+                className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all ${isListening ? 'bg-red-500 text-white animate-pulse' : 'hover:bg-white/10 text-white/30'}`}>
+                {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+              </button>
+            </div>
+
+            <button onClick={sendMessage} disabled={loading || !inputMessage.trim()}
+              className="p-3 rounded-xl bg-senegal-green text-white disabled:opacity-30 hover:bg-emerald-600 transition-all flex-shrink-0">
+              {loading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+            </button>
+          </div>
+        </div>
+
+        <input ref={fileInputRef} type="file" accept="image/*,.pdf" onChange={handleFileUpload} className="hidden" />
+      </div>
+
+      {/* Subject Selector Modal */}
+      {showSubjects && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center">
+          <div className="bg-[#0f2b1a] rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md max-h-[80vh] overflow-y-auto">
+            <div className="p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-black text-white">Choisir une matiere</h2>
+                <button onClick={() => setShowSubjects(false)} className="p-2 rounded-lg hover:bg-white/10"><X size={18} className="text-white/50" /></button>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {SUBJECTS.map(s => (
+                  <button key={s.id} onClick={() => { setSelectedSubject(s); setShowSubjects(false); setMessages([{ role: 'assistant', content: getWelcome(s.name) }]) }}
+                    className={`p-3 rounded-xl border transition-all text-center ${
+                      selectedSubject.id === s.id ? 'bg-senegal-green/20 border-senegal-green/50' : 'bg-white/[0.05] border-white/[0.08] hover:bg-white/[0.1]'
+                    }`}>
+                    <div className="text-2xl mb-1">{s.icon}</div>
+                    <div className="text-[10px] font-bold text-white/70">{s.name}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sidebar - History */}
       {showSidebar && (
         <>
-          <div 
-            className='fixed inset-0 bg-black/50 z-40 md:hidden'
-            onClick={() => setShowSidebar(false)}
-          />
-          
-          <div className='fixed md:relative inset-y-0 left-0 w-80 md:w-80 backdrop-blur-2xl bg-white/30 border-r border-white/30 z-50 md:z-0 flex flex-col shadow-2xl md:shadow-none transition-transform duration-300 p-4 h-full'>
-            <div className='flex items-center justify-between mb-4'>
-              <h3 className='font-bold text-gray-800'>💬 Historique</h3>
-              <div className='flex gap-2'>
-                <button
-                  onClick={startNewConversation}
-                  className='btn-primary flex items-center gap-2 text-sm px-3 py-2'
-                >
-                  <MessageSquarePlus size={16} />
-                  <span className='hidden sm:inline'>Nouveau</span>
+          <div className="fixed inset-0 bg-black/40 z-50" onClick={() => setShowSidebar(false)} />
+          <div className="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-[#0f2b1a] z-50 shadow-2xl flex flex-col" style={{ animation: 'slideInRight 0.3s ease-out' }}>
+            <div className="p-4 border-b border-white/10 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-white">Historique</h3>
+              <div className="flex gap-2">
+                <button onClick={() => { startNewConversation(); setShowSidebar(false) }}
+                  className="px-3 py-1.5 rounded-lg bg-senegal-green text-white text-xs font-bold flex items-center gap-1">
+                  <MessageSquarePlus size={13} /> Nouveau
                 </button>
-                <button
-                  onClick={() => setShowSidebar(false)}
-                  className='md:hidden px-3 py-2 text-gray-500 hover:bg-gray-100 rounded-lg'
-                >
-                  X
+                <button onClick={() => setShowSidebar(false)} className="p-1.5 rounded-lg hover:bg-white/10">
+                  <X size={16} className="text-white/50" />
                 </button>
               </div>
             </div>
-
-            <div className='flex-1 overflow-y-auto space-y-2'>
-              {conversations.map((conv) => (
-                <div
-                  key={conv.id}
-                  onClick={() => {
-                    loadConversation(conv)
-                    setShowSidebar(false)
-                  }}
-                  className={'p-3 rounded-lg cursor-pointer transition-all hover:bg-gray-100 ' + 
-                    (currentConversationId === conv.id ? 'bg-senegal-green/10 border-2 border-senegal-green' : 'border-2 border-transparent')
-                  }
-                >
-                  <div className='flex items-start justify-between gap-2'>
-                    <div className='flex-1 min-w-0'>
-                      <p className='text-sm font-medium text-gray-800 truncate'>
-                        {getConversationTitle(conv)}
-                      </p>
-                      <div className='flex items-center gap-1 mt-1'>
-                        <Clock size={12} className='text-gray-400' />
-                        <p className='text-xs text-gray-500'>{formatDate(conv.updated_at)}</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        deleteConversation(conv.id)
-                      }}
-                      className='text-gray-400 hover:text-red-500 transition-colors'
-                    >
-                      <Trash2 size={16} />
-                    </button>
+            <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
+              {conversations.map(conv => (
+                <div key={conv.id} onClick={() => loadConversation(conv)}
+                  className={`p-3 rounded-xl cursor-pointer transition-all ${currentConversationId === conv.id ? 'bg-senegal-green/15 border border-senegal-green/30' : 'hover:bg-white/[0.05]'}`}>
+                  <p className="text-xs font-semibold text-white truncate">{getTitle(conv)}</p>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-[10px] text-white/25">{new Date(conv.updated_at).toLocaleDateString('fr-FR')}</span>
+                    <button onClick={(e) => { e.stopPropagation(); deleteConversation(conv.id) }}
+                      className="text-white/15 hover:text-red-400 transition-all"><Trash2 size={12} /></button>
                   </div>
                 </div>
               ))}
-
               {conversations.length === 0 && (
-                <div className='text-center py-8 text-gray-500'>
-                  <p className='text-sm'>Aucune conversation</p>
-                  <p className='text-xs mt-2'>Commencez une nouvelle conversation!</p>
-                </div>
+                <p className="text-center text-white/20 text-xs py-8">Aucune conversation</p>
               )}
             </div>
           </div>
         </>
       )}
 
-      {/* Main Chat Area */}
-      <div className='flex-1 flex flex-col min-w-0'>
-        {/* Desktop Subject Selector */}
-        <div className='hidden md:block mb-4'>
-          {showAllSubjects ? (
-            <div>
-              <div className='flex items-center justify-between mb-3'>
-                <h3 className='text-lg font-bold text-gray-800'>📚 Choisissez votre matiere:</h3>
-                <button
-                  onClick={() => setShowAllSubjects(false)}
-                  className='px-4 py-2 text-sm font-semibold text-senegal-green hover:bg-senegal-green/10 rounded-lg transition-colors'
-                >
-                  Masquer
-                </button>
-              </div>
-              <div className='grid grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-2'>
-                {SUBJECTS.map((subject) => (
-                  <button
-                    key={subject.id}
-                    onClick={() => {
-                      setSelectedSubject(subject)
-                      setShowAllSubjects(false)
-                    }}
-                    className={'p-2 rounded-lg border-2 transition-all hover:scale-105 ' + 
-                      (selectedSubject.id === subject.id
-                        ? 'backdrop-blur-md bg-emerald-900/80 border-emerald-700/50 text-white border-white/30 shadow-xl'
-                        : 'backdrop-blur-xl bg-white/40 hover:bg-white/60 border-white/30 hover:border-white/50')
-                    }
-                  >
-                    <div className='text-xl mb-1'>{subject.icon}</div>
-                    <div className='text-[10px] font-semibold leading-tight'>{subject.name}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className='flex items-center justify-between p-3 backdrop-blur-md bg-emerald-900/90 border-emerald-700/50 text-white rounded-2xl border border-white/30 shadow-lg'>
-              <div className='flex items-center gap-3'>
-                <button
-                  onClick={() => setShowSidebar(!showSidebar)}
-                  className='px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors'
-                >
-                  {showSidebar ? '<' : '>'}
-                </button>
-                <div className='text-2xl'>{selectedSubject.icon}</div>
-                <div className='font-semibold'>{selectedSubject.name}</div>
-              </div>
-              <button
-                onClick={() => setShowAllSubjects(true)}
-                className='px-4 py-2 text-sm font-semibold bg-white text-senegal-green rounded-lg hover:bg-gray-100 transition-colors'
-              >
-                Changer de matiere
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Mobile Subject Selector Modal */}
-        {showAllSubjects && (
-          <div className='md:hidden fixed inset-0 bg-white z-50 p-4 overflow-y-auto'>
-            <div className='flex items-center justify-between mb-4'>
-              <h3 className='text-lg font-bold text-gray-800'>📚 Choisissez votre matiere:</h3>
-              <button
-                onClick={() => setShowAllSubjects(false)}
-                className='px-4 py-2 text-sm font-semibold text-senegal-green hover:bg-senegal-green/10 rounded-lg'
-              >
-                Fermer
-              </button>
-            </div>
-            <div className='grid grid-cols-3 gap-2'>
-              {SUBJECTS.map((subject) => (
-                <button
-                  key={subject.id}
-                  onClick={() => {
-                    setSelectedSubject(subject)
-                    setShowAllSubjects(false)
-                  }}
-                  className={'p-3 rounded-lg border-2 transition-all ' + 
-                    (selectedSubject.id === subject.id
-                      ? 'backdrop-blur-md bg-emerald-900/80 border-emerald-700/50 text-white border-white/30 shadow-xl'
-                      : 'bg-white border-gray-200')
-                  }
-                >
-                  <div className='text-2xl mb-1'>{subject.icon}</div>
-                  <div className='text-[10px] font-semibold leading-tight'>{subject.name}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Chat Controls */}
-        <div className='flex items-center justify-between mb-4 flex-wrap gap-2'>
-          <div className='flex items-center gap-2 flex-wrap'>
-            {messages.length > 1 && (
-              <>
-                <button
-                  onClick={exportToWord}
-                  disabled={exporting}
-                  className='btn-secondary flex items-center gap-2 text-xs md:text-sm px-2 md:px-3 py-2'
-                >
-                  <FileText size={14} />
-                  <span className='hidden sm:inline'>Word</span>
-                </button>
-                <button
-                  onClick={exportToPDF}
-                  disabled={exporting}
-                  className='btn-secondary flex items-center gap-2 text-xs md:text-sm px-2 md:px-3 py-2'
-                >
-                  <Download size={14} />
-                  <span className='hidden sm:inline'>PDF</span>
-                </button>
-              </>
-            )}
-          </div>
-          
-          <div className='flex items-center gap-2'>
-            {isPremium ? (
-              <span className='flex items-center gap-2 text-senegal-green font-semibold text-xs md:text-sm'>
-                <Crown size={16} />
-                Premium
-              </span>
-            ) : (
-              <span className='text-gray-600 text-xs md:text-sm'>
-                {messageCount}/10
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Messages Area */}
-          <div className='overflow-y-auto mb-4 p-3 md:p-4' style={{height: 'calc(100vh - 28rem)'}}>
-          <div className='max-w-4xl mx-auto'><div className='space-y-3 md:space-y-4 pb-4'>
-            {messages.map((msg, idx) => (
-              <div
-                key={idx}
-                className={'flex ' + (msg.role === 'user' ? 'justify-end' : 'justify-start')}
-              >
-                <div
-                  className={'max-w-[85%] md:max-w-[80%] p-3 md:p-4 rounded-lg text-sm md:text-base ' + 
-                    (msg.role === 'user' ? 'backdrop-blur-md bg-emerald-900/80 border-emerald-700/50 text-white border border-white/30 shadow-lg'
-                      : 'backdrop-blur-xl bg-white/40 border border-white/30 text-gray-900')
-                  }
-                >
-                  <div className='whitespace-pre-wrap break-words'>{msg.content}</div>
-                </div>
-              </div>
-            ))}
-            {loading && (
-              <div className='flex justify-start'>
-                <div className='bg-gray-100 p-4 rounded-lg'>
-                  <Loader2 className='animate-spin' size={24} />
-                </div>
-              </div>
-            )}
-            </div><div ref={messagesEndRef} />
-          </div>
-        </div>
-
-        {/* Image Upload */}
-        {showImageUpload && isPremium && (
-          <div className='card mb-4 p-4'>
-            {processingImage ? (
-              <div className='text-center py-4'>
-                <Loader2 className='animate-spin mx-auto mb-2' size={32} />
-                <p className='text-sm'>Analyse en cours...</p>
-              </div>
-            ) : (
-              <ImageUpload
-                onImageCapture={handleImageCapture}
-                onPDFUpload={handlePDFUpload}
-              />
-            )}
-          </div>
-        )}
-
-        {/* Input Area */}
-        <div className="fixed bottom-28 left-0 right-0 backdrop-blur-2xl bg-white/30 border-t border-white/30 shadow-lg p-4 space-y-2 z-50">
-          {isPremium && (
-            <div className='flex gap-2'>
-              <button
-                onClick={() => setShowImageUpload(!showImageUpload)}
-                className='btn-secondary flex items-center gap-2 text-xs md:text-sm px-3 py-2'
-              >
-                <Camera size={14} />
-                <span>{showImageUpload ? 'Masquer' : 'Upload Image/PDF'}</span>
-              </button>
-            </div>
-          )}
-          
-          <div className='flex gap-2'>
-            <textarea
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault()
-                  sendMessage()
-                }
-              }}
-              placeholder='Posez votre question...'
-              className='input-field flex-1 resize-none text-sm md:text-base'
-              rows='2'
-              disabled={loading}
-            />
-            <button
-              onClick={sendMessage}
-              disabled={loading || !inputMessage.trim()}
-              className='w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-br from-yellow-500 to-emerald-500 hover:from-yellow-400 hover:to-emerald-400 disabled:from-gray-400 disabled:to-gray-500 shadow-lg hover:shadow-yellow-500/50 transition-all duration-300 flex items-center justify-center group active:scale-95 disabled:cursor-not-allowed'
-            >
-              {loading ? <Loader2 className='animate-spin text-white' size={20} /> : <Send size={20} className='text-white group-hover:scale-110 transition-transform' />}
-            </button>
-          </div>
-        </div>
-      </div>
-        </div>
+      <style>{`
+        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+      `}</style>
     </div>
-          {/* Floating Subject Selector */}
-      <button
-        onClick={() => setShowAllSubjects(true)}
-        className="fixed top-4 left-4 z-50 flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-yellow-500 to-yellow-400 text-black font-bold rounded-full shadow-xl hover:shadow-yellow-500/50 transition-all hover:scale-105 active:scale-95"
-      >
-        <span className="text-xl">{selectedSubject.icon}</span>
-        <span className="text-sm">{selectedSubject.name}</span>
-        <span className="text-xs opacity-70">▼</span>
-      </button>
     </FeatureGate>
   )
 }
