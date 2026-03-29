@@ -1,5 +1,5 @@
-﻿import { createContext, useContext, useEffect, useState } from 'react'
-import { authService, supabase } from '../services/supabase'
+﻿import { createContext, useContext, useEffect, useState, useRef } from 'react'
+import { authService, profileService, supabase } from '../services/supabase'
 
 const AuthContext = createContext({})
 
@@ -106,6 +106,46 @@ export const AuthProvider = ({ children }) => {
     }
   }, [])
 
+  // Online status tracking
+  const onlineIntervalRef = useRef(null)
+
+  useEffect(() => {
+    if (user) {
+      // Set online
+      profileService.updateOnlineStatus(user.id, true)
+
+      // Heartbeat every 60 seconds
+      onlineIntervalRef.current = setInterval(() => {
+        profileService.updateOnlineStatus(user.id, true)
+      }, 60000)
+
+      // Set offline on tab close/hide
+      const handleVisibility = () => {
+        if (document.hidden) {
+          profileService.updateOnlineStatus(user.id, false)
+        } else {
+          profileService.updateOnlineStatus(user.id, true)
+        }
+      }
+
+      const handleBeforeUnload = () => {
+        profileService.updateOnlineStatus(user.id, false)
+      }
+
+      document.addEventListener('visibilitychange', handleVisibility)
+      window.addEventListener('beforeunload', handleBeforeUnload)
+
+      return () => {
+        clearInterval(onlineIntervalRef.current)
+        document.removeEventListener('visibilitychange', handleVisibility)
+        window.removeEventListener('beforeunload', handleBeforeUnload)
+        profileService.updateOnlineStatus(user.id, false)
+      }
+    } else {
+      clearInterval(onlineIntervalRef.current)
+    }
+  }, [user])
+
   const signUp = async (email, password, fullName, extra = {}) => {
     const { data, error } = await authService.signUp(email, password, fullName)
     return { data, error }
@@ -117,6 +157,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   const signOut = async () => {
+    if (user) await profileService.updateOnlineStatus(user.id, false)
     const { error } = await authService.signOut()
     if (!error) {
       setUser(null)
