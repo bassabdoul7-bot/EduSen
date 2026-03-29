@@ -5,7 +5,7 @@ import { Upload, FileText, CheckCircle, Trash2, ArrowLeft, Plus, X, FolderOpen, 
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 
-const ADMIN_EMAILS = ['sales@getagenter.com', 'daouda15@hotmail.com']
+const ADMIN_EMAILS = ['sales@getagenter.com', 'daouda15@hotmail.com', 'bassabdoul7@gmail.com']
 
 export default function AdminUploadPage() {
   const { user } = useAuth()

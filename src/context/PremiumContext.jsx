@@ -5,7 +5,7 @@ import { subscriptionService } from '../services/subscription'
 const PremiumContext = createContext({})
 
 // VIP emails that always get premium
-const VIP_EMAILS = ['daouda15@hotmail.com']
+const VIP_EMAILS = ['daouda15@hotmail.com', 'bassabdoul7@gmail.com']
 
 export const usePremium = () => {
   const context = useContext(PremiumContext)

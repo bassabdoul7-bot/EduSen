@@ -19,7 +19,7 @@ const LEVEL_CONFIG = {
   licence: { label: 'Concours', color: 'bg-orange-500', textColor: 'text-orange-400', bgLight: 'bg-orange-500/10', border: 'border-orange-500/20' },
 }
 
-const ADMIN_EMAILS = ['sales@getagenter.com', 'daouda15@hotmail.com']
+const ADMIN_EMAILS = ['sales@getagenter.com', 'daouda15@hotmail.com', 'bassabdoul7@gmail.com']
 
 export default function ConcoursPage() {
   const { canAccessExamPrep } = usePlan()
