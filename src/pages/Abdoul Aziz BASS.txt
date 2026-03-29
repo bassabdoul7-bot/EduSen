@@ -1,0 +1,37 @@
+Abdoul Aziz BASS
+Charlotte, NC, USA
++1 704 726 3959
+bassabdoul7@gmail.com
+
+_______________________________________________________________________________
+
+
+À l'attention du Service des Ressources Humaines
+Réseau Gazier du Sénégal
+Dakar, Sénégal
+
+Objet : Candidature au poste de Développeur
+
+_______________________________________________________________________________
+
+
+Madame, Monsieur,
+
+C'est avec un vif intérêt que je vous soumets ma candidature pour le poste de Développeur au sein du Réseau Gazier du Sénégal. Fort de plus de 10 ans d'expérience en développement logiciel et en ingénierie informatique entre les États-Unis et le Sénégal, je suis convaincu que mon expertise technique et ma compréhension approfondie des enjeux de transformation digitale peuvent contribuer significativement aux objectifs stratégiques de votre institution.
+
+Mon parcours professionnel m'a permis de développer une solide maîtrise des technologies modernes de développement full-stack. Actuellement en poste chez Bank of America en tant que Production Support Specialist et Full-Stack Developer, je conçois et développe des microservices en Java/Spring Boot et des API REST pour automatiser les processus critiques. J'ai également une expérience significative avec Node.js, React.js, TypeScript et Python, ce qui me permet d'intervenir sur l'ensemble de la chaîne de développement, du backend au frontend.
+
+Ma collaboration antérieure avec Infosys pour T-Mobile a renforcé mon expertise en architecture microservices, en intégration CI/CD (Jenkins, GitLab CI) et en assurance qualité (JUnit, SonarQube). Je maîtrise parfaitement les pratiques DevOps modernes, notamment la conteneurisation Docker, l'observabilité applicative et les principes SRE (Site Reliability Engineering), compétences essentielles pour garantir la fiabilité et la performance des systèmes d'information.
+
+Au-delà de mes compétences techniques, je porte un engagement profond envers le développement technologique du Sénégal. J'ai initié plusieurs projets à impact social, notamment EduSen (plateforme éducative intelligente), SenKonnect (plateforme citoyenne d'engagement) et Talent Academy (formation IT pour la jeunesse sénégalaise). Ces initiatives témoignent de ma capacité à concevoir des solutions innovantes adaptées aux réalités locales et de mon désir de contribuer au progrès numérique de mon pays.
+
+Le Réseau Gazier du Sénégal joue un rôle stratégique dans le développement énergétique national. Rejoindre vos équipes représenterait pour moi l'opportunité de mettre mes compétences au service d'une infrastructure critique et de participer activement à la modernisation des systèmes d'information qui soutiennent vos opérations. Je suis particulièrement motivé par les défis techniques liés à la gestion des données énergétiques, à l'optimisation des processus et à la digitalisation des services.
+
+Ma formation académique, incluant un Bachelor en Business & Technical Management et un Master en Cybersécurité actuellement en cours, complète mon profil technique par une compréhension des enjeux business et sécuritaires, essentiels dans le secteur énergétique.
+
+Je serais honoré de pouvoir échanger avec vous sur la manière dont mon expertise et mon engagement peuvent servir les ambitions du Réseau Gazier du Sénégal. Je me tiens à votre entière disposition pour un entretien à votre convenance.
+
+Dans l'attente de votre retour, je vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.
+
+
+Abdoul Aziz BASS

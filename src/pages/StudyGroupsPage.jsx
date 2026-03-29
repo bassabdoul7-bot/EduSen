@@ -387,13 +387,13 @@ export default function StudyGroupsPage() {
   // ============ BROWSE / MY GROUPS ============
 
   const renderBrowse = () => (
-    <div className="space-y-5 p-4 pt-6">
+    <div className="space-y-5 p-4 pt-16">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-black text-white">Groupes d'Etude</h1>
           <p className="text-xs text-white/40 mt-1">Collaborez, apprenez, reussissez ensemble</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 mr-14">
           <button onClick={() => setShowJoinByCode(true)} className="p-2.5 rounded-xl bg-white/[0.07] border border-white/10 hover:bg-white/[0.12] transition-all">
             <UserPlus size={18} className="text-white/70" />
           </button>
@@ -1000,12 +1000,12 @@ export default function StudyGroupsPage() {
             <div className="flex gap-1 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
               {roomTabs.map(t => (
                 <button key={t.id} onClick={() => setRoomTab(t.id)}
-                  className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1.5 ${
+                  className={`flex-shrink-0 px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                     roomTab === t.id
                       ? t.highlight ? 'bg-red-500/20 text-red-400' : 'bg-white/[0.12] text-white'
                       : t.highlight ? 'text-red-400/50 hover:text-red-400' : 'text-white/30 hover:text-white/50'
                   }`}>
-                  <t.icon size={13} /> {t.label}
+                  <t.icon size={15} /> {t.label}
                 </button>
               ))}
             </div>

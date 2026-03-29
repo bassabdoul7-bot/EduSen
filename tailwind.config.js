@@ -7,8 +7,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Space Grotesk', 'Inter', 'sans-serif'],
+        sans: ['General Sans', 'system-ui', 'sans-serif'],
+        display: ['Satoshi', 'General Sans', 'sans-serif'],
       },
       colors: {
         senegal: {

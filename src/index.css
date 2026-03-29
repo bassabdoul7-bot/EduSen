@@ -3,8 +3,11 @@
 @tailwind utilities;
 
 /* Fonts */
+* {
+  font-family: 'General Sans', system-ui, sans-serif;
+}
 h1, h2, h3, h4, h5, h6, .font-display {
-  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  font-family: 'Satoshi', 'General Sans', system-ui, sans-serif;
 }
 
 /* iOS Safe Area Fix - Dark Background */
