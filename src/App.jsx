@@ -19,6 +19,8 @@ import ARLabPage from './pages/ARLabPage'
 import ConcoursPage from './pages/ConcoursPage'
 import PricingPage from './pages/PricingPage'
 import ResetPassword from './pages/ResetPassword'
+import StudyGroupsPage from './pages/StudyGroupsPage'
+import AdminUploadPage from './pages/AdminUploadPage'
 
 // Layout
 import Layout from './components/shared/Layout'
@@ -47,6 +49,8 @@ function App() {
               <Route path='sponsor' element={<SponsorPage />} />
               <Route path='ar-lab' element={<ARLabPage />} />
               <Route path='concours' element={<ConcoursPage />} />
+              <Route path='study-groups' element={<StudyGroupsPage />} />
+              <Route path='admin/upload' element={<AdminUploadPage />} />
             </Route>
           </Routes>
         </Router>

@@ -83,6 +83,20 @@ export default function Dashboard() {
       {/* Quick Access Section */}
       <div className="relative z-10 px-4 -mt-16 md:-mt-20">
         <div className="max-w-4xl mx-auto">
+          {/* Study Groups Feature Card */}
+          <Link to="/study-groups" className="block mb-4">
+            <div className="backdrop-blur-xl bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-400/20 rounded-2xl p-5 transition-all hover:scale-[1.02] hover:shadow-xl">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-xl bg-cyan-500 flex items-center justify-center text-2xl flex-shrink-0">👥</div>
+                <div className="flex-1">
+                  <h3 className="text-white font-bold text-base md:text-lg">Groupes d'Etude</h3>
+                  <p className="text-white/60 text-xs md:text-sm mt-0.5">Rejoignez des groupes de maths, physique, medecine... et etudiez ensemble!</p>
+                </div>
+                <ArrowRight size={20} className="text-white/40 flex-shrink-0" />
+              </div>
+            </div>
+          </Link>
+
           <div className="grid grid-cols-3 gap-3 md:gap-4">
             <Link to="/concours" className="group">
               <div className="backdrop-blur-xl bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl md:rounded-2xl p-4 md:p-6 text-center transition-all hover:scale-105 hover:shadow-xl">

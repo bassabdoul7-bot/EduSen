@@ -1,6 +1,6 @@
 ﻿import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { Home, MessageSquare, FlaskConical, FileText, User, Menu, X, LogOut, Crown, Heart, GraduationCap, Award, MessageCircle, Mail, Sparkles } from 'lucide-react'
+import { Home, MessageSquare, FlaskConical, FileText, User, Menu, X, LogOut, Crown, Heart, GraduationCap, Award, MessageCircle, Mail, Sparkles, Users } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 
@@ -21,12 +21,14 @@ export default function Layout() {
   const mainTabs = [
     { path: '/', icon: Home, label: 'Accueil' },
     { path: '/chatbot', icon: MessageSquare, label: 'Tuteur' },
+    { path: '/study-groups', icon: Users, label: 'Groupes' },
     { path: '/concours', icon: FileText, label: 'Concours' },
     { path: '/profile', icon: User, label: 'Profil' },
   ]
 
   const menuItems = [
     // { path: '/ar-lab', icon: FlaskConical, label: 'Labo Virtuel', iconBg: 'bg-emerald-500' },
+    { path: '/study-groups', icon: Users, label: 'Groupes d\'Etude', iconBg: 'bg-cyan-500' },
     { path: '/messages', icon: Mail, label: 'Messages', iconBg: 'bg-blue-500' },
     { path: '/forum', icon: MessageCircle, label: 'Forum', iconBg: 'bg-green-500' },
     { path: '/scholarships', icon: Award, label: 'Bourses', iconBg: 'bg-orange-500' },
@@ -132,19 +134,19 @@ export default function Layout() {
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#0a1f14] backdrop-blur-md border-t border-emerald-800/20 shadow-2xl" style={{paddingBottom: "env(safe-area-inset-bottom)"}}>
-        <div className="flex items-center justify-around px-2 py-2 max-w-lg mx-auto">
+        <div className="flex items-center justify-around px-1 py-2 max-w-lg mx-auto">
           {mainTabs.map((tab) => {
             const active = isActive(tab.path)
             return (
               <button
                 key={tab.path}
                 onClick={() => navigate(tab.path)}
-                className="flex flex-col items-center gap-1 px-3 py-2"
+                className="flex flex-col items-center gap-0.5 px-1.5 py-1.5 min-w-0"
               >
-                <div className={active ? 'w-11 h-11 rounded-xl flex items-center justify-center bg-gradient-to-br from-senegal-green via-senegal-yellow to-senegal-red shadow-md' : 'w-11 h-11 rounded-xl flex items-center justify-center bg-white/[0.08] border border-white/[0.1]'}>
-                  <tab.icon size={22} className={active ? 'text-white' : 'text-white/80'} />
+                <div className={active ? 'w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-senegal-green via-senegal-yellow to-senegal-red shadow-md' : 'w-10 h-10 rounded-xl flex items-center justify-center bg-white/[0.08] border border-white/[0.1]'}>
+                  <tab.icon size={20} className={active ? 'text-white' : 'text-white/80'} />
                 </div>
-                <span className={active ? 'text-xs font-semibold text-emerald-300' : 'text-xs font-medium text-white/60'}>{tab.label}</span>
+                <span className={active ? 'text-[10px] font-bold text-yellow-300' : 'text-[10px] font-medium text-white/50'}>{tab.label}</span>
               </button>
             )
           })}

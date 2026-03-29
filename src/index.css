@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fonts */
+h1, h2, h3, h4, h5, h6, .font-display {
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+}
+
 /* iOS Safe Area Fix - Dark Background */
 html {
   background-color: #0a1f14;
