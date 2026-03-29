@@ -10,8 +10,9 @@ import {
   HelpCircle, ThumbsUp, CheckCircle, Timer, Trophy, Zap,
   BookOpen, Link as LinkIcon, FileText, ExternalLink, Calendar,
   Clock, Activity, Star, Brain, ChevronDown, ChevronUp, Play, Pause,
-  Mic, Square, Volume2
+  Mic, Square, Volume2, Video
 } from 'lucide-react'
+import VideoRoom from '../components/VideoRoom'
 import toast from 'react-hot-toast'
 
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY
@@ -849,6 +850,17 @@ export default function StudyGroupsPage() {
 
   // ============ CHAT (Compact) ============
 
+  // ============ RENDER: LIVE VIDEO ============
+
+  const renderLive = () => (
+    <VideoRoom
+      roomId={currentGroup?.id}
+      userId={user?.id}
+      userName={profile?.full_name || 'Etudiant'}
+      onLeave={() => setRoomTab('overview')}
+    />
+  )
+
   const VoiceMessage = ({ url, isMe }) => {
     const [playing, setPlaying] = useState(false)
     const audioRef = useRef(null)
@@ -950,6 +962,7 @@ export default function StudyGroupsPage() {
 
     const roomTabs = [
       { id: 'overview', icon: Zap, label: 'Espace' },
+      { id: 'live', icon: Video, label: 'Live', highlight: true },
       { id: 'qa', icon: HelpCircle, label: 'Q&A' },
       { id: 'ai', icon: Brain, label: 'IA' },
       { id: 'resources', icon: FolderOpen, label: 'Docs' },
@@ -988,7 +1001,9 @@ export default function StudyGroupsPage() {
               {roomTabs.map(t => (
                 <button key={t.id} onClick={() => setRoomTab(t.id)}
                   className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1.5 ${
-                    roomTab === t.id ? 'bg-white/[0.12] text-white' : 'text-white/30 hover:text-white/50'
+                    roomTab === t.id
+                      ? t.highlight ? 'bg-red-500/20 text-red-400' : 'bg-white/[0.12] text-white'
+                      : t.highlight ? 'text-red-400/50 hover:text-red-400' : 'text-white/30 hover:text-white/50'
                   }`}>
                   <t.icon size={13} /> {t.label}
                 </button>
@@ -1010,6 +1025,7 @@ export default function StudyGroupsPage() {
             <div className="flex justify-center py-16"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-senegal-green"></div></div>
           ) : (
             roomTab === 'overview' ? renderOverview() :
+            roomTab === 'live' ? renderLive() :
             roomTab === 'qa' ? renderQA() :
             roomTab === 'ai' ? renderAI() :
             roomTab === 'resources' ? renderResources() :
