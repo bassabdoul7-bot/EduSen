@@ -109,7 +109,7 @@ export default function Login() {
               </div>
 
               <button type="submit" disabled={loading}
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-senegal-green via-senegal-yellow to-senegal-red text-white font-black text-sm shadow-lg disabled:opacity-50 hover:shadow-xl transition-all">
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-senegal-green via-senegal-yellow to-senegal-red text-black font-black text-sm shadow-lg disabled:opacity-50 hover:shadow-xl transition-all">
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

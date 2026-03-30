@@ -119,7 +119,7 @@ export default function Register() {
             ))}
 
             <button onClick={() => selectedPlan && setStep(2)} disabled={!selectedPlan}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-senegal-green via-senegal-yellow to-senegal-red text-white font-black text-sm shadow-lg disabled:opacity-30 flex items-center justify-center gap-2 mt-4">
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-senegal-green via-senegal-yellow to-senegal-red text-black font-black text-sm shadow-lg disabled:opacity-30 flex items-center justify-center gap-2 mt-4">
               Continuer <ArrowRight size={18} />
             </button>
           </div>
@@ -185,7 +185,7 @@ export default function Register() {
                     <p className="text-[10px] text-white/20 mt-1">Minimum 6 caracteres</p>
                   </div>
                   <button type="submit" disabled={loading}
-                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-senegal-green via-senegal-yellow to-senegal-red text-white font-black text-sm shadow-lg disabled:opacity-50">
+                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-senegal-green via-senegal-yellow to-senegal-red text-black font-black text-sm shadow-lg disabled:opacity-50">
                     {loading ? (
                       <span className="flex items-center justify-center gap-2">
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

@@ -48,7 +48,7 @@ function UpgradePrompt({ feature }) {
           {featureDesc[feature] || 'Cette fonctionnalite est reservee aux abonnes KanGam Premium'}
         </p>
         <Link to="/premium"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-senegal-green via-senegal-yellow to-senegal-red text-white font-black text-sm shadow-lg hover:shadow-xl transition-all">
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-senegal-green via-senegal-yellow to-senegal-red text-black font-black text-sm shadow-lg hover:shadow-xl transition-all">
           <Crown size={18} /> Passer a Premium
         </Link>
         <p className="text-[10px] text-white/20 mt-4">A partir de 1,000 FCFA/mois</p>
