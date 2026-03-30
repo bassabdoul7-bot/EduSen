@@ -55,7 +55,7 @@ export const PLAN_INFO = {
     features: ['10 messages IA/jour', 'Concours (epreuves seulement)', 'Forum', 'Groupes d\'etude'],
   },
   [PLANS.STUDENT]: {
-    name: 'Etudiant Premium',
+    name: 'Premium',
     price: 1000,
     period: '/mois',
     description: 'Acces complet',

@@ -29,11 +29,11 @@ export default function Register() {
     },
     {
       id: 'student',
-      name: 'Etudiant',
-      icon: '🎓',
+      name: 'Premium',
+      icon: '👑',
       price: '1,000 FCFA/mois',
-      description: 'Acces complet',
-      features: ['IA illimitee', 'Concours + corriges', 'Bourses', 'Groupes d\'etude'],
+      description: 'Acces complet a tout KanGam',
+      features: ['IA illimitee', 'Concours + corriges', 'Bourses', 'Groupes + Live Video'],
       popular: true,
     },
   ]
@@ -161,7 +161,7 @@ export default function Register() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-white/30 uppercase tracking-wider mb-1.5">Niveau</label>
+                    <label className="block text-[10px] font-bold text-white/30 uppercase tracking-wider mb-1.5">Profil</label>
                     <select value={level} onChange={(e) => setLevel(e.target.value)} required
                       className={inputClass.replace('pl-11', 'pl-4') + ' appearance-none'}>
                       <option value="" className="bg-[#0a1f14]">Selectionnez...</option>
@@ -172,7 +172,8 @@ export default function Register() {
                       <option value="2nde" className="bg-[#0a1f14]">Seconde</option>
                       <option value="1ere" className="bg-[#0a1f14]">Premiere</option>
                       <option value="terminale" className="bg-[#0a1f14]">Terminale (BAC)</option>
-                      <option value="universite" className="bg-[#0a1f14]">Universite</option>
+                      <option value="universite" className="bg-[#0a1f14]">Universite / Licence</option>
+                      <option value="professionnel" className="bg-[#0a1f14]">Professionnel / Concours</option>
                     </select>
                   </div>
                   <div>
