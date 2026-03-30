@@ -24,28 +24,51 @@ export const paymentService = {
   upgradeToPremium: async (userId, plan) => {
     const now = new Date()
     let expiresAt = null
-    
+
     if (plan === 'monthly') {
-      expiresAt = new Date(now.setMonth(now.getMonth() + 1))
+      expiresAt = new Date(new Date().setMonth(now.getMonth() + 1)).toISOString()
     } else if (plan === 'yearly') {
-      expiresAt = new Date(now.setFullYear(now.getFullYear() + 1))
+      expiresAt = new Date(new Date().setFullYear(now.getFullYear() + 1)).toISOString()
     }
     // lifetime = no expiry
-    
-    const { data, error } = await supabase
+
+    // Try update first
+    const { data: existing } = await supabase
       .from('subscriptions')
-      .update({
-        plan: 'premium',
-        status: 'active',
-        expires_at: expiresAt,
-        payment_method: 'flutterwave',
-        started_at: new Date().toISOString()
-      })
+      .select('id')
       .eq('user_id', userId)
-      .select()
       .single()
-    
-    return { data, error }
+
+    if (existing) {
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .update({
+          plan: 'premium',
+          status: 'active',
+          expires_at: expiresAt,
+          payment_method: 'flutterwave',
+          started_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
+        .select()
+        .single()
+      return { data, error }
+    } else {
+      // Insert new subscription
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .insert({
+          user_id: userId,
+          plan: 'premium',
+          status: 'active',
+          expires_at: expiresAt,
+          payment_method: 'flutterwave',
+          started_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+      return { data, error }
+    }
   },
 
   // Verify payment was successful

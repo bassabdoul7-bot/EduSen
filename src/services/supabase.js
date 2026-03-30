@@ -11,16 +11,29 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Auth helpers
 export const authService = {
-  signUp: async (email, password, fullName) => {
+  signUp: async (email, password, fullName, extra = {}) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           full_name: fullName,
+          plan: extra.plan || 'free',
+          level: extra.level || '',
         },
       },
     })
+
+    // After signup, update profile with plan and level
+    if (!error && data?.user) {
+      await supabase.from('profiles').upsert({
+        id: data.user.id,
+        full_name: fullName,
+        plan: extra.plan || 'free',
+        level: extra.level || '',
+      }, { onConflict: 'id' })
+    }
+
     return { data, error }
   },
 

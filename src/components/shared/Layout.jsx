@@ -106,16 +106,16 @@ export default function Layout() {
               ) : (
                 notifications.slice(0, 20).map(n => (
                   <div key={n.id} onClick={() => { navigate('/study-groups'); setShowNotifs(false) }}
-                    className={`p-3 border-b border-white/[0.05] cursor-pointer hover:bg-white/[0.05] transition-all ${!n.read ? 'bg-white/[0.03]' : ''}`}>
+                    className={`p-3 border-b border-white/[0.05] cursor-pointer hover:bg-white/[0.05] transition-all ${!n.is_read ? 'bg-white/[0.03]' : ''}`}>
                     <div className="flex items-start gap-2.5">
                       <span className="text-sm mt-0.5">{n.type === 'message' ? '💬' : '👋'}</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs text-white/70">
-                          <span className="font-bold text-white">{n.senderName}</span> {n.content}
+                          <span className="font-bold text-white">{n.sender_name}</span> {n.content}
                         </p>
-                        <p className="text-[10px] text-white/20 mt-0.5">{n.groupName} · {timeAgo(n.createdAt)}</p>
+                        <p className="text-[10px] text-white/20 mt-0.5">{n.group_name} · {timeAgo(n.created_at)}</p>
                       </div>
-                      {!n.read && <div className="w-2 h-2 rounded-full bg-senegal-green flex-shrink-0 mt-1.5" />}
+                      {!n.is_read && <div className="w-2 h-2 rounded-full bg-senegal-green flex-shrink-0 mt-1.5" />}
                     </div>
                   </div>
                 ))

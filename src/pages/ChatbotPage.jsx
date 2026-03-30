@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import { FeatureGate } from '../components/FeatureGate'
 import { useAuth } from '../context/AuthContext'
 import { usePremium } from '../context/PremiumContext'
 import { chatService } from '../services/chat'
@@ -293,7 +292,6 @@ export default function ChatbotPage() {
   // ============ RENDER ============
 
   return (
-    <FeatureGate feature="ai_tutor">
     <div className="min-h-screen bg-[#0a1f14] flex flex-col" style={{ height: 'calc(100vh - 5rem)' }}>
 
       {/* Top Bar */}
@@ -507,6 +505,5 @@ export default function ChatbotPage() {
         @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
       `}</style>
     </div>
-    </FeatureGate>
   )
 }

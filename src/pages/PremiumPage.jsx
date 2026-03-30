@@ -12,25 +12,25 @@ export default function PremiumPage() {
   const plans = [
     {
       name: 'Mensuel',
-      price: 2500,
-      displayPrice: '2,500',
+      price: 1000,
+      displayPrice: '1,000',
       period: 'par mois',
       plan: 'monthly',
       popular: false
     },
     {
       name: 'Annuel',
-      price: 25000,
-      displayPrice: '25,000',
+      price: 10000,
+      displayPrice: '10,000',
       period: 'par an',
       plan: 'yearly',
       popular: true,
-      savings: 'Économisez 17%'
+      savings: 'Economisez 17%'
     },
     {
-      name: 'À vie',
-      price: 75000,
-      displayPrice: '75,000',
+      name: 'A vie',
+      price: 35000,
+      displayPrice: '35,000',
       period: 'paiement unique',
       plan: 'lifetime',
       popular: false
@@ -38,20 +38,20 @@ export default function PremiumPage() {
   ]
 
   const features = [
-    'Messages IA illimités',
-    'Tous les 12 sujets (Math, Programmation, Médecine, etc.)',
-    'Fonction Caméra - Prendre photo des devoirs',
+    'Messages IA illimites (Tuteur, Quiz, Resoudre)',
+    'Tous les 12 sujets (Math, Physique, Medecine, etc.)',
+    'Groupes d\'etude illimites + Live Video',
+    'Tuteur IA dans les groupes',
+    'Fonction Camera - Photo des devoirs',
     'Upload PDF - Questions sur vos documents',
+    'Concours: corriges + predictions IA',
     'Portail Bourses complet',
-    'Alertes bourses par email',
-    'Base de données complète universités',
-    'Suivi candidatures',
-    'Forum illimité',
-    'Messages directs',
-    'Réponses IA prioritaires',
-    'Télécharger conversations en PDF',
+    'Base de donnees universites + suivi',
+    'Reconnaissance vocale + lecture IA',
+    'Telecharger conversations en PDF',
+    'Forum + Messages directs illimites',
     'Badge Premium',
-    'Sans publicité'
+    'Sans publicite'
   ]
 
   const handlePaymentSuccess = async (response, planType) => {
@@ -94,7 +94,7 @@ export default function PremiumPage() {
         name: profile?.full_name || 'Student',
       },
       customizations: {
-        title: 'EduSen Premium',
+        title: 'KanGam Premium',
         description: 'Abonnement ' + plan.name,
         logo: '',
       },

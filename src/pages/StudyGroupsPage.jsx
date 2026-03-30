@@ -13,11 +13,16 @@ import {
   Mic, Square, Volume2, Video
 } from 'lucide-react'
 import VideoRoom from '../components/VideoRoom'
+import { usePremium } from '../context/PremiumContext'
+import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY
 
+const FREE_MAX_GROUPS = 1
+
 export default function StudyGroupsPage() {
+  const { isPremium } = usePremium()
   const { user, profile } = useAuth()
 
   const [view, setView] = useState('browse')
@@ -153,6 +158,7 @@ export default function StudyGroupsPage() {
   }
 
   const handleCreateGroup = async () => {
+    if (!isPremium) { toast.error('Passez a Premium pour creer un groupe'); return }
     if (!newGroup.name.trim() || !newGroup.subject) { toast.error('Nom et matiere obligatoires'); return }
     const { data, error } = await studyGroupsService.createGroup(user.id, newGroup)
     if (!error && data) {
@@ -166,6 +172,10 @@ export default function StudyGroupsPage() {
   }
 
   const handleJoinGroup = async (group) => {
+    if (!isPremium && myGroups.length >= FREE_MAX_GROUPS) {
+      toast.error('Limite atteinte! Passez a Premium pour rejoindre plus de groupes.')
+      return
+    }
     const { error } = await studyGroupsService.joinGroup(group.id, user.id)
     if (!error) {
       toast.success(`Bienvenue dans "${group.name}"!`)
@@ -195,15 +205,26 @@ export default function StudyGroupsPage() {
     }
   }
 
+  const [groupMsgCount, setGroupMsgCount] = useState(0)
+  const FREE_MSG_LIMIT = 5
+
   const handleSendMessage = async () => {
     if (!messageInput.trim()) return
+    if (!isPremium && groupMsgCount >= FREE_MSG_LIMIT) {
+      toast.error('Limite atteinte! Passez a Premium pour envoyer plus de messages.')
+      return
+    }
     const content = messageInput; setMessageInput('')
     const { data, error } = await studyGroupsService.sendMessage(currentGroup.id, user.id, content)
-    if (!error && data) setMessages(prev => [...prev, data])
+    if (!error && data) {
+      setMessages(prev => [...prev, data])
+      if (!isPremium) setGroupMsgCount(prev => prev + 1)
+    }
     else { toast.error("Erreur d'envoi"); setMessageInput(content) }
   }
 
   const startRecording = async () => {
+    if (!isPremium) { toast.error('Passez a Premium pour envoyer des vocaux'); return }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
 
@@ -681,7 +702,21 @@ export default function StudyGroupsPage() {
 
   // ============ AI TUTOR ============
 
+  const renderPremiumBlock = (feature) => (
+    <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+      <div className="w-16 h-16 rounded-2xl bg-senegal-yellow/10 border border-senegal-yellow/20 flex items-center justify-center mb-4">
+        <Lock size={28} className="text-senegal-yellow" />
+      </div>
+      <h3 className="text-lg font-black text-white mb-1">{feature}</h3>
+      <p className="text-xs text-white/30 mb-5 max-w-[240px]">Passez a Premium pour debloquer cette fonctionnalite</p>
+      <Link to="/premium" className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-senegal-green via-senegal-yellow to-senegal-red text-white font-bold text-xs shadow-lg">
+        <Crown size={14} className="inline mr-1.5 -mt-0.5" /> Passer a Premium
+      </Link>
+    </div>
+  )
+
   const renderAI = () => (
+    !isPremium ? renderPremiumBlock('Tuteur IA du Groupe') :
     <div className="flex flex-col h-full p-4">
       <div className="mb-4">
         <div className="flex items-center gap-2 mb-1">
@@ -853,6 +888,7 @@ export default function StudyGroupsPage() {
   // ============ RENDER: LIVE VIDEO ============
 
   const renderLive = () => (
+    !isPremium ? renderPremiumBlock('Live Video') :
     <VideoRoom
       roomId={currentGroup?.id}
       userId={user?.id}
@@ -902,7 +938,7 @@ export default function StudyGroupsPage() {
             <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
               <div className="max-w-[80%]">
                 {!isMe && <p className="text-[10px] font-semibold text-white/30 mb-0.5 ml-1">{msg.profiles?.full_name || 'Membre'}</p>}
-                <div className={`rounded-2xl px-3.5 py-2 ${isMe ? 'bg-senegal-green text-white rounded-br-md' : 'bg-white/10 rounded-bl-md'}`}>
+                <div className={`rounded-2xl px-3.5 py-2 ${isMe ? 'bg-senegal-green text-white rounded-br-md' : 'bg-white/10 text-white/80 rounded-bl-md'}`}>
                   {isVoice ? (
                     <VoiceMessage url={msg.content} isMe={isMe} />
                   ) : (
