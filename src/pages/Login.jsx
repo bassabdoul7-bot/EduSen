@@ -52,7 +52,7 @@ export default function Login() {
         {/* Logo */}
         <div className="text-center mb-10">
           <BrainLogo size="lg" className="justify-center mb-4" />
-          <p className="text-white/30 text-xs">Rejoignez l'univers KanGam</p>
+          <p className="text-white text-xs">Rejoignez l'univers KanGam</p>
         </div>
 
         {showForgotPassword ? (

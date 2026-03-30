@@ -76,7 +76,7 @@ export default function Dashboard() {
           <h1 className="text-4xl md:text-7xl font-black text-white mb-4 drop-shadow-2xl leading-tight">
             Bienvenue, {profile?.full_name?.split(' ')[0] || 'Etudiant'}
           </h1>
-          <p className="text-lg md:text-2xl text-white/90 mb-8 font-medium drop-shadow-lg">
+          <p className="text-lg md:text-2xl text-white mb-8 font-medium drop-shadow-lg">
             Rejoignez l'univers KanGam
           </p>
           <Link to="/chatbot">
