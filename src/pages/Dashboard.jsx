@@ -77,7 +77,7 @@ export default function Dashboard() {
             Bienvenue, {profile?.full_name?.split(' ')[0] || 'Etudiant'}
           </h1>
           <p className="text-lg md:text-2xl text-white/90 mb-8 font-medium drop-shadow-lg">
-            Excellence academique pour le Senegal
+            Rejoignez l'univers KanGam
           </p>
           <Link to="/chatbot">
             <button className="group px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-400 hover:to-yellow-300 text-black font-bold text-base md:text-lg rounded-full shadow-2xl hover:shadow-yellow-500/50 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2 md:gap-3 mx-auto">
