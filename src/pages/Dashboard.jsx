@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext'
-import { MessageSquare, Sparkles, ArrowRight, Users, ChevronRight } from 'lucide-react'
+import { MessageSquare, ArrowRight, Users, ChevronRight } from 'lucide-react'
+import BrainLogo from '../components/BrainLogo'
 import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { supabase } from '../services/supabase'
@@ -46,10 +47,10 @@ export default function Dashboard() {
 
       {/* Floating Logo */}
       <div
-        className="fixed top-6 left-4 z-50 w-12 h-12 rounded-2xl bg-gradient-to-br from-senegal-green via-senegal-yellow to-senegal-red flex items-center justify-center shadow-lg backdrop-blur-sm"
+        className="fixed top-6 left-4 z-50 rounded-2xl bg-[#0a1f14]/90 backdrop-blur-md border border-white/10 shadow-lg px-3 py-1.5"
         style={{top: "calc(env(safe-area-inset-top) + 1.5rem)"}}
       >
-        <Sparkles className="text-white" size={22} />
+        <BrainLogo size="sm" />
       </div>
 
       {/* Hero Section */}

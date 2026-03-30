@@ -24,6 +24,7 @@ import AdminUploadPage from './pages/AdminUploadPage'
 
 // Layout
 import Layout from './components/shared/Layout'
+import NotificationProvider from './components/NotificationProvider'
 
 function App() {
   return (
@@ -37,7 +38,7 @@ function App() {
             <Route path='/pricing' element={<PricingPage />} />
             <Route path='/reset-password' element={<ResetPassword />} />
             
-            <Route path='/' element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+            <Route path='/' element={<ProtectedRoute><NotificationProvider><Layout /></NotificationProvider></ProtectedRoute>}>
               <Route index element={<Dashboard />} />
               <Route path='chatbot' element={<ChatbotPage />} />
               <Route path='admissions' element={<AdmissionsPage />} />

@@ -1,14 +1,25 @@
 ﻿import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { Home, MessageSquare, FlaskConical, FileText, User, Menu, X, LogOut, Crown, Heart, GraduationCap, Award, MessageCircle, Mail, Sparkles, Users } from 'lucide-react'
+import { Home, MessageSquare, FlaskConical, FileText, User, Menu, X, LogOut, Crown, Heart, GraduationCap, Award, MessageCircle, Mail, Sparkles, Users, Bell } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
+import { useNotifications } from '../NotificationProvider'
 
 export default function Layout() {
   const { profile, signOut } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [showNotifs, setShowNotifs] = useState(false)
+  const { notifications, unreadCount, clearAll } = useNotifications()
+
+  const timeAgo = (date) => {
+    const diff = (Date.now() - new Date(date).getTime()) / 1000
+    if (diff < 60) return "a l'instant"
+    if (diff < 3600) return `il y a ${Math.floor(diff / 60)}min`
+    if (diff < 86400) return `il y a ${Math.floor(diff / 3600)}h`
+    return new Date(date).toLocaleDateString('fr-FR')
+  }
 
   const handleSignOut = async () => {
     const { error } = await signOut()
@@ -50,15 +61,68 @@ export default function Layout() {
   return (
     <div className="min-h-screen" style={{paddingBottom: "calc(5rem + env(safe-area-inset-bottom))"}}>
 
-      {/* Floating Menu Button - Hidden on chatbot page */}
+      {/* Floating Buttons - Hidden on chatbot page */}
       {location.pathname !== '/chatbot' && (
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="fixed top-6 right-4 z-50 w-12 h-12 rounded-full bg-emerald-900/80 backdrop-blur-md border border-emerald-700/50 flex items-center justify-center shadow-lg hover:bg-emerald-800/80 transition-all"
-          style={{top: "calc(env(safe-area-inset-top) + 1.5rem)"}}
-        >
-          {menuOpen ? <X size={22} className="text-white" /> : <Menu size={22} className="text-white" />}
-        </button>
+        <div className="fixed top-6 right-4 z-50 flex items-center gap-2" style={{top: "calc(env(safe-area-inset-top) + 1.5rem)"}}>
+          {/* Notification Bell */}
+          <button
+            onClick={() => setShowNotifs(!showNotifs)}
+            className="relative w-10 h-10 rounded-full bg-emerald-900/80 backdrop-blur-md border border-emerald-700/50 flex items-center justify-center shadow-lg hover:bg-emerald-800/80 transition-all"
+          >
+            <Bell size={18} className="text-white" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">{unreadCount > 9 ? '9+' : unreadCount}</span>
+            )}
+          </button>
+
+          {/* Menu Button */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="w-12 h-12 rounded-full bg-emerald-900/80 backdrop-blur-md border border-emerald-700/50 flex items-center justify-center shadow-lg hover:bg-emerald-800/80 transition-all"
+          >
+            {menuOpen ? <X size={22} className="text-white" /> : <Menu size={22} className="text-white" />}
+          </button>
+        </div>
+      )}
+
+      {/* Notification Panel */}
+      {showNotifs && (
+        <>
+          <div className="fixed inset-0 bg-black/20 z-40" onClick={() => setShowNotifs(false)} />
+          <div className="fixed top-20 right-4 w-80 max-w-[90vw] max-h-[70vh] bg-[#0f2b1a] rounded-2xl border border-white/10 shadow-2xl z-50 overflow-hidden flex flex-col"
+            style={{top: "calc(env(safe-area-inset-top) + 4.5rem)"}}>
+            <div className="p-3 border-b border-white/10 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-white">Notifications</h3>
+              {unreadCount > 0 && (
+                <button onClick={clearAll} className="text-[10px] text-senegal-green font-bold">Tout lire</button>
+              )}
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {notifications.length === 0 ? (
+                <div className="text-center py-8">
+                  <Bell size={24} className="mx-auto mb-2 text-white/10" />
+                  <p className="text-xs text-white/20">Aucune notification</p>
+                </div>
+              ) : (
+                notifications.slice(0, 20).map(n => (
+                  <div key={n.id} onClick={() => { navigate('/study-groups'); setShowNotifs(false) }}
+                    className={`p-3 border-b border-white/[0.05] cursor-pointer hover:bg-white/[0.05] transition-all ${!n.read ? 'bg-white/[0.03]' : ''}`}>
+                    <div className="flex items-start gap-2.5">
+                      <span className="text-sm mt-0.5">{n.type === 'message' ? '💬' : '👋'}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-white/70">
+                          <span className="font-bold text-white">{n.senderName}</span> {n.content}
+                        </p>
+                        <p className="text-[10px] text-white/20 mt-0.5">{n.groupName} · {timeAgo(n.createdAt)}</p>
+                      </div>
+                      {!n.read && <div className="w-2 h-2 rounded-full bg-senegal-green flex-shrink-0 mt-1.5" />}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </>
       )}
 
       {/* Side Panel Menu */}

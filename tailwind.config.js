@@ -12,8 +12,8 @@ export default {
       },
       colors: {
         senegal: {
-          green: '#00853D',
-          yellow: '#FCD116',
+          green: '#00853F',
+          yellow: '#FDEF42',
           red: '#E31B23'
         }
       }
