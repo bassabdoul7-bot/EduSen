@@ -37,6 +37,11 @@ export default function QuizBattlePage() {
 
   const timerRef = useRef(null)
   const questionStartRef = useRef(null)
+  const viewRef = useRef('home')
+  const matchedRef = useRef(false)
+
+  // Keep ref in sync with view state
+  useEffect(() => { viewRef.current = view }, [view])
 
   const SUBJECTS = quizBattleService.SUBJECTS
   const LEVELS = quizBattleService.LEVELS
@@ -50,12 +55,13 @@ export default function QuizBattlePage() {
 
   useEffect(() => {
     if (battle) {
+      matchedRef.current = false
       const sub = quizBattleService.subscribeToBattle(battle.id, (updated) => {
         setBattle(updated)
 
-        // Host was waiting, guest joined → start playing
-        if (updated.status === 'playing' && view === 'waiting') {
-          // Load opponent profile
+        // Host was waiting, guest joined → start playing (fire ONCE only)
+        if (updated.status === 'playing' && viewRef.current === 'waiting' && !matchedRef.current) {
+          matchedRef.current = true
           const opId = updated.host_id === user.id ? updated.guest_id : updated.host_id
           if (opId) {
             supabase.from('profiles').select('full_name, avatar_url').eq('id', opId).single().then(({ data }) => setOpponentProfile(data))
