@@ -1,6 +1,6 @@
 ﻿import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { Home, MessageSquare, FlaskConical, FileText, User, Menu, X, LogOut, Crown, Heart, GraduationCap, Award, MessageCircle, Mail, Sparkles, Users, Bell } from 'lucide-react'
+import { Home, MessageSquare, FlaskConical, FileText, User, Menu, X, LogOut, Crown, Heart, GraduationCap, Award, MessageCircle, Mail, Sparkles, Users, Bell, Swords } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { useNotifications } from '../NotificationProvider'
@@ -32,13 +32,14 @@ export default function Layout() {
   const mainTabs = [
     { path: '/', icon: Home, label: 'Accueil' },
     { path: '/chatbot', icon: MessageSquare, label: 'Tuteur' },
+    { path: '/battle', icon: Swords, label: 'Defi' },
     { path: '/study-groups', icon: Users, label: 'Groupes' },
-    { path: '/concours', icon: FileText, label: 'Concours' },
     { path: '/profile', icon: User, label: 'Profil' },
   ]
 
   const menuItems = [
     // { path: '/ar-lab', icon: FlaskConical, label: 'Labo Virtuel', iconBg: 'bg-emerald-500' },
+    { path: '/battle', icon: Swords, label: 'Quiz Battle', iconBg: 'bg-orange-500' },
     { path: '/study-groups', icon: Users, label: 'Groupes d\'Etude', iconBg: 'bg-cyan-500' },
     { path: '/messages', icon: Mail, label: 'Messages', iconBg: 'bg-blue-500' },
     { path: '/forum', icon: MessageCircle, label: 'Forum', iconBg: 'bg-green-500' },
