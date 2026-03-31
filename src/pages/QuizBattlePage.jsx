@@ -202,7 +202,7 @@ export default function QuizBattlePage() {
   }
 
   function handleAnswer(answer) {
-    if (answered) return
+    if (answered || !battle?.questions) return
     clearInterval(timerRef.current)
     setSelectedAnswer(answer)
     setAnswered(true)
@@ -210,9 +210,9 @@ export default function QuizBattlePage() {
     const timeMs = Date.now() - questionStartRef.current
     quizBattleService.submitAnswer(battle.id, user.id, currentQ, answer, timeMs)
 
-    // Auto-advance after 2s
     setTimeout(() => {
-      if (currentQ < battle.questions.length - 1) {
+      const total = battle.questions?.length || 0
+      if (currentQ < total - 1) {
         setCurrentQ(prev => prev + 1)
         setSelectedAnswer(null)
         setAnswered(false)
@@ -224,11 +224,13 @@ export default function QuizBattlePage() {
   }
 
   function handleTimeout() {
+    if (!battle?.questions) return
     setAnswered(true)
     quizBattleService.submitAnswer(battle.id, user.id, currentQ, null, 30000)
 
     setTimeout(() => {
-      if (currentQ < battle.questions.length - 1) {
+      const total = battle.questions?.length || 0
+      if (currentQ < total - 1) {
         setCurrentQ(prev => prev + 1)
         setSelectedAnswer(null)
         setAnswered(false)
@@ -383,7 +385,21 @@ export default function QuizBattlePage() {
   // ============ PLAYING ============
 
   const renderPlaying = () => {
-    if (!battle?.questions?.[currentQ]) return null
+    if (!battle?.questions?.length) {
+      return (
+        <div className="flex flex-col items-center justify-center h-[70vh] p-6 text-center">
+          <div className="w-16 h-16 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mb-4" />
+          <p className="text-white/50 text-sm">Chargement des questions...</p>
+          <button onClick={() => { setView('home'); setBattle(null) }} className="mt-6 text-xs text-white/30 hover:text-white/50">Annuler</button>
+        </div>
+      )
+    }
+    if (currentQ >= battle.questions.length) {
+      quizBattleService.finishBattle(battle.id)
+      setView('results')
+      return null
+    }
+    if (!battle.questions[currentQ]) return null
     const q = battle.questions[currentQ]
     const total = battle.questions.length
     const progress = ((currentQ + 1) / total) * 100
@@ -422,7 +438,7 @@ export default function QuizBattlePage() {
         {/* Question */}
         <div className="flex-1 p-4 overflow-y-auto">
           <div className="bg-white/[0.05] rounded-2xl p-5 border border-white/[0.08] mb-4">
-            <p className="text-sm text-white font-semibold leading-relaxed">{q.q}</p>
+            <p className="text-sm text-white font-semibold leading-relaxed">{q.q || 'Question en cours de chargement...'}</p>
           </div>
 
           {/* Options */}
