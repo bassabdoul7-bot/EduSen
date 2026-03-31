@@ -56,13 +56,16 @@ export default function QuizBattlePage() {
   useEffect(() => {
     if (battle) {
       matchedRef.current = false
-      const sub = quizBattleService.subscribeToBattle(battle.id, (updated) => {
-        setBattle(updated)
+      const sub = quizBattleService.subscribeToBattle(battle.id, async (updated) => {
+        // Always re-fetch full battle to get questions JSONB
+        const { data: fullBattle } = await quizBattleService.getBattle(battle.id)
+        if (fullBattle) setBattle(fullBattle)
 
         // Host was waiting, guest joined → start playing (fire ONCE only)
         if (updated.status === 'playing' && viewRef.current === 'waiting' && !matchedRef.current) {
           matchedRef.current = true
-          const opId = updated.host_id === user.id ? updated.guest_id : updated.host_id
+          const b = fullBattle || updated
+          const opId = b.host_id === user.id ? b.guest_id : b.host_id
           if (opId) {
             supabase.from('profiles').select('full_name, avatar_url').eq('id', opId).single().then(({ data }) => setOpponentProfile(data))
           }
