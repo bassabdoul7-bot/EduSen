@@ -79,7 +79,7 @@ export default function QuizBattlePage() {
   // Question timer
   useEffect(() => {
     if (view === 'playing' && !answered) {
-      setTimeLeft(15)
+      setTimeLeft(30)
       questionStartRef.current = Date.now()
       timerRef.current = setInterval(() => {
         setTimeLeft(prev => {
@@ -202,7 +202,7 @@ export default function QuizBattlePage() {
 
   function handleTimeout() {
     setAnswered(true)
-    quizBattleService.submitAnswer(battle.id, user.id, currentQ, null, 15000)
+    quizBattleService.submitAnswer(battle.id, user.id, currentQ, null, 30000)
 
     setTimeout(() => {
       if (currentQ < battle.questions.length - 1) {
@@ -364,7 +364,7 @@ export default function QuizBattlePage() {
     const q = battle.questions[currentQ]
     const total = battle.questions.length
     const progress = ((currentQ + 1) / total) * 100
-    const timerColor = timeLeft <= 5 ? 'text-red-400' : timeLeft <= 10 ? 'text-orange-400' : 'text-white'
+    const timerColor = timeLeft <= 10 ? 'text-red-400' : timeLeft <= 20 ? 'text-orange-400' : 'text-white'
 
     return (
       <div className="flex flex-col h-[calc(100vh-6rem)]">
@@ -390,7 +390,7 @@ export default function QuizBattlePage() {
 
           {/* Timer */}
           <div className="flex justify-center">
-            <div className={`w-12 h-12 rounded-full border-3 flex items-center justify-center font-black text-lg ${timerColor} ${timeLeft <= 5 ? 'animate-pulse border-red-500' : 'border-white/20'}`}>
+            <div className={`w-12 h-12 rounded-full border-3 flex items-center justify-center font-black text-lg ${timerColor} ${timeLeft <= 10 ? 'animate-pulse border-red-500' : 'border-white/20'}`}>
               {timeLeft}
             </div>
           </div>
