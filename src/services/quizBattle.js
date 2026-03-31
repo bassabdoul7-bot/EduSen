@@ -61,14 +61,53 @@ MAINTENANT genere ${count} questions AUSSI DIFFICILES que ces exemples en ${subj
     })
   })
 
-  const data = await response.json()
-  const text = data.choices[0]?.message?.content || '[]'
+  if (!response.ok) {
+    console.error('Groq API error:', response.status)
+    return getFallbackQuestions(subject, count)
+  }
 
-  // Extract JSON from response
-  const jsonMatch = text.match(/\[[\s\S]*\]/)
-  if (!jsonMatch) throw new Error('Invalid response')
+  try {
+    const data = await response.json()
+    const text = data.choices[0]?.message?.content || '[]'
+    const jsonMatch = text.match(/\[[\s\S]*\]/)
+    if (!jsonMatch) return getFallbackQuestions(subject, count)
+    const questions = JSON.parse(jsonMatch[0])
+    if (!questions.length) return getFallbackQuestions(subject, count)
+    return questions.slice(0, count)
+  } catch (e) {
+    console.error('Question parse error:', e)
+    return getFallbackQuestions(subject, count)
+  }
+}
 
-  const questions = JSON.parse(jsonMatch[0])
+// Fallback questions if AI fails
+function getFallbackQuestions(subject, count) {
+  const fallbacks = {
+    math: [
+      { q: "Calculer la derivee de f(x) = 3x² + 2x - 5", a: "6x + 2", b: "6x - 2", c: "3x + 2", d: "6x + 5", correct: "a", explanation: "f'(x) = 6x + 2 par les regles de derivation" },
+      { q: "Resoudre: x² - 5x + 6 = 0", a: "x=2 et x=3", b: "x=1 et x=6", c: "x=-2 et x=-3", d: "x=2 et x=-3", correct: "a", explanation: "Discriminant = 1, x = (5±1)/2" },
+      { q: "Quelle est la limite de (x²-1)/(x-1) quand x tend vers 1?", a: "2", b: "1", c: "0", d: "N'existe pas", correct: "a", explanation: "Factoriser: (x-1)(x+1)/(x-1) = x+1, donc limite = 2" },
+      { q: "Si sin(x) = 0.5, quelle est la valeur de x dans [0, pi]?", a: "pi/6", b: "pi/4", c: "pi/3", d: "pi/2", correct: "a", explanation: "sin(pi/6) = 0.5" },
+      { q: "Le volume d'une sphere de rayon 3cm est:", a: "36pi cm³", b: "27pi cm³", c: "108pi cm³", d: "12pi cm³", correct: "a", explanation: "V = 4/3 × pi × r³ = 4/3 × pi × 27 = 36pi" },
+    ],
+    physics: [
+      { q: "Un objet de 2kg tombe en chute libre. Sa vitesse apres 3s est (g=10m/s²):", a: "30 m/s", b: "20 m/s", c: "15 m/s", d: "60 m/s", correct: "a", explanation: "v = g×t = 10×3 = 30 m/s" },
+      { q: "La resistance equivalente de deux resistances de 6Ω en parallele est:", a: "3Ω", b: "6Ω", c: "12Ω", d: "1Ω", correct: "a", explanation: "1/Req = 1/6 + 1/6 = 2/6, Req = 3Ω" },
+      { q: "L'energie cinetique d'un objet de 4kg a 5m/s est:", a: "50 J", b: "100 J", c: "25 J", d: "20 J", correct: "a", explanation: "Ec = 1/2 × m × v² = 1/2 × 4 × 25 = 50 J" },
+      { q: "La periode d'un pendule simple de longueur 1m est environ (g=10m/s²):", a: "2s", b: "1s", c: "3s", d: "0.5s", correct: "a", explanation: "T = 2pi×sqrt(L/g) ≈ 2s" },
+      { q: "L'indice de refraction de l'eau est environ:", a: "1.33", b: "1.5", c: "1.0", d: "2.0", correct: "a", explanation: "L'indice de refraction de l'eau est 1.33" },
+    ],
+    general: [
+      { q: "En quelle annee le Senegal a-t-il obtenu son independance?", a: "1960", b: "1958", c: "1962", d: "1955", correct: "a", explanation: "Le Senegal est devenu independant le 4 avril 1960" },
+      { q: "Quel est le siege de la CEDEAO?", a: "Abuja", b: "Dakar", c: "Accra", d: "Lagos", correct: "a", explanation: "La CEDEAO a son siege a Abuja, Nigeria" },
+      { q: "Le Plan Senegal Emergent (PSE) a ete lance en:", a: "2014", b: "2012", c: "2016", d: "2010", correct: "a", explanation: "Le PSE a ete adopte en fevrier 2014" },
+      { q: "Le premier president du Senegal etait:", a: "Leopold Sedar Senghor", b: "Abdou Diouf", c: "Abdoulaye Wade", d: "Mamadou Dia", correct: "a", explanation: "Senghor a ete president de 1960 a 1980" },
+      { q: "La monnaie utilisee au Senegal est:", a: "Franc CFA (XOF)", b: "Franc CFA (XAF)", c: "Dalasi", d: "Cedi", correct: "a", explanation: "Le Senegal utilise le Franc CFA de l'UEMOA (XOF)" },
+    ],
+  }
+  const questions = fallbacks[subject] || fallbacks.general
+  // Repeat if not enough
+  while (questions.length < count) questions.push(...questions)
   return questions.slice(0, count)
 }
 

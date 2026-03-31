@@ -161,13 +161,19 @@ export default function QuizBattlePage() {
     if (!subject || !level) { toast.error('Choisissez matiere et niveau'); return }
 
     setLoading(true)
-    const { data, error, matched } = await quizBattleService.findBattle(user.id, subject, level)
-    setLoading(false)
+    toast.loading('Preparation des questions...', { id: 'matchmaking' })
 
-    if (error) { toast.error(error.message); return }
-    setBattle(data)
+    try {
+      const { data, error, matched } = await quizBattleService.findBattle(user.id, subject, level)
+      toast.dismiss('matchmaking')
+      setLoading(false)
 
-    if (matched) {
+      if (error) { toast.error(error.message); return }
+      if (!data) { toast.error('Erreur de creation'); return }
+
+      setBattle(data)
+
+      if (matched) {
       loadOpponent(data)
       setCurrentQ(0)
       setSelectedAnswer(null)
@@ -176,6 +182,12 @@ export default function QuizBattlePage() {
       toast.success('Adversaire trouve! C\'est parti!')
     } else {
       setView('waiting')
+      toast.success('En attente d\'un adversaire...')
+    }
+    } catch (err) {
+      console.error('Matchmaking error:', err)
+      toast.error('Erreur, reessayez', { id: 'matchmaking' })
+      setLoading(false)
     }
   }
 
