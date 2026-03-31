@@ -30,61 +30,33 @@ async function generateQuestions(subject, level, count = 10) {
       model: 'llama-3.3-70b-versatile',
       messages: [{
         role: 'system',
-        content: `Tu es un professeur senegalais severe et exigeant qui cree des questions de niveau EXAMEN REEL. Genere EXACTEMENT ${count} questions QCM de niveau ${level} en ${subject}.
-
-NIVEAU DE DIFFICULTE:
-- BFEM: questions de niveau epreuve officielle du BFEM, pas de questions evidentes
-- BAC: questions de niveau BAC senegalais (1er et 2e groupe), complexes avec pieges
-- Licence/Concours: questions de niveau concours ENA, ESP, FASTEF — tres exigeantes
-
-TYPES DE QUESTIONS EXIGEES:
-- Questions qui demandent de REFLECHIR, pas juste memoriser
-- Questions avec des pieges subtils dans les options
-- Questions d'application (pas seulement de definition)
-- Pour les maths/physique: calculs reels, pas juste "quelle est la formule"
-- Pour les lettres: analyse de texte, pas juste "qui a ecrit ce livre"
-- Pour culture generale: questions pointues sur l'actualite, les institutions, l'economie du Senegal
-- Les mauvaises reponses doivent etre PLAUSIBLES (pas evidemment fausses)
-
-EXEMPLES DE BON NIVEAU:
-- MAUVAIS: "Quelle est la capitale du Senegal?" (trop facile)
-- BON: "En quelle annee le Senegal a-t-il adopte sa premiere constitution post-independance?"
-- MAUVAIS: "Combien font 2+2?" (trop basique)
-- BON: "Calculer la limite de (sin(3x)/x) quand x tend vers 0" (niveau BAC S2)
-
-CONTEXTE SENEGALAIS:
-- Programme officiel (manuels CIAM, Collection Phare, programmes du Ministere)
-- Histoire: Empire du Jolof, traite des esclaves, AOF, independance, politique contemporaine
-- Geo: regions du Senegal, demographie, economie, ressources naturelles (petrole, gaz, phosphates)
-- Institutions: CEDEAO, UEMOA, Union Africaine, Assemblee nationale, Conseil constitutionnel
-- Personnalites: Senghor, Cheikh Anta Diop, Mariama Ba, Ousmane Sembene, Abdoulaye Wade, Macky Sall
-- Actualites: Plan Senegal Emergent, TER, port de Ndayane, exploitation petroliere
-
-REPONDS UNIQUEMENT en JSON valide, sans texte avant ou apres:
-[
-  {
-    "q": "La question detaillee et precise",
-    "a": "Option plausible A",
-    "b": "Option plausible B",
-    "c": "Option plausible C",
-    "d": "Option plausible D",
-    "correct": "a",
-    "explanation": "Explication pedagogique de la bonne reponse"
-  }
-]
-
-REGLES STRICTES:
-- JAMAIS de questions triviales ou evidentes
-- Les 4 options doivent toutes etre plausibles
-- Varier les chapitres et themes
-- 2-3 questions de culture generale senegalaise par quiz
-- Francais uniquement
-- PAS de markdown, UNIQUEMENT le JSON`
+        content: `Generateur de QCM difficiles. Reponds UNIQUEMENT en JSON: [{"q":"...","a":"...","b":"...","c":"...","d":"...","correct":"a","explanation":"..."}]. Pas de texte avant/apres.`
       }, {
         role: 'user',
-        content: `Genere ${count} questions QCM en ${subject} niveau ${level} pour un etudiant senegalais.`
+        content: `Voici des exemples de VRAIES questions de niveau ${level} au Senegal:
+
+${level === 'bac' ? `EXEMPLES BAC SENEGALAIS (ce niveau est OBLIGATOIRE):
+- Maths S2: "Soit f(x) = (x²-3x+2)/(x-1). Determiner la limite de f en 1. a) 1  b) -1  c) 0  d) N'existe pas"
+- Physique: "Un projectile est lance avec une vitesse initiale de 20 m/s sous un angle de 60° avec l'horizontale. Quelle est la portee du tir? (g=10m/s²) a) 34.6m  b) 20m  c) 40m  d) 17.3m"
+- Philo: "Selon Kant, l'imperatif categorique exige d'agir: a) Selon ses interets  b) Selon la loi morale universelle  c) Selon les consequences  d) Selon la tradition"
+- SVT: "Dans la mitose, l'anaphase se caracterise par: a) La condensation des chromosomes  b) L'alignement sur la plaque equatoriale  c) La separation des chromatides soeurs  d) La decondensation"
+- Histoire: "Le traite de Protectorat entre la France et le Cayor a ete signe en: a) 1855  b) 1886  c) 1895  d) 1902"` :
+level === 'licence' ? `EXEMPLES CONCOURS ENA/ESP (TRES DIFFICILE):
+- Droit: "L'article 92 de la Constitution senegalaise porte sur: a) Le Conseil constitutionnel  b) La Haute Cour de Justice  c) Le Conseil economique et social  d) La Cour des comptes"
+- Economie: "Le taux de croissance du PIB du Senegal dans le cadre du PSE vise: a) 5%  b) 7%  c) 10%  d) 3%"
+- Culture G: "Le bassin sedimentaire senegalais contient des reserves estimees de gaz naturel a: a) Grand Tortue/Ahmeyim  b) Rufisque Offshore  c) Sangomar  d) Cayar Offshore"` :
+`EXEMPLES BFEM (niveau 3eme):
+- Maths: "Resoudre: 2x² - 5x + 3 = 0. Les solutions sont: a) x=1 et x=3/2  b) x=1 et x=3  c) x=-1 et x=3/2  d) x=2 et x=3"
+- Francais: "Dans 'L'enfant noir' de Camara Laye, le personnage principal grandit a: a) Conakry  b) Kouroussa  c) Dakar  d) Bamako"
+- Histoire: "L'AOF (Afrique Occidentale Francaise) a ete creee en: a) 1895  b) 1900  c) 1885  d) 1910"`}
+
+MAINTENANT genere ${count} questions AUSSI DIFFICILES que ces exemples en ${subject}. Niveau: ${level}.
+- Questions d'APPLICATION et de REFLEXION, pas de definitions basiques
+- 4 options toutes PLAUSIBLES et proches
+- Inclus 2 questions sur le Senegal/Afrique
+- Si c'est des maths/physique: mets de VRAIS calculs`
       }],
-      temperature: 0.8,
+      temperature: 0.4,
       max_tokens: 4000,
     })
   })
