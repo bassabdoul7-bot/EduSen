@@ -76,6 +76,29 @@ export default function QuizBattlePage() {
     }
   }, [battle?.id])
 
+  // Polling fallback for waiting screen
+  useEffect(() => {
+    if (view !== 'waiting' || !battle) return
+    const poll = setInterval(async () => {
+      const { data } = await quizBattleService.getBattle(battle.id)
+      if (data && data.status === 'playing') {
+        setBattle(data)
+        const opId = data.host_id === user.id ? data.guest_id : data.host_id
+        if (opId) {
+          const { data: p } = await supabase.from('profiles').select('full_name, avatar_url').eq('id', opId).single()
+          setOpponentProfile(p)
+        }
+        setCurrentQ(0)
+        setSelectedAnswer(null)
+        setAnswered(false)
+        setView('playing')
+        toast.success('Adversaire trouve! C\'est parti!')
+        clearInterval(poll)
+      }
+    }, 3000)
+    return () => clearInterval(poll)
+  }, [view, battle?.id])
+
   // Question timer
   useEffect(() => {
     if (view === 'playing' && !answered) {
