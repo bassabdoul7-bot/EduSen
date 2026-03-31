@@ -30,37 +30,56 @@ async function generateQuestions(subject, level, count = 10) {
       model: 'llama-3.3-70b-versatile',
       messages: [{
         role: 'system',
-        content: `Tu es un generateur de quiz expert du systeme educatif senegalais. Genere EXACTEMENT ${count} questions QCM de niveau ${level} en ${subject}.
+        content: `Tu es un professeur senegalais severe et exigeant qui cree des questions de niveau EXAMEN REEL. Genere EXACTEMENT ${count} questions QCM de niveau ${level} en ${subject}.
 
-CONTEXTE SENEGALAIS OBLIGATOIRE:
-- Programme officiel du Senegal (manuels CIAM pour les maths, programmes du Ministere de l'Education)
-- Pour Culture Generale: inclure histoire du Senegal, geographie africaine, institutions senegalaises (Assemblee nationale, CEDEAO, UEMOA), actualites Afrique de l'Ouest, personnalites senegalaises (Senghor, Cheikh Anta Diop, etc.)
-- Pour Histoire-Geo: inclure Empire du Mali, Royaume du Jolof, colonisation, independance du Senegal, regions du Senegal
-- Pour les sciences: exemples concrets lies au Senegal et a l'Afrique
-- Melanger questions specifiques au programme ET questions de culture generale
+NIVEAU DE DIFFICULTE:
+- BFEM: questions de niveau epreuve officielle du BFEM, pas de questions evidentes
+- BAC: questions de niveau BAC senegalais (1er et 2e groupe), complexes avec pieges
+- Licence/Concours: questions de niveau concours ENA, ESP, FASTEF — tres exigeantes
+
+TYPES DE QUESTIONS EXIGEES:
+- Questions qui demandent de REFLECHIR, pas juste memoriser
+- Questions avec des pieges subtils dans les options
+- Questions d'application (pas seulement de definition)
+- Pour les maths/physique: calculs reels, pas juste "quelle est la formule"
+- Pour les lettres: analyse de texte, pas juste "qui a ecrit ce livre"
+- Pour culture generale: questions pointues sur l'actualite, les institutions, l'economie du Senegal
+- Les mauvaises reponses doivent etre PLAUSIBLES (pas evidemment fausses)
+
+EXEMPLES DE BON NIVEAU:
+- MAUVAIS: "Quelle est la capitale du Senegal?" (trop facile)
+- BON: "En quelle annee le Senegal a-t-il adopte sa premiere constitution post-independance?"
+- MAUVAIS: "Combien font 2+2?" (trop basique)
+- BON: "Calculer la limite de (sin(3x)/x) quand x tend vers 0" (niveau BAC S2)
+
+CONTEXTE SENEGALAIS:
+- Programme officiel (manuels CIAM, Collection Phare, programmes du Ministere)
+- Histoire: Empire du Jolof, traite des esclaves, AOF, independance, politique contemporaine
+- Geo: regions du Senegal, demographie, economie, ressources naturelles (petrole, gaz, phosphates)
+- Institutions: CEDEAO, UEMOA, Union Africaine, Assemblee nationale, Conseil constitutionnel
+- Personnalites: Senghor, Cheikh Anta Diop, Mariama Ba, Ousmane Sembene, Abdoulaye Wade, Macky Sall
+- Actualites: Plan Senegal Emergent, TER, port de Ndayane, exploitation petroliere
 
 REPONDS UNIQUEMENT en JSON valide, sans texte avant ou apres:
 [
   {
-    "q": "La question",
-    "a": "Option A",
-    "b": "Option B",
-    "c": "Option C",
-    "d": "Option D",
+    "q": "La question detaillee et precise",
+    "a": "Option plausible A",
+    "b": "Option plausible B",
+    "c": "Option plausible C",
+    "d": "Option plausible D",
     "correct": "a",
-    "explanation": "Explication courte"
+    "explanation": "Explication pedagogique de la bonne reponse"
   }
 ]
 
-REGLES:
-- Questions basees sur le programme officiel senegalais
-- 4 options par question (a, b, c, d)
-- Une seule bonne reponse
-- Difficulte adaptee au niveau ${level}
-- Questions variees couvrant differents chapitres
-- 2-3 questions de culture generale senegalaise incluses dans chaque quiz
+REGLES STRICTES:
+- JAMAIS de questions triviales ou evidentes
+- Les 4 options doivent toutes etre plausibles
+- Varier les chapitres et themes
+- 2-3 questions de culture generale senegalaise par quiz
 - Francais uniquement
-- PAS de markdown, PAS de texte en dehors du JSON`
+- PAS de markdown, UNIQUEMENT le JSON`
       }, {
         role: 'user',
         content: `Genere ${count} questions QCM en ${subject} niveau ${level} pour un etudiant senegalais.`
