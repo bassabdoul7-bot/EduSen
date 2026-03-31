@@ -49,9 +49,24 @@ export default function QuizBattlePage() {
   }, [user])
 
   useEffect(() => {
-    if (battle && battle.status === 'playing') {
+    if (battle) {
       const sub = quizBattleService.subscribeToBattle(battle.id, (updated) => {
         setBattle(updated)
+
+        // Host was waiting, guest joined → start playing
+        if (updated.status === 'playing' && view === 'waiting') {
+          // Load opponent profile
+          const opId = updated.host_id === user.id ? updated.guest_id : updated.host_id
+          if (opId) {
+            supabase.from('profiles').select('full_name, avatar_url').eq('id', opId).single().then(({ data }) => setOpponentProfile(data))
+          }
+          setCurrentQ(0)
+          setSelectedAnswer(null)
+          setAnswered(false)
+          setView('playing')
+          toast.success('Adversaire trouve! C\'est parti!')
+        }
+
         if (updated.status === 'finished') {
           setView('results')
           quizBattleService.unsubscribeFromBattle(battle.id)
@@ -59,7 +74,7 @@ export default function QuizBattlePage() {
       })
       return () => quizBattleService.unsubscribeFromBattle(battle.id)
     }
-  }, [battle?.id, battle?.status])
+  }, [battle?.id])
 
   // Question timer
   useEffect(() => {
@@ -131,9 +146,11 @@ export default function QuizBattlePage() {
 
     if (matched) {
       loadOpponent(data)
-      setView('playing')
       setCurrentQ(0)
-      toast.success('Adversaire trouve!')
+      setSelectedAnswer(null)
+      setAnswered(false)
+      setView('playing')
+      toast.success('Adversaire trouve! C\'est parti!')
     } else {
       setView('waiting')
     }
