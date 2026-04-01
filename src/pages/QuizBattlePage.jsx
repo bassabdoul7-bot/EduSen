@@ -435,58 +435,70 @@ export default function QuizBattlePage() {
       <div className="flex flex-col h-[calc(100vh-6rem)] bg-[#060e09]">
 
         {/* ========== ELECTRONIC SCOREBOARD ========== */}
-        <div className="flex-shrink-0 mx-2 mt-2">
-          <div className="relative">
-            {/* Scoreboard image */}
-            <img src="/scoreboard.png" alt="" className="w-full h-auto" />
+        <div className="flex-shrink-0 mx-3 mt-3">
+          {/* Board frame */}
+          <div className="rounded-xl overflow-hidden shadow-2xl" style={{ background: 'linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%)', boxShadow: '0 4px 20px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05)' }}>
+            {/* Screen area */}
+            <div className="mx-2 mt-2 rounded-lg p-3 relative overflow-hidden" style={{ background: '#0a0a0a' }}>
+              {/* LED grid texture */}
+              <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: 'radial-gradient(circle, #fff 0.5px, transparent 0.5px)', backgroundSize: '4px 4px' }} />
 
-            {/* Overlay: Player names on HOME / GUESTS */}
-            <div className="absolute inset-0 flex flex-col justify-between py-[8%] px-[5%]">
-
-              {/* Top row: Scores */}
-              <div className="flex items-center justify-between px-[2%]">
-                {/* My score - left side */}
-                <div className="flex-1 flex justify-center">
-                  <span className="text-3xl sm:text-5xl font-black font-mono text-red-500" style={{ textShadow: '0 0 15px rgba(239,68,68,0.8)' }}>{myScore}</span>
+              {/* Row 1: Scores */}
+              <div className="relative flex items-center justify-between mb-1">
+                <div className="flex-1 text-center">
+                  <span className="text-4xl font-black font-mono text-red-500" style={{ textShadow: '0 0 20px rgba(239,68,68,0.7), 0 0 40px rgba(239,68,68,0.3)' }}>{myScore}</span>
                 </div>
-                {/* Question number - center */}
-                <div className="flex-shrink-0">
-                  <span className="text-lg sm:text-2xl font-black font-mono text-green-400" style={{ textShadow: '0 0 10px rgba(74,222,128,0.6)' }}>{currentQ + 1}</span>
+                <div className="px-3">
+                  <span className="text-lg font-black font-mono text-green-400" style={{ textShadow: '0 0 12px rgba(74,222,128,0.6)' }}>Q{currentQ + 1}</span>
                 </div>
-                {/* Opponent score - right side */}
-                <div className="flex-1 flex justify-center">
-                  <span className="text-3xl sm:text-5xl font-black font-mono text-red-500" style={{ textShadow: '0 0 15px rgba(239,68,68,0.8)' }}>{opScore}</span>
+                <div className="flex-1 text-center">
+                  <span className="text-4xl font-black font-mono text-red-500" style={{ textShadow: '0 0 20px rgba(239,68,68,0.7), 0 0 40px rgba(239,68,68,0.3)' }}>{opScore}</span>
                 </div>
               </div>
 
-              {/* Middle row: Names */}
-              <div className="flex items-center justify-between px-[4%] -mt-[2%]">
-                <span className="text-[10px] sm:text-sm font-black text-white uppercase tracking-wider truncate max-w-[35%]" style={{ textShadow: '0 0 8px rgba(255,255,255,0.5)' }}>{myName}</span>
-                <span className="text-[10px] sm:text-sm font-black text-white uppercase tracking-wider truncate max-w-[35%] text-right" style={{ textShadow: '0 0 8px rgba(255,255,255,0.5)' }}>{opName}</span>
+              {/* Row 2: Names */}
+              <div className="relative flex items-center justify-between mb-1.5">
+                <span className="text-[10px] font-black text-white uppercase tracking-widest truncate max-w-[40%]" style={{ textShadow: '0 0 6px rgba(255,255,255,0.4)' }}>{myName}</span>
+                <span className="text-[10px] font-black text-white uppercase tracking-widest truncate max-w-[40%] text-right" style={{ textShadow: '0 0 6px rgba(255,255,255,0.4)' }}>{opName}</span>
               </div>
 
-              {/* Bottom row: Timer + subject */}
-              <div className="flex items-center justify-center gap-4 mt-[1%]">
-                <span className="text-xs sm:text-base font-black font-mono text-yellow-400" style={{ textShadow: '0 0 10px rgba(250,204,21,0.6)' }}>
-                  {String(Math.floor(timeLeft / 60)).padStart(2, '0')}:{String(timeLeft % 60).padStart(2, '0')}
-                </span>
+              {/* Row 3: Timer + Subject */}
+              <div className="relative flex items-center justify-between">
+                <span className="text-[8px] font-bold text-yellow-500/60 uppercase">{quizBattleService.SUBJECTS.find(s => s.id === battle.subject)?.name}</span>
+                <div className="flex items-center gap-1.5">
+                  <div className={`w-1.5 h-1.5 rounded-full ${timerDanger ? 'bg-red-500' : 'bg-green-500'} animate-pulse`} />
+                  <span className={`text-sm font-black font-mono ${timerDanger ? 'text-red-400' : timerWarn ? 'text-yellow-400' : 'text-green-400'}`}
+                    style={{ textShadow: `0 0 12px ${timerDanger ? 'rgba(239,68,68,0.6)' : timerWarn ? 'rgba(250,204,21,0.6)' : 'rgba(74,222,128,0.6)'}` }}>
+                    00:{String(timeLeft).padStart(2, '0')}
+                  </span>
+                </div>
+                <span className="text-[8px] font-mono text-white/20">{currentQ + 1}/{total}</span>
               </div>
             </div>
 
-            {/* Player avatars - floating on sides */}
-            <div className="absolute -bottom-3 left-3 w-10 h-10 rounded-full border-2 border-senegal-green bg-[#0a1f14] overflow-hidden shadow-lg">
-              {myAvatar ? <img src={myAvatar} className="w-full h-full object-cover" /> :
-                <div className="w-full h-full flex items-center justify-center text-sm font-black text-senegal-green">{myName[0]}</div>}
+            {/* Bottom frame with avatars */}
+            <div className="flex items-center justify-between px-3 py-1.5">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full bg-black border border-green-500/30 overflow-hidden">
+                  {myAvatar ? <img src={myAvatar} className="w-full h-full object-cover" /> :
+                    <div className="w-full h-full flex items-center justify-center text-[10px] font-black text-green-400">{myName[0]}</div>}
+                </div>
+                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+              </div>
+              {/* Progress dots */}
+              <div className="flex gap-1">
+                {Array.from({ length: total }, (_, i) => (
+                  <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i < currentQ ? 'bg-green-500' : i === currentQ ? 'bg-yellow-400 animate-pulse' : 'bg-white/10'}`} />
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                <div className="w-7 h-7 rounded-full bg-black border border-red-500/30 overflow-hidden">
+                  {opAvatar ? <img src={opAvatar} className="w-full h-full object-cover" /> :
+                    <div className="w-full h-full flex items-center justify-center text-[10px] font-black text-red-400">{opName[0]}</div>}
+                </div>
+              </div>
             </div>
-            <div className="absolute -bottom-3 right-3 w-10 h-10 rounded-full border-2 border-red-500 bg-[#0a1f14] overflow-hidden shadow-lg">
-              {opAvatar ? <img src={opAvatar} className="w-full h-full object-cover" /> :
-                <div className="w-full h-full flex items-center justify-center text-sm font-black text-red-400">{opName[0]}</div>}
-            </div>
-          </div>
-
-          {/* Progress bar below scoreboard */}
-          <div className="h-1.5 bg-black/30 rounded-full mt-5 mx-2 overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500 rounded-full transition-all duration-500" style={{ width: progress + '%' }} />
           </div>
         </div>
 
