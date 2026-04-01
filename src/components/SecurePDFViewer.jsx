@@ -53,16 +53,90 @@ export default function SecurePDFViewer({ fileUrl, fileName, user, onClose }) {
     return () => clearInterval(interval);
   }, [fileUrl]);
 
+  const [blurred, setBlurred] = useState(false);
+
   useEffect(() => {
+    // Block right-click
     const block = (e) => e.preventDefault();
+
+    // Block keyboard shortcuts
     const blockKeys = (e) => {
-      if ((e.ctrlKey || e.metaKey) && ['s','p','S','P'].includes(e.key)) e.preventDefault();
+      // Block Ctrl+S, Ctrl+P, Ctrl+C, Ctrl+A, Ctrl+Shift+S
+      if ((e.ctrlKey || e.metaKey) && ['s','p','S','P','c','C','a','A'].includes(e.key)) {
+        e.preventDefault();
+        return;
+      }
+      // Block PrintScreen
+      if (e.key === 'PrintScreen' || e.keyCode === 44) {
+        e.preventDefault();
+        // Clear clipboard
+        navigator.clipboard?.writeText('').catch(() => {});
+        setBlurred(true);
+        setTimeout(() => setBlurred(false), 2000);
+        return;
+      }
+      // Block F12 (dev tools)
+      if (e.key === 'F12') {
+        e.preventDefault();
+        return;
+      }
+      // Block Ctrl+Shift+I (dev tools)
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'I') {
+        e.preventDefault();
+        return;
+      }
+      // Block Windows+Shift+S (Snipping tool)
+      if (e.metaKey && e.shiftKey && e.key === 'S') {
+        e.preventDefault();
+        setBlurred(true);
+        setTimeout(() => setBlurred(false), 3000);
+      }
     };
+
+    // Blur content when tab loses focus (user switching to screenshot tool)
+    const handleVisibility = () => {
+      if (document.hidden) {
+        setBlurred(true);
+      } else {
+        // Delay unblur to catch screenshot tools
+        setTimeout(() => setBlurred(false), 1500);
+      }
+    };
+
+    // Blur on window blur (alt-tab, snipping tool overlay)
+    const handleBlur = () => {
+      setBlurred(true);
+    };
+    const handleFocus = () => {
+      setTimeout(() => setBlurred(false), 1000);
+    };
+
+    // Try to enable FLAG_SECURE on Capacitor (native mobile)
+    try {
+      if (window.Capacitor?.isNativePlatform()) {
+        // Android FLAG_SECURE
+        window.Capacitor.Plugins?.ScreenProtection?.enable?.();
+      }
+    } catch (e) {}
+
     document.addEventListener('contextmenu', block);
     document.addEventListener('keydown', blockKeys);
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('blur', handleBlur);
+    window.addEventListener('focus', handleFocus);
+
     return () => {
       document.removeEventListener('contextmenu', block);
       document.removeEventListener('keydown', blockKeys);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('focus', handleFocus);
+      // Disable FLAG_SECURE when leaving
+      try {
+        if (window.Capacitor?.isNativePlatform()) {
+          window.Capacitor.Plugins?.ScreenProtection?.disable?.();
+        }
+      } catch (e) {}
     };
   }, []);
 
@@ -95,6 +169,18 @@ export default function SecurePDFViewer({ fileUrl, fileName, user, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/95 z-50 flex flex-col">
+      {/* Screenshot blur overlay */}
+      {blurred && (
+        <div className="absolute inset-0 z-[100] bg-black flex items-center justify-center" style={{ backdropFilter: 'blur(50px)' }}>
+          <div className="text-center">
+            <svg className="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+            </svg>
+            <p className="text-white font-bold">Capture d'ecran non autorisee</p>
+            <p className="text-white/40 text-sm mt-1">Ce document est protege</p>
+          </div>
+        </div>
+      )}
       <div className="bg-gray-900 text-white px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
