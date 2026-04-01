@@ -630,14 +630,24 @@ export default function QuizBattlePage() {
               <div className="text-8xl animate-winner">🏆</div>
               {/* Arms raised character */}
               <div className="text-5xl -mt-4 animate-pulse">🙌</div>
-              {/* Pouring sparkles from cup */}
-              <div className="absolute top-2 left-1/2 -translate-x-1/2">
-                <div className="flex gap-1">
-                  {[0, 1, 2, 3, 4].map(i => (
-                    <div key={i} className="w-1 h-1 rounded-full bg-yellow-400 animate-pour"
-                      style={{ animationDelay: i * 0.15 + 's' }} />
-                  ))}
-                </div>
+              {/* Pouring sparkles from cup - continuous streams */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20">
+                {Array.from({ length: 15 }, (_, i) => (
+                  <div key={i} className="absolute animate-sparkle-pour"
+                    style={{
+                      left: 20 + Math.random() * 60 + '%',
+                      animationDelay: (Math.random() * 2) + 's',
+                      animationDuration: (1 + Math.random() * 1.5) + 's',
+                    }}>
+                    <div style={{
+                      width: 2 + Math.random() * 4,
+                      height: 2 + Math.random() * 4,
+                      borderRadius: '50%',
+                      background: ['#FFD700', '#FFF', '#FDEF42', '#FFB800'][Math.floor(Math.random() * 4)],
+                      boxShadow: '0 0 4px rgba(255,215,0,0.8)',
+                    }} />
+                  </div>
+                ))}
               </div>
             </div>
           ) : draw ? (
@@ -719,12 +729,13 @@ export default function QuizBattlePage() {
           .animate-winner {
             animation: winner-bounce 1.5s ease-in-out infinite;
           }
-          @keyframes pour {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(30px) scale(0); opacity: 0; }
+          @keyframes sparkle-pour {
+            0% { transform: translateY(-5px) scale(0); opacity: 0; }
+            20% { opacity: 1; transform: translateY(5px) scale(1); }
+            100% { transform: translateY(60px) scale(0); opacity: 0; }
           }
-          .animate-pour {
-            animation: pour 0.8s ease-out infinite;
+          .animate-sparkle-pour {
+            animation: sparkle-pour ease-out infinite;
           }
         `}</style>
       </div>
