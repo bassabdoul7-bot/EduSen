@@ -1,6 +1,6 @@
 {
-  "appId": "com.edusen.platform",
-  "appName": "EduSen",
+  "appId": "com.kangam.app",
+  "appName": "KanGam",
   "webDir": "dist",
   "bundledWebRuntime": false,
   "server": {
