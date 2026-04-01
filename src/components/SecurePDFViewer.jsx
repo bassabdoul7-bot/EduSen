@@ -181,62 +181,76 @@ export default function SecurePDFViewer({ fileUrl, fileName, user, onClose }) {
           </div>
         </div>
       )}
-      <div className="bg-gray-900 text-white px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {/* Top bar - compact mobile */}
+      <div className="bg-[#0a1f14] text-white px-3 py-2 flex items-center justify-between border-b border-white/10">
+        <button onClick={onClose} className="p-2 rounded-lg hover:bg-white/10">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+        <div className="flex items-center gap-1.5">
+          <svg className="w-4 h-4 text-senegal-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
-          <span className="font-medium">{fileName}</span>
-          <span className="text-xs text-gray-400">Document protege EduSen</span>
+          <span className="text-xs font-semibold truncate max-w-[150px]">{fileName}</span>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 bg-gray-800 rounded-lg px-3 py-1">
-            <button onClick={() => setScale(s => Math.max(s - 0.2, 0.5))} className="hover:text-green-400">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" /></svg>
-            </button>
-            <span className="text-sm w-14 text-center">{Math.round(scale * 100)}%</span>
-            <button onClick={() => setScale(s => Math.min(s + 0.2, 3))} className="hover:text-green-400">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" /></svg>
-            </button>
-          </div>
-          <div className="flex items-center gap-2 bg-gray-800 rounded-lg px-3 py-1">
-            <button onClick={() => setPageNumber(p => Math.max(p - 1, 1))} disabled={pageNumber <= 1} className="hover:text-green-400 disabled:opacity-50">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-            </button>
-            <span className="text-sm w-20 text-center">{pageNumber} / {numPages || '...'}</span>
-            <button onClick={() => setPageNumber(p => Math.min(p + 1, numPages || p))} disabled={pageNumber >= numPages} className="hover:text-green-400 disabled:opacity-50">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-            </button>
-          </div>
-          <button onClick={onClose} className="hover:text-red-400 ml-2">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-          </button>
-        </div>
+        <span className="text-[10px] text-white/30 font-mono">{pageNumber}/{numPages || '?'}</span>
       </div>
-      
-      <div className="flex-1 overflow-auto flex justify-center py-8 bg-gray-800" onCopy={(e) => e.preventDefault()} onCut={(e) => e.preventDefault()}>
-        <div className="relative select-none">
+
+      {/* PDF Content - pinch to zoom on mobile */}
+      <div className="flex-1 overflow-auto bg-[#1a1a1a]" onCopy={(e) => e.preventDefault()} onCut={(e) => e.preventDefault()}
+        style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="relative select-none min-h-full flex justify-center py-4 px-2">
           <Document
             file={signedUrl}
             onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-            loading={<div className="flex items-center justify-center h-96"><div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div></div>}
-            error={<div className="text-red-400 p-8">Erreur de chargement</div>}
+            loading={<div className="flex items-center justify-center h-[60vh]"><div className="animate-spin rounded-full h-8 w-8 border-2 border-senegal-green border-t-transparent"></div></div>}
+            error={<div className="text-red-400 p-8 text-center text-sm">Erreur de chargement du document</div>}
           >
-            <Page pageNumber={pageNumber} scale={scale} renderTextLayer={false} renderAnnotationLayer={false} />
+            <Page
+              pageNumber={pageNumber}
+              width={Math.min(window.innerWidth - 16, 800)}
+              renderTextLayer={false}
+              renderAnnotationLayer={false}
+            />
           </Document>
-          
-          <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
-            <div className="text-white/10 text-2xl font-bold transform -rotate-45 whitespace-nowrap select-none">
-              EduSen - {user?.email || 'Utilisateur'} - {new Date().toLocaleDateString('fr-FR')}
-            </div>
+
+          {/* Watermarks - repeating diagonal */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="absolute text-white/[0.04] text-sm font-bold whitespace-nowrap select-none"
+                style={{ transform: 'rotate(-35deg)', top: (15 + i * 16) + '%', left: '-10%', width: '150%' }}>
+                {`KanGam · ${user?.email || ''} · ${new Date().toLocaleDateString('fr-FR')}      `.repeat(3)}
+              </div>
+            ))}
           </div>
-          <div className="absolute top-2 left-2 text-white/20 text-xs select-none">EduSen - Usage personnel uniquement</div>
-          <div className="absolute bottom-2 right-2 text-white/20 text-xs select-none">{user?.email}</div>
         </div>
       </div>
-      
-      <div className="bg-gray-900 text-center py-2 text-xs text-gray-500">
-        Document protege - Reproduction interdite - Acces: {user?.email} - {new Date().toLocaleString('fr-FR')}
+
+      {/* Bottom controls - mobile friendly */}
+      <div className="bg-[#0a1f14] border-t border-white/10 px-3 py-2">
+        <div className="flex items-center justify-between">
+          {/* Page nav */}
+          <div className="flex items-center gap-1">
+            <button onClick={() => setPageNumber(p => Math.max(p - 1, 1))} disabled={pageNumber <= 1}
+              className="w-10 h-10 rounded-lg bg-white/[0.07] flex items-center justify-center disabled:opacity-30">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            <span className="text-xs text-white/50 font-mono w-16 text-center">{pageNumber} / {numPages || '...'}</span>
+            <button onClick={() => setPageNumber(p => Math.min(p + 1, numPages || p))} disabled={pageNumber >= numPages}
+              className="w-10 h-10 rounded-lg bg-white/[0.07] flex items-center justify-center disabled:opacity-30">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </button>
+          </div>
+
+          {/* Zoom */}
+          <div className="flex items-center gap-1">
+            <button onClick={() => setScale(s => Math.max(s - 0.2, 0.5))}
+              className="w-10 h-10 rounded-lg bg-white/[0.07] flex items-center justify-center text-white text-lg font-bold">−</button>
+            <span className="text-[10px] text-white/30 w-10 text-center">{Math.round(scale * 100)}%</span>
+            <button onClick={() => setScale(s => Math.min(s + 0.2, 3))}
+              className="w-10 h-10 rounded-lg bg-white/[0.07] flex items-center justify-center text-white text-lg font-bold">+</button>
+          </div>
+        </div>
+        <p className="text-[8px] text-white/15 text-center mt-1 select-none">Document protege KanGam · {user?.email}</p>
       </div>
     </div>
   );
