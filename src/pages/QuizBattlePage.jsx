@@ -575,49 +575,158 @@ export default function QuizBattlePage() {
   const renderResults = () => {
     const won = myScore > opScore
     const draw = myScore === opScore
+    const total = battle?.questions?.length || 10
+    const myName = profile?.full_name?.split(' ')[0] || 'Vous'
+    const opName = opponentProfile?.full_name?.split(' ')[0] || 'Adversaire'
+
+    // Confetti particles
+    const confetti = won ? Array.from({ length: 40 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      delay: Math.random() * 2,
+      duration: 2 + Math.random() * 3,
+      size: 4 + Math.random() * 8,
+      color: ['#00853F', '#FDEF42', '#E31B23', '#FFD700', '#fff'][Math.floor(Math.random() * 5)],
+      type: Math.random() > 0.5 ? 'circle' : 'rect',
+    })) : []
 
     return (
-      <div className="flex flex-col items-center justify-center min-h-[70vh] p-6 text-center">
-        <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-5 ${won ? 'bg-green-500/20 border-2 border-green-500/40' : draw ? 'bg-orange-500/20 border-2 border-orange-500/40' : 'bg-red-500/20 border-2 border-red-500/40'}`}>
-          {won ? <Trophy size={40} className="text-green-400" /> : draw ? <Medal size={40} className="text-orange-400" /> : <X size={40} className="text-red-400" />}
+      <div className="relative min-h-[80vh] flex flex-col items-center justify-center p-4 text-center overflow-hidden">
+
+        {/* Confetti animation for winner */}
+        {won && confetti.map(c => (
+          <div key={c.id} className="absolute top-0 pointer-events-none animate-confetti"
+            style={{
+              left: c.left + '%',
+              animationDelay: c.delay + 's',
+              animationDuration: c.duration + 's',
+            }}>
+            <div style={{
+              width: c.size, height: c.type === 'rect' ? c.size * 0.6 : c.size,
+              background: c.color,
+              borderRadius: c.type === 'circle' ? '50%' : '2px',
+              transform: `rotate(${Math.random() * 360}deg)`,
+            }} />
+          </div>
+        ))}
+
+        {/* Sparkle bursts for winner */}
+        {won && (
+          <>
+            <div className="absolute top-10 left-6 text-3xl animate-bounce" style={{ animationDelay: '0.2s' }}>✨</div>
+            <div className="absolute top-16 right-8 text-2xl animate-bounce" style={{ animationDelay: '0.5s' }}>⭐</div>
+            <div className="absolute top-24 left-16 text-xl animate-bounce" style={{ animationDelay: '0.8s' }}>🎉</div>
+            <div className="absolute top-8 right-20 text-2xl animate-bounce" style={{ animationDelay: '1.1s' }}>🎊</div>
+          </>
+        )}
+
+        {/* Character with trophy */}
+        <div className="relative mb-4">
+          {won ? (
+            <div className="relative">
+              {/* Medal */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-4xl animate-bounce z-10">🏅</div>
+              {/* Character lifting cup */}
+              <div className="text-8xl animate-winner">🏆</div>
+              {/* Arms raised character */}
+              <div className="text-5xl -mt-4 animate-pulse">🙌</div>
+              {/* Pouring sparkles from cup */}
+              <div className="absolute top-2 left-1/2 -translate-x-1/2">
+                <div className="flex gap-1">
+                  {[0, 1, 2, 3, 4].map(i => (
+                    <div key={i} className="w-1 h-1 rounded-full bg-yellow-400 animate-pour"
+                      style={{ animationDelay: i * 0.15 + 's' }} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : draw ? (
+            <div className="text-7xl">🤝</div>
+          ) : (
+            <div className="text-7xl opacity-60">😔</div>
+          )}
         </div>
 
-        <h2 className="text-2xl font-black text-white mb-1">
-          {won ? 'Victoire!' : draw ? 'Egalite!' : 'Defaite!'}
+        {/* Result text */}
+        <h2 className={`text-3xl font-black mb-1 ${won ? 'text-yellow-400' : draw ? 'text-orange-400' : 'text-white/50'}`}
+          style={won ? { textShadow: '0 0 20px rgba(250,204,21,0.5)' } : {}}>
+          {won ? 'VICTOIRE!' : draw ? 'EGALITE!' : 'Defaite...'}
         </h2>
-        <p className="text-xs text-white/40 mb-6">
+        <p className="text-xs text-white/40 mb-5">
           {SUBJECTS.find(s => s.id === battle?.subject)?.name} · {LEVELS.find(l => l.id === battle?.level)?.name}
         </p>
 
-        {/* Score comparison */}
-        <div className="flex items-center gap-6 mb-8">
-          <div className="text-center">
-            <div className="w-16 h-16 rounded-full bg-senegal-green/20 flex items-center justify-center mb-2">
-              <span className="text-2xl font-black text-senegal-green">{myScore}</span>
+        {/* Mini Scoreboard */}
+        <div className="w-full max-w-xs mb-6">
+          <div className="rounded-xl overflow-hidden" style={{ background: 'linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%)', boxShadow: '0 4px 20px rgba(0,0,0,0.8)' }}>
+            <div className="mx-2 mt-2 rounded-lg p-3" style={{ background: '#0a0a0a' }}>
+              <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'radial-gradient(circle, #fff 0.5px, transparent 0.5px)', backgroundSize: '4px 4px' }} />
+              {/* Final Scores */}
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex-1 text-center">
+                  <span className="text-3xl font-black font-mono text-green-400" style={{ textShadow: '0 0 15px rgba(74,222,128,0.7)' }}>{myScore}</span>
+                </div>
+                <div className="px-3">
+                  <Swords size={16} className="text-white/20" />
+                </div>
+                <div className="flex-1 text-center">
+                  <span className="text-3xl font-black font-mono text-red-400" style={{ textShadow: '0 0 15px rgba(239,68,68,0.7)' }}>{opScore}</span>
+                </div>
+              </div>
+              {/* Names */}
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] font-black text-white/60 uppercase tracking-wider">{myName}</span>
+                <span className="text-[8px] font-mono text-white/20">{myScore}/{total}</span>
+                <span className="text-[9px] font-black text-white/60 uppercase tracking-wider">{opName}</span>
+              </div>
             </div>
-            <p className="text-xs text-white/50">Vous</p>
-          </div>
-          <span className="text-white/20 text-xl font-black">VS</span>
-          <div className="text-center">
-            <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mb-2">
-              <span className="text-2xl font-black text-red-400">{opScore}</span>
+            {/* Score bar comparison */}
+            <div className="flex h-1.5 mx-2 mb-2 mt-1 rounded-full overflow-hidden bg-black/30">
+              <div className="bg-green-500 transition-all" style={{ width: (total > 0 ? (myScore / total) * 100 : 0) + '%' }} />
+              <div className="flex-1 bg-black/20" />
+              <div className="bg-red-500 transition-all" style={{ width: (total > 0 ? (opScore / total) * 100 : 0) + '%' }} />
             </div>
-            <p className="text-xs text-white/50">{opponentProfile?.full_name?.split(' ')[0] || 'Adversaire'}</p>
           </div>
         </div>
 
-        <p className="text-white/30 text-xs mb-6">{myScore}/{battle?.questions?.length} bonnes reponses</p>
-
+        {/* Actions */}
         <div className="space-y-2 w-full max-w-xs">
           <button onClick={() => { setView('home'); setBattle(null); setCurrentQ(0); setSelectedAnswer(null); setAnswered(false); loadStats(); loadDailyCount() }}
-            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white font-black text-sm">
-            Rejouer
+            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white font-black text-sm shadow-xl">
+            <Swords size={16} className="inline mr-2 -mt-0.5" /> Rejouer
           </button>
           <button onClick={() => { loadLeaderboard(); setView('leaderboard') }}
             className="w-full py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white/50 text-xs font-bold">
-            Voir le classement
+            <Trophy size={14} className="inline mr-1.5 -mt-0.5" /> Voir le classement
           </button>
         </div>
+
+        {/* CSS Animations */}
+        <style>{`
+          @keyframes confetti-fall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(80vh) rotate(720deg); opacity: 0; }
+          }
+          .animate-confetti {
+            animation: confetti-fall linear forwards;
+          }
+          @keyframes winner-bounce {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(-5deg); }
+            50% { transform: scale(1.2) rotate(5deg); }
+            75% { transform: scale(1.1) rotate(-3deg); }
+          }
+          .animate-winner {
+            animation: winner-bounce 1.5s ease-in-out infinite;
+          }
+          @keyframes pour {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(30px) scale(0); opacity: 0; }
+          }
+          .animate-pour {
+            animation: pour 0.8s ease-out infinite;
+          }
+        `}</style>
       </div>
     )
   }
