@@ -435,68 +435,58 @@ export default function QuizBattlePage() {
       <div className="flex flex-col h-[calc(100vh-6rem)] bg-[#060e09]">
 
         {/* ========== ELECTRONIC SCOREBOARD ========== */}
-        <div className="flex-shrink-0 mx-3 mt-3">
-          <div className="relative rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}>
-            {/* LED dots effect */}
-            <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '8px 8px' }} />
+        <div className="flex-shrink-0 mx-2 mt-2">
+          <div className="relative">
+            {/* Scoreboard image */}
+            <img src="/scoreboard.png" alt="" className="w-full h-auto" />
 
-            {/* Top bar - subject + question number */}
-            <div className="relative flex items-center justify-between px-4 py-1.5 border-b border-white/[0.06]">
-              <span className="text-[9px] font-bold text-cyan-400/60 uppercase tracking-widest">{quizBattleService.SUBJECTS.find(s => s.id === battle.subject)?.name}</span>
-              <span className="text-[9px] font-mono text-white/30">Q{currentQ + 1}/{total}</span>
-            </div>
+            {/* Overlay: Player names on HOME / GUESTS */}
+            <div className="absolute inset-0 flex flex-col justify-between py-[8%] px-[5%]">
 
-            {/* Main scoreboard */}
-            <div className="relative flex items-center px-3 py-3">
-              {/* Player 1 (You) */}
-              <div className="flex-1 flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-xl bg-senegal-green/20 border border-senegal-green/30 flex items-center justify-center overflow-hidden flex-shrink-0">
-                  {myAvatar ? <img src={myAvatar} className="w-full h-full object-cover" /> :
-                    <span className="text-sm font-black text-senegal-green">{myName[0]}</span>}
+              {/* Top row: Scores */}
+              <div className="flex items-center justify-between px-[2%]">
+                {/* My score - left side */}
+                <div className="flex-1 flex justify-center">
+                  <span className="text-3xl sm:text-5xl font-black font-mono text-red-500" style={{ textShadow: '0 0 15px rgba(239,68,68,0.8)' }}>{myScore}</span>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-bold text-white truncate">{myName}</p>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                    <span className="text-[8px] text-green-400/60">EN JEU</span>
-                  </div>
+                {/* Question number - center */}
+                <div className="flex-shrink-0">
+                  <span className="text-lg sm:text-2xl font-black font-mono text-green-400" style={{ textShadow: '0 0 10px rgba(74,222,128,0.6)' }}>{currentQ + 1}</span>
+                </div>
+                {/* Opponent score - right side */}
+                <div className="flex-1 flex justify-center">
+                  <span className="text-3xl sm:text-5xl font-black font-mono text-red-500" style={{ textShadow: '0 0 15px rgba(239,68,68,0.8)' }}>{opScore}</span>
                 </div>
               </div>
 
-              {/* Scores - LED style */}
-              <div className="flex items-center gap-2 mx-2">
-                <div className="w-14 h-14 rounded-xl bg-black/40 border border-senegal-green/20 flex items-center justify-center shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]">
-                  <span className="text-2xl font-black text-senegal-green font-mono" style={{ textShadow: '0 0 10px rgba(0,133,63,0.5)' }}>{myScore}</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <span className="text-[8px] font-black text-white/20">VS</span>
-                  <Swords size={14} className="text-orange-500/40 my-0.5" />
-                </div>
-                <div className="w-14 h-14 rounded-xl bg-black/40 border border-red-500/20 flex items-center justify-center shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]">
-                  <span className="text-2xl font-black text-red-400 font-mono" style={{ textShadow: '0 0 10px rgba(239,68,68,0.5)' }}>{opScore}</span>
-                </div>
+              {/* Middle row: Names */}
+              <div className="flex items-center justify-between px-[4%] -mt-[2%]">
+                <span className="text-[10px] sm:text-sm font-black text-white uppercase tracking-wider truncate max-w-[35%]" style={{ textShadow: '0 0 8px rgba(255,255,255,0.5)' }}>{myName}</span>
+                <span className="text-[10px] sm:text-sm font-black text-white uppercase tracking-wider truncate max-w-[35%] text-right" style={{ textShadow: '0 0 8px rgba(255,255,255,0.5)' }}>{opName}</span>
               </div>
 
-              {/* Player 2 (Opponent) */}
-              <div className="flex-1 flex items-center gap-2.5 justify-end">
-                <div className="min-w-0 text-right">
-                  <p className="text-xs font-bold text-white truncate">{opName}</p>
-                  <div className="flex items-center gap-1 mt-0.5 justify-end">
-                    <span className="text-[8px] text-orange-400/60">EN JEU</span>
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
-                  </div>
-                </div>
-                <div className="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/30 flex items-center justify-center overflow-hidden flex-shrink-0">
-                  {opAvatar ? <img src={opAvatar} className="w-full h-full object-cover" /> :
-                    <span className="text-sm font-black text-red-400">{opName[0]}</span>}
-                </div>
+              {/* Bottom row: Timer + subject */}
+              <div className="flex items-center justify-center gap-4 mt-[1%]">
+                <span className="text-xs sm:text-base font-black font-mono text-yellow-400" style={{ textShadow: '0 0 10px rgba(250,204,21,0.6)' }}>
+                  {String(Math.floor(timeLeft / 60)).padStart(2, '0')}:{String(timeLeft % 60).padStart(2, '0')}
+                </span>
               </div>
             </div>
 
-            {/* Progress bar */}
-            <div className="h-1 bg-black/30">
-              <div className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-500" style={{ width: progress + '%' }} />
+            {/* Player avatars - floating on sides */}
+            <div className="absolute -bottom-3 left-3 w-10 h-10 rounded-full border-2 border-senegal-green bg-[#0a1f14] overflow-hidden shadow-lg">
+              {myAvatar ? <img src={myAvatar} className="w-full h-full object-cover" /> :
+                <div className="w-full h-full flex items-center justify-center text-sm font-black text-senegal-green">{myName[0]}</div>}
             </div>
+            <div className="absolute -bottom-3 right-3 w-10 h-10 rounded-full border-2 border-red-500 bg-[#0a1f14] overflow-hidden shadow-lg">
+              {opAvatar ? <img src={opAvatar} className="w-full h-full object-cover" /> :
+                <div className="w-full h-full flex items-center justify-center text-sm font-black text-red-400">{opName[0]}</div>}
+            </div>
+          </div>
+
+          {/* Progress bar below scoreboard */}
+          <div className="h-1.5 bg-black/30 rounded-full mt-5 mx-2 overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500 rounded-full transition-all duration-500" style={{ width: progress + '%' }} />
           </div>
         </div>
 
