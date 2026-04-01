@@ -18,7 +18,7 @@ export default function PricingPage() {
             Choisissez votre formule
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Debloquez tout le potentiel d'EduSen pour reussir vos etudes
+            Debloquez tout le potentiel d'KanGam pour reussir vos etudes
           </p>
         </div>
         

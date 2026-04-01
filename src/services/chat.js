@@ -5,7 +5,7 @@ const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
 // World-class Senegalese education AI system prompts
 const SYSTEM_PROMPTS = {
-  base: `Tu es EduSen AI, le tuteur virtuel le plus avance du Senegal. Tu es un professeur expert, patient et bienveillant.
+  base: `Tu es KanGam AI, le tuteur virtuel le plus avance du Senegal. Tu es un professeur expert, patient et bienveillant.
 
 REGLES ABSOLUES:
 - Reponds TOUJOURS en francais

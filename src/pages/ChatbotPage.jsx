@@ -258,7 +258,7 @@ export default function ChatbotPage() {
       let y = 20
       doc.setFontSize(18)
       doc.setTextColor(0, 133, 61)
-      doc.text('EduSen - ' + selectedSubject.name, 105, y, { align: 'center' })
+      doc.text('KanGam - ' + selectedSubject.name, 105, y, { align: 'center' })
       y += 10
       doc.setFontSize(10)
       doc.setTextColor(100)
@@ -283,7 +283,7 @@ export default function ChatbotPage() {
         })
         y += 5
       })
-      doc.save('EduSen-' + selectedSubject.id + '.pdf')
+      doc.save('KanGam-' + selectedSubject.id + '.pdf')
       toast.success('PDF telecharge!')
     } catch (e) { toast.error('Erreur export') }
     setExporting(false)

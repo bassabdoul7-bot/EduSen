@@ -84,9 +84,9 @@ export const donationService = {
           name: donationData.name
         },
         customizations: {
-          title: 'EduSen Sponsorship',
-          description: `Sponsor students with EduSen`,
-          logo: 'https://edusen.netlify.app/logo.png'
+          title: 'KanGam Sponsorship',
+          description: `Sponsor students with KanGam`,
+          logo: 'https://kangam.click/logo.png'
         },
         redirect_url: `${window.location.origin}/sponsor/success`
       }

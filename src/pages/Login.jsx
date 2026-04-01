@@ -33,7 +33,7 @@ export default function Login() {
     if (!email) { toast.error('Entrez votre email'); return }
     setResetLoading(true)
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://edusen.netlify.app/reset-password'
+      redirectTo: 'https://kangam.click/reset-password'
     })
     if (error) toast.error('Erreur: ' + error.message)
     else { toast.success('Email de reinitialisation envoye!'); setShowForgotPassword(false) }

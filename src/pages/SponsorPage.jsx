@@ -109,9 +109,9 @@ export default function SponsorPage() {
         name: donationData.name
       },
       customizations: {
-        title: 'EduSen Sponsorship',
+        title: 'KanGam Sponsorship',
         description: `Sponsor ${studentsToSponsor} students`,
-        logo: 'https://edusen.netlify.app/logo.png'
+        logo: 'https://kangam.click/logo.png'
       },
       callback: (response) => {
         toast.success('Paiement réussi! Merci! 🎉', { id: 'payment' })
