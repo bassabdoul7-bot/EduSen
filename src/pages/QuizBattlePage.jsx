@@ -274,14 +274,54 @@ export default function QuizBattlePage() {
 
   // ============ HOME ============
 
-  const renderHome = () => (
+  const renderHome = () => {
+    const myName = profile?.full_name?.split(' ')[0] || 'Vous'
+    const myAvatar = profile?.avatar_url
+
+    return (
     <div className="p-4 pt-6 space-y-5">
-      <div className="text-center mb-2">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/20 flex items-center justify-center mx-auto mb-3">
-          <Swords size={30} className="text-orange-400" />
+      {/* Scoreboard header */}
+      <div className="mx-0">
+        <div className="rounded-xl overflow-hidden" style={{ background: 'linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%)', boxShadow: '0 4px 20px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05)' }}>
+          <div className="mx-2 mt-2 rounded-lg p-4 relative overflow-hidden" style={{ background: '#0a0a0a' }}>
+            <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: 'radial-gradient(circle, #fff 0.5px, transparent 0.5px)', backgroundSize: '4px 4px' }} />
+
+            <div className="relative flex items-center justify-between mb-2">
+              <div className="flex-1 text-center">
+                <span className="text-3xl font-black font-mono text-green-400" style={{ textShadow: '0 0 15px rgba(74,222,128,0.7)' }}>0</span>
+              </div>
+              <div className="px-3 flex flex-col items-center">
+                <Swords size={18} className="text-orange-500/60 mb-0.5" />
+                <span className="text-[8px] font-black text-white/20">VS</span>
+              </div>
+              <div className="flex-1 text-center">
+                <span className="text-3xl font-black font-mono text-red-400" style={{ textShadow: '0 0 15px rgba(239,68,68,0.7)' }}>0</span>
+              </div>
+            </div>
+
+            <div className="relative flex items-center justify-between">
+              <span className="text-[9px] font-black text-green-400/80 uppercase tracking-wider">{myName}</span>
+              <span className="text-[9px] font-black text-red-400/80 uppercase tracking-wider">???</span>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between px-3 py-1.5">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-full bg-black border border-green-500/30 overflow-hidden">
+                {myAvatar ? <img src={myAvatar} className="w-full h-full object-cover" /> :
+                  <div className="w-full h-full flex items-center justify-center text-[10px] font-black text-green-400">{myName[0]}</div>}
+              </div>
+              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+            </div>
+            <span className="text-[8px] text-white/20 font-mono">PRET A JOUER</span>
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-white/10" />
+              <div className="w-7 h-7 rounded-full bg-black border border-white/10 flex items-center justify-center">
+                <span className="text-[10px] text-white/20">?</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <h1 className="text-2xl font-black text-white">Quiz Battle</h1>
-        <p className="text-xs text-white/40 mt-1">Defie d'autres etudiants en temps reel</p>
       </div>
 
       {/* Stats */}
@@ -376,7 +416,7 @@ export default function QuizBattlePage() {
         </div>
       )}
     </div>
-  )
+  )}
 
   // ============ WAITING ============
 
