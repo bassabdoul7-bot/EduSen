@@ -424,75 +424,143 @@ export default function QuizBattlePage() {
     const q = battle.questions[currentQ]
     const total = battle.questions.length
     const progress = ((currentQ + 1) / total) * 100
-    const timerColor = timeLeft <= 10 ? 'text-red-400' : timeLeft <= 20 ? 'text-orange-400' : 'text-white'
+    const timerDanger = timeLeft <= 10
+    const timerWarn = timeLeft <= 20
+    const myName = profile?.full_name?.split(' ')[0] || 'Vous'
+    const opName = opponentProfile?.full_name?.split(' ')[0] || 'Adversaire'
+    const myAvatar = profile?.avatar_url
+    const opAvatar = opponentProfile?.avatar_url
 
     return (
-      <div className="flex flex-col h-[calc(100vh-6rem)]">
-        {/* Top Bar */}
-        <div className="flex-shrink-0 p-4 space-y-3">
-          {/* Score */}
-          <div className="flex items-center justify-between">
-            <div className="text-center">
-              <p className="text-lg font-black text-senegal-green">{myScore}</p>
-              <p className="text-[9px] text-white/30">Vous</p>
-            </div>
-            <div className="flex-1 mx-4">
-              <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full transition-all" style={{ width: progress + '%' }} />
-              </div>
-              <p className="text-center text-[10px] text-white/30 mt-1">{currentQ + 1}/{total}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-lg font-black text-red-400">{opScore}</p>
-              <p className="text-[9px] text-white/30">{opponentProfile?.full_name?.split(' ')[0] || 'Adversaire'}</p>
-            </div>
-          </div>
+      <div className="flex flex-col h-[calc(100vh-6rem)] bg-[#060e09]">
 
-          {/* Timer */}
-          <div className="flex justify-center">
-            <div className={`w-12 h-12 rounded-full border-3 flex items-center justify-center font-black text-lg ${timerColor} ${timeLeft <= 10 ? 'animate-pulse border-red-500' : 'border-white/20'}`}>
-              {timeLeft}
+        {/* ========== ELECTRONIC SCOREBOARD ========== */}
+        <div className="flex-shrink-0 mx-3 mt-3">
+          <div className="relative rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}>
+            {/* LED dots effect */}
+            <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '8px 8px' }} />
+
+            {/* Top bar - subject + question number */}
+            <div className="relative flex items-center justify-between px-4 py-1.5 border-b border-white/[0.06]">
+              <span className="text-[9px] font-bold text-cyan-400/60 uppercase tracking-widest">{quizBattleService.SUBJECTS.find(s => s.id === battle.subject)?.name}</span>
+              <span className="text-[9px] font-mono text-white/30">Q{currentQ + 1}/{total}</span>
+            </div>
+
+            {/* Main scoreboard */}
+            <div className="relative flex items-center px-3 py-3">
+              {/* Player 1 (You) */}
+              <div className="flex-1 flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-senegal-green/20 border border-senegal-green/30 flex items-center justify-center overflow-hidden flex-shrink-0">
+                  {myAvatar ? <img src={myAvatar} className="w-full h-full object-cover" /> :
+                    <span className="text-sm font-black text-senegal-green">{myName[0]}</span>}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-white truncate">{myName}</p>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                    <span className="text-[8px] text-green-400/60">EN JEU</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Scores - LED style */}
+              <div className="flex items-center gap-2 mx-2">
+                <div className="w-14 h-14 rounded-xl bg-black/40 border border-senegal-green/20 flex items-center justify-center shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]">
+                  <span className="text-2xl font-black text-senegal-green font-mono" style={{ textShadow: '0 0 10px rgba(0,133,63,0.5)' }}>{myScore}</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className="text-[8px] font-black text-white/20">VS</span>
+                  <Swords size={14} className="text-orange-500/40 my-0.5" />
+                </div>
+                <div className="w-14 h-14 rounded-xl bg-black/40 border border-red-500/20 flex items-center justify-center shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]">
+                  <span className="text-2xl font-black text-red-400 font-mono" style={{ textShadow: '0 0 10px rgba(239,68,68,0.5)' }}>{opScore}</span>
+                </div>
+              </div>
+
+              {/* Player 2 (Opponent) */}
+              <div className="flex-1 flex items-center gap-2.5 justify-end">
+                <div className="min-w-0 text-right">
+                  <p className="text-xs font-bold text-white truncate">{opName}</p>
+                  <div className="flex items-center gap-1 mt-0.5 justify-end">
+                    <span className="text-[8px] text-orange-400/60">EN JEU</span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
+                  </div>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/30 flex items-center justify-center overflow-hidden flex-shrink-0">
+                  {opAvatar ? <img src={opAvatar} className="w-full h-full object-cover" /> :
+                    <span className="text-sm font-black text-red-400">{opName[0]}</span>}
+                </div>
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            <div className="h-1 bg-black/30">
+              <div className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-500" style={{ width: progress + '%' }} />
             </div>
           </div>
         </div>
 
-        {/* Question */}
-        <div className="flex-1 p-4 overflow-y-auto">
-          <div className="bg-white/[0.05] rounded-2xl p-5 border border-white/[0.08] mb-4">
+        {/* ========== TIMER ========== */}
+        <div className="flex justify-center py-3">
+          <div className={`relative w-14 h-14 rounded-full flex items-center justify-center ${timerDanger ? 'bg-red-500/10' : 'bg-white/[0.03]'}`}>
+            {/* Timer ring */}
+            <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 56 56">
+              <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="3" />
+              <circle cx="28" cy="28" r="24" fill="none"
+                stroke={timerDanger ? '#ef4444' : timerWarn ? '#f97316' : '#22c55e'}
+                strokeWidth="3" strokeLinecap="round"
+                strokeDasharray={`${2 * Math.PI * 24}`}
+                strokeDashoffset={`${2 * Math.PI * 24 * (1 - timeLeft / 30)}`}
+                className="transition-all duration-1000" />
+            </svg>
+            <span className={`text-lg font-black font-mono ${timerDanger ? 'text-red-400 animate-pulse' : timerWarn ? 'text-orange-400' : 'text-white'}`}>
+              {timeLeft}
+            </span>
+          </div>
+        </div>
+
+        {/* ========== QUESTION + OPTIONS ========== */}
+        <div className="flex-1 px-3 pb-3 overflow-y-auto">
+          {/* Question card */}
+          <div className="bg-white/[0.04] rounded-2xl p-4 border border-white/[0.06] mb-3">
             <p className="text-sm text-white font-semibold leading-relaxed">{q.q || 'Question en cours de chargement...'}</p>
           </div>
 
           {/* Options */}
-          <div className="space-y-2.5">
+          <div className="space-y-2">
             {['a', 'b', 'c', 'd'].map(opt => {
               const isSelected = selectedAnswer === opt
               const isCorrect = q.correct === opt
-              let optClass = 'bg-white/[0.05] border-white/[0.08] text-white/70'
+              let bgClass = 'bg-white/[0.04] border-white/[0.06]'
+              let textClass = 'text-white/70'
+              let badgeClass = 'bg-white/10 text-white/40'
 
               if (answered) {
-                if (isCorrect) optClass = 'bg-green-500/20 border-green-500/50 text-green-400'
-                else if (isSelected && !isCorrect) optClass = 'bg-red-500/20 border-red-500/50 text-red-400'
+                if (isCorrect) { bgClass = 'bg-green-500/15 border-green-500/40'; textClass = 'text-green-300'; badgeClass = 'bg-green-500 text-white' }
+                else if (isSelected) { bgClass = 'bg-red-500/15 border-red-500/40'; textClass = 'text-red-300'; badgeClass = 'bg-red-500 text-white' }
               } else if (isSelected) {
-                optClass = 'bg-orange-500/20 border-orange-500/50 text-orange-400'
+                bgClass = 'bg-orange-500/15 border-orange-500/40'; textClass = 'text-orange-300'; badgeClass = 'bg-orange-500 text-white'
               }
 
               return (
                 <button key={opt} onClick={() => handleAnswer(opt)} disabled={answered}
-                  className={`w-full p-4 rounded-xl border text-left text-sm font-semibold transition-all flex items-center gap-3 ${optClass}`}>
-                  <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black ${answered && isCorrect ? 'bg-green-500 text-white' : answered && isSelected ? 'bg-red-500 text-white' : 'bg-white/10 text-white/40'}`}>
+                  className={`w-full p-3.5 rounded-xl border text-left transition-all flex items-center gap-3 ${bgClass}`}>
+                  <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0 transition-all ${badgeClass}`}>
                     {opt.toUpperCase()}
                   </span>
-                  <span className="flex-1">{q[opt]}</span>
+                  <span className={`flex-1 text-sm font-medium ${textClass}`}>{q[opt]}</span>
+                  {answered && isCorrect && <Check size={16} className="text-green-400 flex-shrink-0" />}
+                  {answered && isSelected && !isCorrect && <X size={16} className="text-red-400 flex-shrink-0" />}
                 </button>
               )
             })}
           </div>
 
-          {/* Explanation after answer */}
+          {/* Explanation */}
           {answered && q.explanation && (
-            <div className="mt-4 bg-blue-500/10 rounded-xl p-3 border border-blue-500/20">
-              <p className="text-[10px] text-blue-400 font-bold mb-1">Explication:</p>
-              <p className="text-xs text-white/50">{q.explanation}</p>
+            <div className="mt-3 bg-cyan-500/5 rounded-xl p-3 border border-cyan-500/10">
+              <p className="text-[10px] text-cyan-400/70 font-bold mb-0.5">Explication:</p>
+              <p className="text-xs text-white/40 leading-relaxed">{q.explanation}</p>
             </div>
           )}
         </div>
