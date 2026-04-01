@@ -195,62 +195,46 @@ export default function SecurePDFViewer({ fileUrl, fileName, user, onClose }) {
         <span className="text-[10px] text-white/30 font-mono">{pageNumber}/{numPages || '?'}</span>
       </div>
 
-      {/* PDF Content - pinch to zoom on mobile */}
+      {/* PDF Content - all pages scrollable */}
       <div className="flex-1 overflow-auto bg-[#1a1a1a]" onCopy={(e) => e.preventDefault()} onCut={(e) => e.preventDefault()}
         style={{ WebkitOverflowScrolling: 'touch' }}>
-        <div className="relative select-none min-h-full flex justify-center py-4 px-2">
+        <div className="select-none py-2 px-2">
           <Document
             file={signedUrl}
-            onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+            onLoadSuccess={({ numPages: n }) => setNumPages(n)}
             loading={<div className="flex items-center justify-center h-[60vh]"><div className="animate-spin rounded-full h-8 w-8 border-2 border-senegal-green border-t-transparent"></div></div>}
             error={<div className="text-red-400 p-8 text-center text-sm">Erreur de chargement du document</div>}
           >
-            <Page
-              pageNumber={pageNumber}
-              width={Math.min(window.innerWidth - 16, 800)}
-              renderTextLayer={false}
-              renderAnnotationLayer={false}
-            />
-          </Document>
-
-          {/* Watermarks - repeating diagonal */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="absolute text-white/[0.04] text-sm font-bold whitespace-nowrap select-none"
-                style={{ transform: 'rotate(-35deg)', top: (15 + i * 16) + '%', left: '-10%', width: '150%' }}>
-                {`KanGam · ${user?.email || ''} · ${new Date().toLocaleDateString('fr-FR')}      `.repeat(3)}
+            {numPages && Array.from({ length: numPages }, (_, i) => (
+              <div key={i} className="relative mb-3 flex justify-center">
+                <Page
+                  pageNumber={i + 1}
+                  width={Math.min(window.innerWidth - 16, 800)}
+                  renderTextLayer={false}
+                  renderAnnotationLayer={false}
+                />
+                {/* Watermark per page */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
+                  {[...Array(4)].map((_, j) => (
+                    <div key={j} className="absolute text-white/[0.04] text-xs font-bold whitespace-nowrap select-none"
+                      style={{ transform: 'rotate(-35deg)', top: (10 + j * 25) + '%', left: '-10%', width: '150%' }}>
+                      {`KanGam · ${user?.email || ''} · ${new Date().toLocaleDateString('fr-FR')}      `.repeat(3)}
+                    </div>
+                  ))}
+                </div>
+                {/* Page number */}
+                <div className="absolute bottom-1 right-2 bg-black/50 rounded px-1.5 py-0.5 pointer-events-none">
+                  <span className="text-[9px] text-white/30 font-mono">{i + 1}/{numPages}</span>
+                </div>
               </div>
             ))}
-          </div>
+          </Document>
         </div>
       </div>
 
-      {/* Bottom controls - mobile friendly */}
-      <div className="bg-[#0a1f14] border-t border-white/10 px-3 py-2">
-        <div className="flex items-center justify-between">
-          {/* Page nav */}
-          <div className="flex items-center gap-1">
-            <button onClick={() => setPageNumber(p => Math.max(p - 1, 1))} disabled={pageNumber <= 1}
-              className="w-10 h-10 rounded-lg bg-white/[0.07] flex items-center justify-center disabled:opacity-30">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-            </button>
-            <span className="text-xs text-white/50 font-mono w-16 text-center">{pageNumber} / {numPages || '...'}</span>
-            <button onClick={() => setPageNumber(p => Math.min(p + 1, numPages || p))} disabled={pageNumber >= numPages}
-              className="w-10 h-10 rounded-lg bg-white/[0.07] flex items-center justify-center disabled:opacity-30">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-            </button>
-          </div>
-
-          {/* Zoom */}
-          <div className="flex items-center gap-1">
-            <button onClick={() => setScale(s => Math.max(s - 0.2, 0.5))}
-              className="w-10 h-10 rounded-lg bg-white/[0.07] flex items-center justify-center text-white text-lg font-bold">−</button>
-            <span className="text-[10px] text-white/30 w-10 text-center">{Math.round(scale * 100)}%</span>
-            <button onClick={() => setScale(s => Math.min(s + 0.2, 3))}
-              className="w-10 h-10 rounded-lg bg-white/[0.07] flex items-center justify-center text-white text-lg font-bold">+</button>
-          </div>
-        </div>
-        <p className="text-[8px] text-white/15 text-center mt-1 select-none">Document protege KanGam · {user?.email}</p>
+      {/* Bottom bar - minimal */}
+      <div className="bg-[#0a1f14] border-t border-white/10 px-3 py-1.5">
+        <p className="text-[8px] text-white/15 text-center select-none">Document protege KanGam · {numPages} pages · {user?.email}</p>
       </div>
     </div>
   );
