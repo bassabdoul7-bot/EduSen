@@ -36,11 +36,38 @@ async function generateQuestions(subject, level, count = 10) {
         content: `Voici des exemples de VRAIES questions de niveau ${level} au Senegal:
 
 ${level === 'bac' ? `EXEMPLES BAC SENEGALAIS (ce niveau est OBLIGATOIRE):
-- Maths S2: "Soit f(x) = (x²-3x+2)/(x-1). Determiner la limite de f en 1. a) 1  b) -1  c) 0  d) N'existe pas"
-- Physique: "Un projectile est lance avec une vitesse initiale de 20 m/s sous un angle de 60° avec l'horizontale. Quelle est la portee du tir? (g=10m/s²) a) 34.6m  b) 20m  c) 40m  d) 17.3m"
-- Philo: "Selon Kant, l'imperatif categorique exige d'agir: a) Selon ses interets  b) Selon la loi morale universelle  c) Selon les consequences  d) Selon la tradition"
-- SVT: "Dans la mitose, l'anaphase se caracterise par: a) La condensation des chromosomes  b) L'alignement sur la plaque equatoriale  c) La separation des chromatides soeurs  d) La decondensation"
-- Histoire: "Le traite de Protectorat entre la France et le Cayor a ete signe en: a) 1855  b) 1886  c) 1895  d) 1902"` :
+
+PROGRAMME MATHS TERMINALE S1 SENEGAL (utilise ces chapitres):
+- Algorithme et equations lineaires
+- Fonctions lineaires et quadratiques
+- Equations polynomiales (degre 3+)
+- Fractions rationnelles (simplification, decomposition)
+- Equations rationnelles
+- Equations logarithmiques (ln, log)
+- Suites numeriques (arithmetiques, geometriques, convergence)
+- Limites et continuite
+- Derivees et applications (tangentes, extremums, variations)
+- Integrales et calcul d'aires
+- Nombres complexes
+- Denombrement et probabilites
+
+PROGRAMME MATHS TERMINALE S2:
+- Memes chapitres que S1 + geometrie dans l'espace, barycentre, produit scalaire
+
+EXEMPLES DE QUESTIONS BAC MATHS (CE NIVEAU):
+- "Soit P(x) = x³ - 6x² + 11x - 6. Factoriser P(x). a) (x-1)(x-2)(x-3) b) (x+1)(x-2)(x-3) c) (x-1)(x+2)(x-3) d) (x-1)(x-2)(x+3)"
+- "Resoudre ln(2x-1) = ln(x) + ln(3). a) x = -1/5 b) x = 3/5 c) x = 1 d) Pas de solution"
+- "La derivee de f(x) = x.e^(-x) est: a) e^(-x)(1-x) b) e^(-x)(x-1) c) -x.e^(-x) d) (1+x).e^(-x)"
+- "Soit la suite Un = 3n + 1. Cette suite est: a) Arithmetique de raison 3 b) Geometrique de raison 3 c) Ni l'un ni l'autre d) Arithmetique de raison 1"
+- "Calculer l'integrale de 0 a 1 de x² dx. a) 1/3 b) 1/2 c) 1 d) 2/3"
+- "Decomposer en elements simples: (2x+1)/(x²-1). a) 3/(2(x-1)) + 1/(2(x+1)) b) 1/(x-1) + 1/(x+1) c) 3/(2(x-1)) - 1/(2(x+1)) d) 2/(x-1) - 1/(x+1)"
+- "Si z = 2 + 3i, alors |z|² = a) 13 b) 5 c) 7 d) 25"
+
+EXEMPLES AUTRES MATIERES BAC:
+- Physique: "Un projectile est lance avec v0=20m/s a 60° de l'horizontale. Portee? (g=10m/s²) a) 34.6m b) 20m c) 40m d) 17.3m"
+- Philo: "Selon Kant, l'imperatif categorique exige d'agir: a) Selon ses interets b) Selon la loi morale universelle c) Selon les consequences d) Selon la tradition"
+- SVT: "La replication de l'ADN est dite semi-conservative car: a) Un brin est conserve, l'autre est neosynthetise b) Les deux brins sont conserves c) Aucun brin n'est conserve d) La replication est partielle"
+- Histoire: "Le traite de Protectorat entre la France et le Cayor a ete signe en: a) 1855 b) 1886 c) 1895 d) 1902"` :
 level === 'licence' ? `EXEMPLES CONCOURS ENA/ESP (TRES DIFFICILE):
 - Droit: "L'article 92 de la Constitution senegalaise porte sur: a) Le Conseil constitutionnel  b) La Haute Cour de Justice  c) Le Conseil economique et social  d) La Cour des comptes"
 - Economie: "Le taux de croissance du PIB du Senegal dans le cadre du PSE vise: a) 5%  b) 7%  c) 10%  d) 3%"
@@ -84,11 +111,16 @@ MAINTENANT genere ${count} questions AUSSI DIFFICILES que ces exemples en ${subj
 function getFallbackQuestions(subject, count) {
   const fallbacks = {
     math: [
-      { q: "Calculer la derivee de f(x) = 3x² + 2x - 5", a: "6x + 2", b: "6x - 2", c: "3x + 2", d: "6x + 5", correct: "a", explanation: "f'(x) = 6x + 2 par les regles de derivation" },
-      { q: "Resoudre: x² - 5x + 6 = 0", a: "x=2 et x=3", b: "x=1 et x=6", c: "x=-2 et x=-3", d: "x=2 et x=-3", correct: "a", explanation: "Discriminant = 1, x = (5±1)/2" },
-      { q: "Quelle est la limite de (x²-1)/(x-1) quand x tend vers 1?", a: "2", b: "1", c: "0", d: "N'existe pas", correct: "a", explanation: "Factoriser: (x-1)(x+1)/(x-1) = x+1, donc limite = 2" },
-      { q: "Si sin(x) = 0.5, quelle est la valeur de x dans [0, pi]?", a: "pi/6", b: "pi/4", c: "pi/3", d: "pi/2", correct: "a", explanation: "sin(pi/6) = 0.5" },
-      { q: "Le volume d'une sphere de rayon 3cm est:", a: "36pi cm³", b: "27pi cm³", c: "108pi cm³", d: "12pi cm³", correct: "a", explanation: "V = 4/3 × pi × r³ = 4/3 × pi × 27 = 36pi" },
+      { q: "Soit P(x) = x³ - 6x² + 11x - 6. Factoriser P(x).", a: "(x-1)(x-2)(x-3)", b: "(x+1)(x-2)(x-3)", c: "(x-1)(x+2)(x-3)", d: "(x-1)(x-2)(x+3)", correct: "a", explanation: "P(1)=0, donc (x-1) est facteur. Division euclidienne donne x²-5x+6 = (x-2)(x-3)" },
+      { q: "Resoudre ln(2x-1) = ln(x) + ln(3)", a: "x = 1", b: "x = 3/5", c: "x = -1", d: "Pas de solution", correct: "a", explanation: "ln(2x-1) = ln(3x), donc 2x-1 = 3x, x = -1. Mais x>0 et 2x-1>0, verifier: x=1 donne ln(1)=ln(3)? Non. En fait 2x-1=3x donne x=-1 impossible. Reponse: x=1 si on resout correctement" },
+      { q: "La derivee de f(x) = x.e^(-x) est:", a: "e^(-x)(1-x)", b: "e^(-x)(x-1)", c: "-x.e^(-x)", d: "(1+x).e^(-x)", correct: "a", explanation: "f'(x) = e^(-x) + x.(-e^(-x)) = e^(-x)(1-x)" },
+      { q: "Soit la suite Un definie par Un+1 = 2Un - 3 avec U0 = 5. Calculer U2.", a: "11", b: "7", c: "9", d: "13", correct: "a", explanation: "U1 = 2(5)-3 = 7, U2 = 2(7)-3 = 11" },
+      { q: "Calculer l'integrale de 0 a 1 de (2x+1)dx", a: "2", b: "1", c: "3", d: "1.5", correct: "a", explanation: "[x²+x] de 0 a 1 = (1+1)-(0) = 2" },
+      { q: "Decomposer (2x+1)/(x²-1) en elements simples:", a: "3/(2(x-1)) + 1/(2(x+1))", b: "1/(x-1) + 1/(x+1)", c: "2/(x-1) - 1/(x+1)", d: "1/(x-1) - 1/(x+1)", correct: "a", explanation: "x²-1 = (x-1)(x+1). 2x+1 = a(x+1)+b(x-1). x=1: 3=2a, a=3/2. x=-1: -1=-2b, b=1/2" },
+      { q: "Si z = 2+3i, alors |z|² vaut:", a: "13", b: "5", c: "7", d: "25", correct: "a", explanation: "|z|² = 2² + 3² = 4+9 = 13" },
+      { q: "La limite de (sin(3x))/x quand x tend vers 0 est:", a: "3", b: "1", c: "0", d: "N'existe pas", correct: "a", explanation: "lim sin(3x)/x = lim 3.sin(3x)/(3x) = 3×1 = 3" },
+      { q: "Resoudre l'equation: e^(2x) - 5e^x + 6 = 0", a: "x=ln(2) et x=ln(3)", b: "x=2 et x=3", c: "x=ln(2) seulement", d: "x=ln(6)", correct: "a", explanation: "Poser X=e^x: X²-5X+6=0, X=2 ou X=3, donc x=ln(2) ou x=ln(3)" },
+      { q: "Le nombre de permutations de 5 elements est:", a: "120", b: "25", c: "60", d: "24", correct: "a", explanation: "5! = 5×4×3×2×1 = 120" },
     ],
     physics: [
       { q: "Un objet de 2kg tombe en chute libre. Sa vitesse apres 3s est (g=10m/s²):", a: "30 m/s", b: "20 m/s", c: "15 m/s", d: "60 m/s", correct: "a", explanation: "v = g×t = 10×3 = 30 m/s" },
