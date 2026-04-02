@@ -8,6 +8,7 @@ import {
   Zap, Crown, ArrowLeft, Share2, History, Target, Star, Medal
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { PARCOURS, getSubjectsForParcours, getBattleLevel } from '../services/parcours'
 import toast from 'react-hot-toast'
 
 const FREE_DAILY_BATTLES = 3
@@ -19,6 +20,14 @@ export default function QuizBattlePage() {
   const [view, setView] = useState('home') // home | waiting | playing | results | leaderboard | history
   const [subject, setSubject] = useState('')
   const [level, setLevel] = useState('')
+
+  // Auto-set level from parcours on first load
+  useEffect(() => {
+    if (profile?.level && PARCOURS[profile.level]) {
+      const autoLevel = getBattleLevel(profile.level)
+      if (autoLevel && !level) setLevel(autoLevel)
+    }
+  }, [profile?.level])
   const [battle, setBattle] = useState(null)
   const [currentQ, setCurrentQ] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState(null)
@@ -43,8 +52,13 @@ export default function QuizBattlePage() {
   // Keep ref in sync with view state
   useEffect(() => { viewRef.current = view }, [view])
 
-  const SUBJECTS = quizBattleService.SUBJECTS
+  const userParcours = profile?.level || ''
+  const parcoursSubjectIds = userParcours && PARCOURS[userParcours] ? getSubjectsForParcours(userParcours) : null
+  const SUBJECTS = parcoursSubjectIds
+    ? quizBattleService.SUBJECTS.filter(s => parcoursSubjectIds.includes(s.id) || s.id === 'general')
+    : quizBattleService.SUBJECTS
   const LEVELS = quizBattleService.LEVELS
+  const userLevel = userParcours ? getBattleLevel(userParcours) : ''
 
   useEffect(() => {
     if (user) {
