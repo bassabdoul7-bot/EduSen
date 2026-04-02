@@ -111,7 +111,7 @@ export default function QuizBattlePage() {
   // Question timer
   useEffect(() => {
     if (view === 'playing' && !answered) {
-      setTimeLeft(90)
+      setTimeLeft(60)
       questionStartRef.current = Date.now()
       timerRef.current = setInterval(() => {
         setTimeLeft(prev => {
@@ -247,7 +247,7 @@ export default function QuizBattlePage() {
   function handleTimeout() {
     if (!battle?.questions) return
     setAnswered(true)
-    quizBattleService.submitAnswer(battle.id, user.id, currentQ, null, 90000)
+    quizBattleService.submitAnswer(battle.id, user.id, currentQ, null, 60000)
 
     setTimeout(() => {
       const total = battle.questions?.length || 0
@@ -552,7 +552,7 @@ export default function QuizBattlePage() {
                 stroke={timerDanger ? '#ef4444' : timerWarn ? '#f97316' : '#22c55e'}
                 strokeWidth="3" strokeLinecap="round"
                 strokeDasharray={`${2 * Math.PI * 24}`}
-                strokeDashoffset={`${2 * Math.PI * 24 * (1 - timeLeft / 90)}`}
+                strokeDashoffset={`${2 * Math.PI * 24 * (1 - timeLeft / 60)}`}
                 className="transition-all duration-1000" />
             </svg>
             <span className={`text-lg font-black font-mono ${timerDanger ? 'text-red-400 animate-pulse' : timerWarn ? 'text-orange-400' : 'text-white'}`}>
