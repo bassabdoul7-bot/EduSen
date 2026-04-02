@@ -99,10 +99,11 @@ export default function QuizBattlePage() {
     }
   }, [battle?.id])
 
-  // Polling fallback for waiting screen
+  // Polling fallback for waiting screen — checks every 1.5s
   useEffect(() => {
     if (view !== 'waiting' || !battle) return
-    const poll = setInterval(async () => {
+
+    async function checkBattle() {
       const { data } = await quizBattleService.getBattle(battle.id)
       if (data && data.status === 'playing') {
         setBattle(data)
@@ -114,11 +115,22 @@ export default function QuizBattlePage() {
         setCurrentQ(0)
         setSelectedAnswer(null)
         setAnswered(false)
+        matchedRef.current = true
         setView('playing')
         toast.success('Adversaire trouve! C\'est parti!')
-        clearInterval(poll)
+        return true
       }
-    }, 3000)
+      return false
+    }
+
+    // Check immediately
+    checkBattle()
+
+    // Then poll every 1.5 seconds
+    const poll = setInterval(async () => {
+      const found = await checkBattle()
+      if (found) clearInterval(poll)
+    }, 1500)
     return () => clearInterval(poll)
   }, [view, battle?.id])
 
