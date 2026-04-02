@@ -147,7 +147,8 @@ export default function ChatbotPage() {
           streamedContent += chunk
           setMessages([...updatedMessages, { role: 'assistant', content: streamedContent }])
         },
-        mode
+        mode,
+        profile?.level || profile?.parcours || null
       )
       if (response.reply) {
         await incrementMessageCount()

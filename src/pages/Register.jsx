@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
-import { Mail, Lock, User, UserPlus, ArrowLeft, ArrowRight, Check } from 'lucide-react'
+import { Mail, Lock, User, UserPlus, ArrowLeft, ArrowRight, Check, ChevronDown } from 'lucide-react'
 import BrainLogo from '../components/BrainLogo'
+import { CATEGORIES, PARCOURS, getParcoursForCategory } from '../services/parcours'
 
 export default function Register() {
   const [step, setStep] = useState(1)
@@ -161,20 +162,34 @@ export default function Register() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-white/30 uppercase tracking-wider mb-1.5">Profil</label>
-                    <select value={level} onChange={(e) => setLevel(e.target.value)} required
-                      className={inputClass.replace('pl-11', 'pl-4') + ' appearance-none'}>
-                      <option value="" className="bg-[#0a1f14]">Selectionnez...</option>
-                      <option value="6eme" className="bg-[#0a1f14]">6eme</option>
-                      <option value="5eme" className="bg-[#0a1f14]">5eme</option>
-                      <option value="4eme" className="bg-[#0a1f14]">4eme</option>
-                      <option value="3eme" className="bg-[#0a1f14]">3eme (BFEM)</option>
-                      <option value="2nde" className="bg-[#0a1f14]">Seconde</option>
-                      <option value="1ere" className="bg-[#0a1f14]">Premiere</option>
-                      <option value="terminale" className="bg-[#0a1f14]">Terminale (BAC)</option>
-                      <option value="universite" className="bg-[#0a1f14]">Universite / Licence</option>
-                      <option value="professionnel" className="bg-[#0a1f14]">Professionnel / Concours</option>
-                    </select>
+                    <label className="block text-[10px] font-bold text-white/30 uppercase tracking-wider mb-1.5">Mon parcours</label>
+                    {!level ? (
+                      <div className="space-y-2">
+                        {CATEGORIES.map(cat => (
+                          <div key={cat.id}>
+                            <p className="text-[9px] font-bold text-white/20 uppercase tracking-wider mb-1.5 mt-2">{cat.icon} {cat.name}</p>
+                            <div className="grid grid-cols-2 gap-1.5">
+                              {getParcoursForCategory(cat.id).map(p => (
+                                <button key={p.id} type="button" onClick={() => setLevel(p.id)}
+                                  className="p-2.5 rounded-lg bg-white/[0.05] border border-white/[0.08] hover:bg-white/[0.1] text-left transition-all">
+                                  <span className="text-sm mr-1">{p.icon}</span>
+                                  <span className="text-[10px] font-bold text-white/70">{p.name}</span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <button type="button" onClick={() => setLevel('')}
+                        className="w-full p-3 rounded-xl bg-senegal-green/10 border border-senegal-green/30 flex items-center justify-between">
+                        <span className="flex items-center gap-2">
+                          <span className="text-lg">{PARCOURS[level]?.icon}</span>
+                          <span className="text-xs font-bold text-white">{PARCOURS[level]?.name}</span>
+                        </span>
+                        <span className="text-[10px] text-senegal-green">Changer</span>
+                      </button>
+                    )}
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-white/30 uppercase tracking-wider mb-1.5">Mot de passe</label>

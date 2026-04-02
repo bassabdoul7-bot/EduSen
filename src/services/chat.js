@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { getParcoursPrompt } from './parcours'
 
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
@@ -150,13 +151,15 @@ METHODE DE RESOLUTION:
 
 Sois tres detaille dans chaque etape. L'etudiant doit pouvoir reproduire la methode seul.`
 
-function getSystemPrompt(subject, mode = 'tutor') {
+function getSystemPrompt(subject, mode = 'tutor', parcoursId = null) {
   const base = SYSTEM_PROMPTS.base
   const subjectPrompt = SYSTEM_PROMPTS[subject] || SYSTEM_PROMPTS.general
 
-  if (mode === 'quiz') return base + '\n\n' + subjectPrompt + '\n\n' + QUIZ_PROMPT
-  if (mode === 'solver') return base + '\n\n' + subjectPrompt + '\n\n' + SOLVER_PROMPT
-  return base + '\n\n' + subjectPrompt
+  const parcoursPrompt = parcoursId ? getParcoursPrompt(parcoursId) : ''
+
+  if (mode === 'quiz') return base + '\n\n' + subjectPrompt + parcoursPrompt + '\n\n' + QUIZ_PROMPT
+  if (mode === 'solver') return base + '\n\n' + subjectPrompt + parcoursPrompt + '\n\n' + SOLVER_PROMPT
+  return base + '\n\n' + subjectPrompt + parcoursPrompt
 }
 
 async function streamGroq(messages, onStream, model = 'llama-3.3-70b-versatile', maxTokens = 4000) {
@@ -226,9 +229,9 @@ async function streamGroq(messages, onStream, model = 'llama-3.3-70b-versatile',
 
 export const chatService = {
   // Main chat - streaming with enhanced prompts
-  sendMessage: async (userId, subject, message, conversationHistory, conversationId = null, onStream = null, mode = 'tutor') => {
+  sendMessage: async (userId, subject, message, conversationHistory, conversationId = null, onStream = null, mode = 'tutor', parcoursId = null) => {
     try {
-      const systemPrompt = getSystemPrompt(subject, mode)
+      const systemPrompt = getSystemPrompt(subject, mode, parcoursId)
 
       const messages = [
         { role: 'system', content: systemPrompt },

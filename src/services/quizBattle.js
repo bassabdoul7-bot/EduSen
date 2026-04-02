@@ -1,5 +1,7 @@
 import { supabase } from './supabase'
 
+import { PARCOURS, getParcours } from './parcours'
+
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
