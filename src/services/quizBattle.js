@@ -22,7 +22,13 @@ const LEVELS = [
   { id: 'licence', name: 'Licence / Concours' },
 ]
 
+function getSubjectName(id) {
+  const s = SUBJECTS.find(s => s.id === id)
+  return s ? s.name : id
+}
+
 async function generateQuestions(subject, level, count = 10) {
+  const subjectName = getSubjectName(subject)
   const response = await fetch(GROQ_API_URL, {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + GROQ_API_KEY, 'Content-Type': 'application/json' },
@@ -77,8 +83,39 @@ level === 'licence' ? `EXEMPLES CONCOURS ENA/ESP (TRES DIFFICILE):
 - Francais: "Dans 'L'enfant noir' de Camara Laye, le personnage principal grandit a: a) Conakry  b) Kouroussa  c) Dakar  d) Bamako"
 - Histoire: "L'AOF (Afrique Occidentale Francaise) a ete creee en: a) 1895  b) 1900  c) 1885  d) 1910"`}
 
-MAINTENANT genere ${count} questions AUSSI DIFFICILES que ces exemples en ${subject}. Niveau: ${level}.
-- Questions d'APPLICATION et de REFLEXION, pas de definitions basiques
+MAINTENANT genere EXACTEMENT ${count} questions en **${subjectName}** (PAS une autre matiere). Niveau: ${level}.
+
+IMPORTANT: TOUTES les ${count} questions doivent etre en ${subjectName}. NE GENERE PAS de questions d'une autre matiere.
+
+${subjectName === 'Francais' ? `Pour le Francais, genere des questions sur:
+- Grammaire (accord, conjugaison, syntaxe)
+- Litterature africaine (Senghor, Mariama Ba, Camara Laye, Ousmane Sembene, Birago Diop)
+- Litterature francaise (Moliere, Hugo, Baudelaire, Camus)
+- Figures de style (metaphore, comparaison, hyperbole, etc.)
+- Comprehension de texte
+- Vocabulaire avance` :
+subjectName === 'Anglais' ? `Pour l'Anglais, genere des questions sur:
+- Grammar (tenses, conditionals, reported speech, passive voice)
+- Vocabulary (synonyms, antonyms, idioms)
+- Reading comprehension
+- Prepositions and phrasal verbs
+- Questions EN ANGLAIS avec options EN ANGLAIS` :
+subjectName === 'Philo' ? `Pour la Philosophie, genere des questions sur:
+- Concepts: conscience, liberte, devoir, verite, justice, Etat, travail, art
+- Philosophes: Platon, Aristote, Descartes, Kant, Hegel, Marx, Sartre, Nietzsche
+- Philosophes africains: Cheikh Anta Diop, Paulin Hountondji, Frantz Fanon
+- Dissertation et argumentation` :
+subjectName === 'Histoire-Geo' ? `Pour Histoire-Geo, genere des questions sur:
+- Histoire du Senegal: Empire du Jolof, colonisation, AOF, independance
+- Histoire mondiale: guerres mondiales, guerre froide, decolonisation
+- Geographie du Senegal: regions, climat, economie, demographie
+- Geographie mondiale: mondialisation, developpement, environnement` :
+subjectName === 'Economie' ? `Pour l'Economie, genere des questions sur:
+- Microeconomie, macroeconomie
+- Economie du Senegal et de l'UEMOA
+- Commerce international, CEDEAO
+- Comptabilite, finance` : ''}
+
 - 4 options toutes PLAUSIBLES et proches
 - Inclus 2 questions sur le Senegal/Afrique
 - Si c'est des maths/physique: mets de VRAIS calculs`
