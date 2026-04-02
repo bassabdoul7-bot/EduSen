@@ -15,6 +15,9 @@ const SUBJECTS = [
   { id: 'history', name: 'Histoire-Geo' },
   { id: 'philosophy', name: 'Philo' },
   { id: 'economics', name: 'Economie' },
+  { id: 'programming', name: 'Informatique' },
+  { id: 'medicine', name: 'Medecine' },
+  { id: 'law', name: 'Droit' },
   { id: 'general', name: 'Culture Generale' },
 ]
 
