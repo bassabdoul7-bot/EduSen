@@ -8,6 +8,7 @@ import {
   Brain, Zap, HelpCircle, BookOpen, ArrowLeft, X, ChevronDown
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { PARCOURS, getSubjectsForParcours } from '../services/parcours'
 import Tesseract from 'tesseract.js'
 import * as pdfjsLib from 'pdfjs-dist'
 import { Document, Paragraph, TextRun, Packer, AlignmentType, HeadingLevel } from 'docx'
@@ -15,7 +16,7 @@ import { jsPDF } from 'jspdf'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
 
-const SUBJECTS = [
+const ALL_SUBJECTS = [
   { id: 'math', name: 'Maths', icon: '📐' },
   { id: 'physics', name: 'Physique', icon: '⚛️' },
   { id: 'chemistry', name: 'Chimie', icon: '🧪' },
@@ -27,7 +28,8 @@ const SUBJECTS = [
   { id: 'economics', name: 'Economie', icon: '💰' },
   { id: 'programming', name: 'Code', icon: '💻' },
   { id: 'medicine', name: 'Medecine', icon: '⚕️' },
-  { id: 'general', name: 'General', icon: '💬' }
+  { id: 'law', name: 'Droit', icon: '⚖️' },
+  { id: 'general', name: 'General', icon: '💬' },
 ]
 
 const MODES = [
@@ -39,6 +41,13 @@ const MODES = [
 export default function ChatbotPage() {
   const { user, profile } = useAuth()
   const { isPremium, checkCanSendMessage, incrementMessageCount } = usePremium()
+
+  // Filter subjects based on user's parcours
+  const userParcours = profile?.level || ''
+  const parcoursSubjectIds = userParcours && PARCOURS[userParcours] ? getSubjectsForParcours(userParcours) : null
+  const SUBJECTS = parcoursSubjectIds
+    ? ALL_SUBJECTS.filter(s => parcoursSubjectIds.includes(s.id) || s.id === 'general')
+    : ALL_SUBJECTS
 
   const [selectedSubject, setSelectedSubject] = useState(SUBJECTS[0])
   const [mode, setMode] = useState('tutor')
@@ -115,9 +124,10 @@ export default function ChatbotPage() {
     const name = profile?.full_name?.split(' ')[0] || 'cher etudiant'
     const sub = subjectName || selectedSubject.name
     const m = currentMode || mode
-    if (m === 'quiz') return `Salut ${name}! Je vais generer un quiz en ${sub} pour tester tes connaissances. Dis-moi le sujet et ton niveau (BFEM, BAC, Licence).`
-    if (m === 'solver') return `Salut ${name}! Envoie-moi un exercice (texte ou photo) en ${sub} et je le resous etape par etape.`
-    return `Salut ${name}! Je suis ton tuteur en ${sub}. Pose-moi n'importe quelle question, je t'explique tout clairement.`
+    const parcoursInfo = userParcours && PARCOURS[userParcours] ? ` (${PARCOURS[userParcours].name})` : ''
+    if (m === 'quiz') return `Salut ${name}${parcoursInfo}! Je vais generer un quiz en ${sub} adapte a ton niveau. Dis-moi le sujet precis.`
+    if (m === 'solver') return `Salut ${name}${parcoursInfo}! Envoie-moi un exercice en ${sub} et je le resous etape par etape.`
+    return `Salut ${name}${parcoursInfo}! Je suis ton tuteur en ${sub}. Pose-moi n'importe quelle question, je t'explique tout a ton niveau.`
   }
 
   const getTitle = (conv) => {
