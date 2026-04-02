@@ -741,7 +741,7 @@ export default function QuizBattlePage() {
 
         {/* Actions */}
         <div className="space-y-2 w-full max-w-xs">
-          <button onClick={() => { setView('home'); setBattle(null); setCurrentQ(0); setSelectedAnswer(null); setAnswered(false); loadStats(); loadDailyCount() }}
+          <button onClick={() => { matchedRef.current = false; setView('home'); setBattle(null); setCurrentQ(0); setSelectedAnswer(null); setAnswered(false); setOpponentProfile(null); loadStats(); loadDailyCount() }}
             className="w-full py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white font-black text-sm shadow-xl">
             <Swords size={16} className="inline mr-2 -mt-0.5" /> Rejouer
           </button>
