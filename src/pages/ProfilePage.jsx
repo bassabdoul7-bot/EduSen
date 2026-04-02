@@ -4,13 +4,14 @@ import { usePremium } from '../context/PremiumContext'
 import { profileService } from '../services/supabase'
 import { supabase } from '../services/supabase'
 import { forumService } from '../services/forum'
-import { 
-  User, 
-  Mail, 
-  Calendar, 
-  Crown, 
-  Edit2, 
-  Save, 
+import { CATEGORIES, PARCOURS, getParcoursForCategory } from '../services/parcours'
+import {
+  User,
+  Mail,
+  Calendar,
+  Crown,
+  Edit2,
+  Save,
   X,
   MessageSquare,
   Award,
@@ -18,7 +19,8 @@ import {
   Settings,
   LogOut,
   Camera,
-  Upload
+  Upload,
+  GraduationCap
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
@@ -36,6 +38,8 @@ export default function ProfilePage() {
   const [uploading, setUploading] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [parcours, setParcours] = useState('')
+  const [showParcoursPicker, setShowParcoursPicker] = useState(false)
   
   // Stats
   const [stats, setStats] = useState({
@@ -56,6 +60,7 @@ export default function ProfilePage() {
       setFullName(data.full_name || '')
       setBio(data.bio || '')
       setAvatarUrl(data.avatar_url || '')
+      setParcours(data.level || '')
     }
     setLoading(false)
   }
@@ -152,6 +157,17 @@ export default function ProfilePage() {
       toast.error('Erreur lors de la mise Ã  jour')
     }
     setSaving(false)
+  }
+
+  const handleParcoursChange = async (newParcours) => {
+    setParcours(newParcours)
+    setShowParcoursPicker(false)
+    const { error } = await profileService.updateProfile(user.id, { level: newParcours })
+    if (!error) {
+      toast.success('Parcours mis a jour!')
+    } else {
+      toast.error('Erreur de mise a jour')
+    }
   }
 
   const handleSignOut = async () => {
@@ -314,6 +330,60 @@ export default function ProfilePage() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Parcours */}
+      <div className='backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-5 shadow-lg'>
+        <h3 className='text-sm font-bold text-white mb-3 flex items-center gap-2'>
+          <GraduationCap size={18} className='text-senegal-yellow' />
+          Mon Parcours
+        </h3>
+
+        {!showParcoursPicker ? (
+          <div>
+            {parcours && PARCOURS[parcours] ? (
+              <div className='flex items-center justify-between bg-senegal-green/10 border border-senegal-green/20 rounded-xl p-4'>
+                <div className='flex items-center gap-3'>
+                  <span className='text-2xl'>{PARCOURS[parcours].icon}</span>
+                  <div>
+                    <p className='text-sm font-bold text-white'>{PARCOURS[parcours].name}</p>
+                    <p className='text-[10px] text-white/40'>{PARCOURS[parcours].description}</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowParcoursPicker(true)} className='text-[10px] font-bold text-senegal-green hover:text-emerald-400'>
+                  Changer
+                </button>
+              </div>
+            ) : (
+              <button onClick={() => setShowParcoursPicker(true)}
+                className='w-full p-4 rounded-xl border-2 border-dashed border-white/10 hover:border-senegal-green/30 text-center transition-all'>
+                <GraduationCap size={24} className='mx-auto mb-2 text-white/20' />
+                <p className='text-xs font-bold text-white/40'>Choisir mon parcours</p>
+                <p className='text-[10px] text-white/20 mt-0.5'>L'app s'adaptera a votre niveau</p>
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className='space-y-3'>
+            {CATEGORIES.map(cat => (
+              <div key={cat.id}>
+                <p className='text-[9px] font-bold text-white/25 uppercase tracking-wider mb-1.5'>{cat.icon} {cat.name}</p>
+                <div className='grid grid-cols-2 gap-1.5'>
+                  {getParcoursForCategory(cat.id).map(p => (
+                    <button key={p.id} onClick={() => handleParcoursChange(p.id)}
+                      className={`p-2.5 rounded-lg text-left transition-all flex items-center gap-2 ${
+                        parcours === p.id ? 'bg-senegal-green/20 border border-senegal-green/40' : 'bg-white/[0.05] border border-white/[0.06] hover:bg-white/[0.1]'
+                      }`}>
+                      <span className='text-base'>{p.icon}</span>
+                      <span className='text-[10px] font-bold text-white/70'>{p.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+            <button onClick={() => setShowParcoursPicker(false)} className='text-xs text-white/30 hover:text-white/50'>Annuler</button>
+          </div>
+        )}
       </div>
 
       {/* Statistics */}
