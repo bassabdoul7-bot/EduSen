@@ -234,13 +234,7 @@ export const quizBattleService = {
 
   // Find random opponent (matchmaking) — matches on subject, any level
   findBattle: async (userId, subject, level) => {
-    // Clean up stale waiting battles (older than 5 min)
-    const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
-    await supabase.from('quiz_battles').delete().eq('status', 'waiting').lt('created_at', fiveMinAgo)
-
-    // Also delete any old waiting battle from this user
-    await supabase.from('quiz_battles').delete().eq('status', 'waiting').eq('host_id', userId)
-
+    // FIRST: search for an existing waiting battle to join
     const { data: existing } = await supabase
       .from('quiz_battles')
       .select('*')
@@ -262,7 +256,12 @@ export const quizBattleService = {
       return { data, error, matched: true }
     }
 
-    // No battle found — create one and wait
+    // No battle found — clean up my old waiting battles, then create new one
+    await supabase.from('quiz_battles').delete().eq('status', 'waiting').eq('host_id', userId)
+
+    // Also clean stale battles (older than 5 min) from anyone
+    const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+    await supabase.from('quiz_battles').delete().eq('status', 'waiting').lt('created_at', fiveMinAgo)
     const result = await quizBattleService.createBattle(userId, subject, level)
     return { ...result, matched: false }
   },
